@@ -42,27 +42,30 @@
     };
   })();
   const PHONE = (() => {
+    // Phone plan, left to right (400 units = the width of the screen):
+    // red door 0-90 | pier | poster window | post | newsstand window | pier | black door 310-400.
+    // Both doors sit fully on screen at the edges, and the SPEAKEASY sign sits on the red door's transom, as on desktop.
     const doors = [
-      { side: "l", opening: { x: -70, y: 536, w: 122, h: 700 }, transom: { x: -62, y: 544, w: 106, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: -56, y: 630, w: 98, h: 602 } },
-      { side: "r", opening: { x: 348, y: 536, w: 122, h: 700 }, transom: { x: 356, y: 544, w: 106, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: 358, y: 630, w: 98, h: 602 } }
+      { side: "l", opening: { x: 0, y: 536, w: 90, h: 352 }, transom: { x: 6, y: 544, w: 78, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: 10, y: 630, w: 70, h: 254 } },
+      { side: "r", opening: { x: 310, y: 536, w: 90, h: 352 }, transom: { x: 316, y: 544, w: 78, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: 320, y: 630, w: 70, h: 254 } }
     ];
     return {
-      ref: 400, h: 1300, ground: 1236, shopTop: 530, phone: true,
+      ref: 400, h: 950, ground: 888, shopTop: 530, phone: true,
       upperWin: { x: 75, y: 104, w: 150, h: 176 }, lintel: { x: 67, y: 86, w: 166, h: 18 }, wsill: { x: 66, y: 280, w: 168, h: 12 },
       sign: { x: 236, y: 120, w: 150 }, marquee: { x: 10, y: 306, w: 380, h: 118 },
       cornice: { x: -4, y: 436, w: 408, h: 22 }, fascia: { x: 6, y: 458, w: 388, h: 72 },
       corbels: [{ x: -8, y: 448, w: 20, h: 100 }, { x: 388, y: 448, w: 20, h: 100 }],
-      piers: [{ x: 52, w: 18 }, { x: 330, w: 18 }],
+      piers: [{ x: 90, w: 8 }, { x: 302, w: 8 }],
       doors,
-      front: { x: 70, y: 536, w: 260, h: 700, rail: 8, posts: [70, 195, 320], postW: 10,
-        transomBand: { x: 80, y: 544, w: 240, h: 72 }, bar: { y: 616, h: 10 },
-        glass: [{ x: 80, y: 626, w: 115, h: 548 }, { x: 205, y: 626, w: 115, h: 548 }],
-        sill: { x: 62, y: 1174, w: 276, h: 12 }, riser: { x: 74, y: 1186, w: 252, h: 50 } },
-      steps: [{ x: -80, y: 1236, w: 136, h: 16 }, { x: 344, y: 1236, w: 136, h: 16 }],
-      neon: { x: 80, y: 544, w: 240, h: 72 }, num: { x: 356, y: 544, w: 44, h: 72 },
-      pumpkins: { x: 344, y: 1237, w: 56 },
-      awning: { x0: 6, x1: 394, wall: 530, front: 546, spread: .02, lamps: [61, 339] },
-      ivy: { side: 34, canopy: 46, droop: 90, keepClear: [{ x: 62, y: 80, w: 176, h: 214 }, { x: 8, y: 302, w: 384, h: 126 }, { x: 230, y: 112, w: 162, h: 166 }, { x: 30, y: 520, w: 340, h: 760 }] }
+      front: { x: 98, y: 536, w: 204, h: 352, rail: 8, posts: [98, 196, 294], postW: 8,
+        transomBand: { x: 106, y: 544, w: 188, h: 72 }, bar: { y: 616, h: 10 },
+        glass: [{ x: 106, y: 626, w: 90, h: 200 }, { x: 204, y: 626, w: 90, h: 200 }],
+        sill: { x: 94, y: 826, w: 212, h: 12 }, riser: { x: 102, y: 838, w: 196, h: 50 } },
+      steps: [{ x: -4, y: 888, w: 100, h: 14 }, { x: 304, y: 888, w: 100, h: 14 }],
+      neon: doors[0].transom, num: doors[1].transom,
+      pumpkins: { x: 344, y: 889, w: 48 },
+      awning: { x0: 6, x1: 394, wall: 530, front: 546, spread: .02, lamps: [94, 306] },
+      ivy: { side: 34, canopy: 46, droop: 90, keepClear: [{ x: 62, y: 80, w: 176, h: 214 }, { x: 8, y: 302, w: 384, h: 126 }, { x: 230, y: 112, w: 162, h: 166 }, { x: 0, y: 520, w: 400, h: 460 }] }
     };
   })();
 
@@ -577,6 +580,7 @@
       // where ivy may grow: the top band, and a band down each side that narrows toward the street
       const allowed = (x, y) => {
         if (y < I.canopy * 1.5) return true;
+        if (G.phone && y > G.cornice.y) return false;                    // phones: no ivy below the cornice, so both doors show
         const w = y < G.shopTop ? band * 1.25 : band * (G.phone ? .5 : 1) * (1 - Math.max(0, (y - G.shopTop) / (gy - G.shopTop)) * .25);   // on phones, leave the door edges showing
         return x < w || x > ref - w;
       };
@@ -595,7 +599,7 @@
       // 1. Two old trunks rising from the pavement and hugging the outer corners
       [[0, 1], [ref, -1]].forEach(([edge, side]) => {
         const trunk = [], x0 = edge + side * band * .22;
-        for (let y = gy + 6; y > -10; y -= 5 * k) trunk.push([x0 + side * (Math.sin(y * .021) * band * .16 + Math.sin(y * .057 + edge) * band * .07), y]);
+        for (let y = G.phone ? G.cornice.y : gy + 6; y > -10; y -= 5 * k) trunk.push([x0 + side * (Math.sin(y * .021) * band * .16 + Math.sin(y * .057 + edge) * band * .07), y]);
         vines.push(trunk);
         along(trunk, .95, [16 * k, 30 * k], band * .5);
         // side shoots wandering over the corner, heading in and slightly down like real runners
@@ -789,7 +793,7 @@
           <span class="nrsf-p-best"><span class="l1"><em>${esc(best.rank)}</em> NOT RISING MAGAZINE</span><span class="l2">BEST STORYTELLER</span>
           <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title">${esc(best.book.toUpperCase())}</span></span></a>` : "";
       // Same bulb sizes as the newsstand window next door, so the two match
-      const P = G.phone ? { ring: 8, gap: 25, r: 4.2, posterW: 83 } : { ring: 13, gap: 30, r: 6.2, posterW: 172 };
+      const P = G.phone ? { ring: 7, gap: 22, r: 3.6, posterW: 64 } : { ring: 13, gap: 30, r: 6.2, posterW: 172 };
       const pw = P.posterW, ph = pw * 1102 / 864;               // the poster's height follows from its shape (864 wide : 1102 tall)
       let html = bestHTML((gl.w - pw) / 2, (gl.h - ph) / 2, pw); // centred: half the leftover space on each side
       html += bulbRing(gl, P);
@@ -802,7 +806,7 @@
       const host = $("nrsf-covers"), NR = window.NR;
       const issues = NR ? NR.FEATURES.map((f, i) => ({ f, no: String(i + 1).padStart(2, "0") })).filter(o => o.f.cover) : [];
       const P = G.phone
-        ? { ring: 8, gap: 25, r: 4.2, x0: 18, x1: 97, y0: 58, cols: 2, coverW: 28, rowH: 53, tag: 3.4, tagGap: 5 }
+        ? { ring: 7, gap: 22, r: 3.6, x0: 15, x1: 75, y0: 58, cols: 2, coverW: 26, rowH: 62, tag: 4, tagGap: 5, max: 4 }   // phones: just the first 4 issues, 2 by 2
         : { ring: 13, gap: 30, r: 6.2, x0: 30, x1: 271, y0: 70, cols: 6, coverW: 32, rowH: 67, tag: 4.4, tagGap: 7 };
       const pw = (P.x1 - P.x0) / P.cols, ch = P.coverW * 1056 / 816;
       let html = "";
@@ -810,6 +814,7 @@
         const col = i % P.cols, row = (i / P.cols) | 0;
         const cx = P.x0 + col * pw + (pw - P.coverW) / 2, cy = P.y0 + row * P.rowH;
         if (cy + ch > gl.h - P.ring * 2) return;                      // no room left in this window
+        if (P.max && i >= P.max) return;                              // phones: stop after P.max issues
         html += `<span class="nrsf-stack" style="${pos(cx + 2, cy - 2, P.coverW, ch)}"></span>`;
         html += `<img class="nrsf-mag" src="${img("thumbs/" + NR.IMAGES[f.cover], NS_BASE)}" alt="" style="${pos(cx, cy, P.coverW, ch)}">`;
         html += `<span class="nrsf-tag" style="left:${cx * u}px;top:${(cy + ch + P.tagGap) * u}px;font-size:${P.tag * u}px">NO. ${no}</span>`;
@@ -820,7 +825,7 @@
       // "The Newsstand" gilt sign-writing on the glass, arched above the magazines and inside the bulbs
       const w = gl.w, gold = `<defs><linearGradient id="nrsf-gilt-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c9"/><stop offset=".5" stop-color="#d9b46a"/><stop offset="1" stop-color="#9a7230"/></linearGradient></defs>`;
       html += `<svg class="nrsf-gilt" style="${pos(0, 0, w, gl.h)}" viewBox="0 0 ${w} ${gl.h}">${gold}` + (G.phone
-        ? `<g font-family="Cinzel, Georgia, serif" font-weight="700" text-anchor="middle" fill="url(#nrsf-gilt-g)" stroke="#2a1b08" stroke-width=".4" paint-order="stroke"><text x="${w / 2}" y="30" font-size="10" letter-spacing="1">The</text><text x="${w / 2}" y="47" font-size="14" letter-spacing=".5">Newsstand</text></g>`
+        ? `<g font-family="Cinzel, Georgia, serif" font-weight="700" text-anchor="middle" fill="url(#nrsf-gilt-g)" stroke="#2a1b08" stroke-width=".4" paint-order="stroke"><text x="${w / 2}" y="30" font-size="9" letter-spacing="1">The</text><text x="${w / 2}" y="45" font-size="11" letter-spacing=".3">Newsstand</text></g>`
         : `<path id="nrsf-arc" d="M44 58 Q${w / 2} 22 ${w - 44} 58" fill="none"/><text font-family="Cinzel, Georgia, serif" font-weight="700" font-size="23" letter-spacing="2.5" fill="url(#nrsf-gilt-g)" stroke="#2a1b08" stroke-width=".6" paint-order="stroke"><textPath href="#nrsf-arc" startOffset="50%" text-anchor="middle">The Newsstand</textPath></text>`) + `</svg>`;
       host.innerHTML = html;
     }
