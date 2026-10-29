@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOT RISING Trading Post</title>
+<meta name="description" content="777 Daydream St. — the NOT RISING Trading Post, Newsstand and Speakeasy.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Arimo:wght@400;700&family=Cinzel:wght@400;700&family=Oswald:wght@600&family=Permanent+Marker&family=Sacramento&display=swap">
+<style>
+  /* basic reset: no page margin, phone notches respected */
+  html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
+  body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<link rel="stylesheet" href="assets/storefront.css">
+</head>
+<body>
+<!-- NOT RISING · The Trading Post storefront. The script fills in the
+     marked spots (letter tiles, bulbs, leaves, posters, covers). -->
+<div class="nrsf alignfull" id="nrsf" data-season="fall" lang="en">
+  <div class="nrsf-scene">
+
+    <!-- UPSTAIRS: white brick, a sash window, the swinging sign, the marquee -->
+    <div class="nrsf-upper">
+      <div class="nrsf-window2" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="nrsf-bracket" aria-hidden="true">
+        <svg viewBox="0 0 200 60"><path d="M4 8 H196 M4 8 C40 8 60 50 110 30 C130 22 150 14 196 8" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/><path d="M60 8 c0 -10 16 -10 16 0 M120 8 c0 -10 16 -10 16 0" fill="none" stroke="#111" stroke-width="3"/><circle cx="6" cy="8" r="6" fill="#111"/></svg>
+        <div class="nrsf-hanging"><div class="nrsf-hanging-board"><span data-sign="hanging"></span></div></div>
+      </div>
+      <div class="nrsf-marquee">
+        <div class="nrsf-globes" id="nrsf-marquee-lights" aria-hidden="true"></div>
+        <div class="nrsf-board"><h1 class="nrsf-tiles" id="nrsf-marquee" data-sign="marquee"></h1></div>
+      </div>
+    </div>
+
+    <!-- THE SHOPFRONT -->
+    <div class="nrsf-front">
+      <div class="nrsf-cornice" aria-hidden="true"></div>
+      <div class="nrsf-fascia">
+        <h2><span data-sign="shop"></span></h2>
+        <p data-sign="address"></p>
+      </div>
+      <div class="nrsf-strand" id="nrsf-strand" aria-hidden="true"></div>
+
+      <div class="nrsf-bays">
+        <!-- Left door: the Speakeasy -->
+        <div class="nrsf-transom nrsf-neonbox">
+          <p class="nrsf-neon" aria-label="The Speakeasy, painted over to read: The Speak Up">
+            <span class="lit">The<br class="br"> Speak</span><span class="unlit">easy<span class="nrsf-graffiti" aria-hidden="true"><span class="blot"></span><b>UP<i></i><i></i><i></i></b></span></span>
+          </p>
+        </div>
+        <a class="nrsf-door nrsf-door-l" data-link="speakeasy" href="#" aria-label="Enter the Speakeasy, door 9¾">
+          <span class="nrsf-leaf"><span class="num" data-sign="leftDoor"></span><span class="knob"></span><span class="slot"></span></span>
+          <span class="nrsf-inside" aria-hidden="true"></span>
+        </a>
+
+        <!-- Window 1: posters -->
+        <div class="nrsf-win nrsf-win-posters"><span class="nrsf-card nrsf-card-top" aria-hidden="true">Now Showing</span><div class="nrsf-posters" id="nrsf-posters"></div></div>
+
+        <!-- Window 2: the newsstand display -->
+        <a class="nrsf-win nrsf-win-news" data-link="newsstand" href="#" aria-label="Visit the Newsstand">
+          <span class="nrsf-covers" id="nrsf-covers"></span>
+          <span class="nrsf-card">Newsstand<small>Step inside ↗</small></span>
+        </a>
+
+        <!-- Right door: the Trading Post, unit 9 -->
+        <div class="nrsf-transom nrsf-numbox"><span data-sign="rightDoor"></span></div>
+        <a class="nrsf-door nrsf-door-r" data-link="tradingPost" href="#" aria-label="Enter the Trading Post, unit 9">
+          <span class="nrsf-leaf"><span class="nrsf-note"><span data-sign="doorNote"></span> <b>♥</b></span><span class="knob"></span><span class="slot"></span></span>
+          <span class="nrsf-inside" aria-hidden="true"></span>
+        </a>
+
+        <div class="nrsf-riser nrsf-riser-a" aria-hidden="true"></div>
+        <div class="nrsf-riser nrsf-riser-b" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <!-- Steps, pumpkins, pavement -->
+    <div class="nrsf-ground" aria-hidden="true">
+      <span class="nrsf-step nrsf-step-l"></span>
+      <span class="nrsf-step nrsf-step-r"><span class="nrsf-pumpkins" id="nrsf-pumpkins"></span></span>
+    </div>
+  </div>
+
+  <!-- The seasonal frame and falling leaves (drawn by the script) -->
+  <div class="nrsf-frame" id="nrsf-frame" aria-hidden="true"></div>
+  <div class="nrsf-fall" id="nrsf-fall" aria-hidden="true"></div>
+  <div class="nrsf-veil" id="nrsf-veil" aria-hidden="true"></div>
+  <div class="nrsf-toast" id="nrsf-toast" role="status" hidden></div>
+</div>
+
+<!-- Where the pictures live, then the data, then the engine -->
+<script>window.NRSF_BASE = "assets/img/"; window.NRNS_BASE = "assets/img/";</script>
+<script src="assets/data.js"></script>
+<script src="assets/storefront.js"></script>
+</body>
+</html>
