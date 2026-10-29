@@ -273,10 +273,9 @@ window.NR = {
    ============================================================ */
 window.NRSF = {
 
-  /* Where each door and window leads, as folders of this site.
-     Leave one empty ("") and that door says it opens soon. */
+  /* Where each door and window leads, as folders of this site. */
   LINKS: {
-    tradingPost: "",                // right door, unit 9: inside the Trading Post (not built yet)
+    tradingPost: "newsstand/",      // right door, unit 9: opens onto the Newsstand (for now)
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/"         // the magazine window
   },
@@ -286,39 +285,36 @@ window.NRSF = {
     marquee: "GRAND OPENING",       // letter board under the upstairs window
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
-    hanging: "THIS IS NOT RISING",  // the antique swinging sign
+    hanging: "NOT RISING",          // the antique swinging sign (split over two lines)
     leftDoor: "9¾",
-    rightDoor: "9",
-    doorNote: "Hi, Human"
+    rightDoor: "9"
   },
 
   /* Seasons. "auto" picks by today's date:
        fall = Sep–Nov, winter = Dec–Feb, spring = Mar–May, summer = Jun–Aug.
-     A season that isn't built yet falls back to the one named in "fallback". */
+     A season that isn't built yet falls back to the one named in FALLBACK_SEASON. */
   SEASON: "auto",
   SEASONS: {
     fall: {
-      leaves: ["#7a1414", "#8e1b1b", "#a8231c", "#bf331f", "#cf4a22", "#dc6a2c", "#b5391f"],
-      stems: "#3b2418",
+      // Colours of the Boston ivy painted on the walls. (The leaves that fall and lie on the
+      // cobbles are real maple leaves cut from your trail photos: img/leaves.webp.)
+      leaves: ["#9b1a1a", "#b8241c", "#c8331f", "#7c1420", "#d4561f", "#a0281a", "#e08a2c", "#8a2a16", "#c23a24", "#6f7a2e"],
       falling: true,
-      pumpkins: true
+      pumpkins: false       // the white pumpkins on the step (true = show them)
     }
   },
   FALLBACK_SEASON: "fall",
 
-  /* The poster window. kind: "bestseller" mimics a best-seller poster;
-     kind: "nowplaying" is a theatre bill for the Speakeasy. */
+  /* The poster window: one poster, styled like a best-seller poster.
+     (The Now Playing bills for the Speakeasy come back when it opens.) */
   POSTERS: [
     {
       kind: "bestseller",
       rank: "#1",
       book: "Poetic Drift",
       author: "Joel Lymneos",
-      cover: "poetic-drift.webp",
+      cover: "poetic-drift.jpg",
       link: "https://www.amazon.com/dp/B0HMFJL61C"
-    },
-    { kind: "nowplaying", act: "Live Music", note: "Coming soon", link: "speakeasy" },
-    { kind: "nowplaying", act: "Poets", note: "Coming soon", link: "speakeasy" },
-    { kind: "nowplaying", act: "Short Films", note: "Coming soon", link: "speakeasy" }
+    }
   ]
 };
