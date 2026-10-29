@@ -799,6 +799,42 @@
       let html = bestHTML((gl.w - pw) / 2, (gl.h - ph) / 2, pw); // centred: half the leftover space on each side
       html += bulbRing(gl, P);
       host.innerHTML = html;
+      // Clicking the poster opens it up close first (with a BUY IT button), instead of going straight to the shop
+      const posterEl = host.querySelector(".nrsf-poster");
+      if (posterEl && best) posterEl.addEventListener("click", e => { e.preventDefault(); openPoster(best, posterEl); });
+    }
+
+    /* ---------- The poster up close ----------
+       A dark overlay with the poster blown up and a BUY IT button under it. It reuses the poster's own
+       artwork (from.innerHTML), so the big one always matches the one in the window.
+       Closes with the x, the Escape key, or a click on the dark backdrop. */
+    let lb = null, lbBack = null, keyboardUser = false;
+    addEventListener("keydown", () => (keyboardUser = true), true);           // remember whether the visitor is using keys or a mouse/finger,
+    addEventListener("pointerdown", () => (keyboardUser = false), true);      // so focus only moves around for keyboard users
+    function openPoster(best, from) {
+      if (!lb) {                                                              // build the overlay the first time it's needed
+        lb = document.createElement("div");
+        lb.className = "nrsf-lb"; lb.hidden = true; lb.tabIndex = -1;
+        lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true");
+        root.appendChild(lb);
+        lb.addEventListener("click", e => { if (e.target === lb) closePoster(); });
+        addEventListener("keydown", e => { if (e.key === "Escape" && !lb.hidden) closePoster(); });
+      }
+      const href = LINKS[best.link] || best.link;
+      lb.setAttribute("aria-label", `${best.book} by ${best.author}`);
+      lb.innerHTML = `<div class="nrsf-lb-box">
+          <button class="nrsf-lb-x" type="button" aria-label="Close">\u00d7</button>
+          <div class="nrsf-lb-poster">${from.innerHTML}</div>
+          <a class="nrsf-lb-buy" href="${esc(href)}" target="_blank" rel="noopener">Buy it</a>
+        </div>`;
+      lb.querySelector(".nrsf-lb-x").addEventListener("click", closePoster);
+      lbBack = from;
+      lb.hidden = false;
+      lb.focus({ preventScroll: true });
+    }
+    function closePoster() {
+      lb.hidden = true;
+      if (keyboardUser && lbBack) lbBack.focus({ preventScroll: true });     // keyboard users go back to the poster
     }
 
     // The newsstand window: a little copy of the real newsstand. Every issue in order on
@@ -894,7 +930,7 @@
       const el = root.querySelector(".nrsf-opensign");
       if (!el) return;
       const gx = leaf.w * .13, gy = leaf.h * .055, gw = leaf.w - gx * 2, gh = leaf.h * .44;
-      const w = gw * .52, h = w * 130 / 60;
+      const w = gw * (G.phone ? .7 : .52), h = w * 130 / 60;              // a bit bigger on phones, where the door is narrow
       Object.assign(el.style, { left: (gx + (gw - w) / 2) * u + "px", top: (gy + (gh - h) / 2) * u + "px", width: w * u + "px", height: h * u + "px" });
     }
 
