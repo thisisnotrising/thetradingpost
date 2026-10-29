@@ -15,6 +15,13 @@
   [hidden] { display: none !important; }
 </style>
 <link rel="stylesheet" href="../assets/newsstand.css">
+<!-- Came through a storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
+<style>
+html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
+@keyframes nr-from-light { to { opacity: 0; visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
+</style>
+<script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
 </head>
 <body>
 <!-- NOT RISING Newsstand: the kiosk (what you see on the page) -->
