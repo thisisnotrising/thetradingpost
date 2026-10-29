@@ -317,7 +317,7 @@ body {
     0 0 0 100vmax rgba(8, 8, 12, .72);   /* a huge dark "shadow" that dims the whole page behind it: nighttime */
   font-family: "Oswald", "Arimo", sans-serif; font-weight: 600; text-transform: uppercase;
   text-align: center; line-height: 1.15;
-  animation: mq-on .7s steps(1, end);    /* flickers on like the lights warming up */
+  animation: mq-in .25s ease-out;        /* one smooth fade-in. (A strobing flicker here also strobed the dimmed page, since the dim is part of this box) */
 }
 /* Bulbs all the way around the case.
    ::before = the top and bottom rows (full width, corners included)
@@ -362,7 +362,8 @@ body {
   .nrns .toast { padding: 28px 22px 22px; }
 }
 
-@keyframes mq-on { 0% { opacity: 0; } 15% { opacity: .7; } 30% { opacity: .15; } 45% { opacity: 1; } 60% { opacity: .5; } 75% { opacity: 1; } }
+/* Fade-in: the transform must repeat translate(-50%, -50%), because an animated transform replaces the whole centering transform */
+@keyframes mq-in { from { opacity: 0; transform: translate(-50%, -50%) scale(.97); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
 @keyframes mq-twinkle { from { opacity: .7; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .nrns .toast, .nrns .toast::before, .nrns .toast::after { animation: none; } }
 
