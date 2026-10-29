@@ -942,7 +942,7 @@
         a.addEventListener("click", e => {
           e.preventDefault();
           const door = a.classList.contains("nrsf-door") ? a : null;
-          if (door) door.classList.add("open");
+          if (door) { door.classList.add("open"); root.classList.add("into-light"); }   // into-light: the veil turns white
           if (PREVIEW) {
             if (key === "speakeasy" && window.NRSF_SHOW_SPEAKEASY) { setTimeout(() => window.NRSF_SHOW_SPEAKEASY(), door ? 650 : 0); setTimeout(() => door && door.classList.remove("open"), 1400); return; }
             toast(`On the live site, this takes you into ${NAMES[key] || key} (${LINKS[key] || key}).`);
@@ -953,11 +953,12 @@
           const r = a.getBoundingClientRect(), s = root.getBoundingClientRect();
           scene.style.transformOrigin = `${r.left - s.left + r.width / 2}px ${r.top - s.top + r.height / 2}px`;
           setTimeout(() => root.classList.add("leaving"), door ? 450 : 0);
-          setTimeout(() => (location.href = LINKS[key] || key), door ? 1300 : 850);
+          if (door) { try { sessionStorage.setItem("nr-light", "1"); } catch (e) {} }   // tells the next page to fade in from white
+          setTimeout(() => (location.href = LINKS[key] || key), door ? 1450 : 850);
         });
       });
     }
-    addEventListener("pageshow", () => { root.classList.remove("leaving"); root.querySelectorAll(".open").forEach(d => d.classList.remove("open")); });
+    addEventListener("pageshow", () => { root.classList.remove("leaving", "into-light"); root.querySelectorAll(".open").forEach(d => d.classList.remove("open")); });
 
     // Load the photo textures first, then paint
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
