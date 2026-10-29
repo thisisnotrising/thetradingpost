@@ -1,0 +1,507 @@
+html, body { min-height: 100%; }
+body { background: #0a0a0a; color: #efede8; }
+/* ============================================================
+   NOT RISING — NEWSSTAND STYLES
+   Every rule starts with .nrns so it only touches the newsstand,
+   never the rest of thisisnotrising.org (and your theme's styles
+   can't leak in and change the magazine).
+   ============================================================ */
+
+/* ---------- Tokens ---------- */
+.nrns {
+  --wall: #0a0a0a;          /* the kiosk interior */
+  --ink: #efede8;           /* off-white, matches the cover masthead */
+  --muted: #8f8c86;         /* quiet text */
+  --stripe: #000000;        /* black awning stripe (true black, outlined) */
+  --rack: #121211;          /* rack back panel */
+  --chrome-hi: #c9c7c1;     /* metal highlight */
+  --chrome-lo: #3b3a37;     /* metal shadow */
+  --paper: #ffffff;         /* magazine white pages */
+  --paper-ink: #111111;     /* text on white pages */
+  --night: #000000;         /* magazine black pages */
+  --f-display: "Archivo Black", "Arial Black", Impact, sans-serif;   /* kiosk sign */
+  --f-mag: "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif;      /* interview pages */
+  --f-canva: var(--f-mag);   /* Team + Editor's Letter: same family as the rest of the magazine */
+  --f-legal: var(--f-mag);   /* copyright + back cover: same family too */
+  color: var(--ink);
+  font-family: var(--f-mag);
+  color-scheme: dark;
+}
+
+/* ---------- Shield from the theme ---------- */
+.nrns [hidden], .nrns[hidden] { display: none !important; }
+.nrns :is(h1, h2, h3, p, blockquote, figure) {
+  margin: 0; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; letter-spacing: inherit; text-transform: inherit; quotes: none; max-width: none;
+}
+.nrns blockquote::before, .nrns blockquote::after { content: none; }
+.nrns img { max-width: none; border-radius: 0; box-shadow: none; }
+.nrns button { all: unset; box-sizing: border-box; cursor: pointer; }
+.nrns a { color: inherit; }
+.nrns button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+/* ---------- THE KIOSK: indie old-school newsstand at blue hour ----------
+   A changeable-letter marquee ringed with Edison bulbs, string lights
+   draped over the rack, velvet ropes on antique copper posts, and the
+   odd camera flash from the sidewalk. */
+.nrns {
+  --silver-hi: #f1f2f4;     /* polished silver highlight */
+  --silver: #b9bdc4;        /* silver trim */
+  --silver-lo: #6c7179;     /* silver in shadow */
+  --velvet-dk: #4a0812;     /* red velvet, deep fold */
+  --velvet: #8e1427;        /* red velvet */
+  --velvet-hi: #c43a50;     /* red velvet sheen */
+  --bulb: #fff6df;          /* marquee bulb */
+  --copper-hi: #f0bb93;     /* copper highlight */
+  --copper: #b8693c;        /* deep copper */
+  --copper-lo: #5e2c13;     /* copper in shadow */
+}
+.nrns.stand {
+  position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 30% at 50% 2%, rgba(255, 214, 150, .12), rgba(255, 214, 150, 0) 70%),   /* warm glow from the marquee */
+    linear-gradient(#0e1a33 0, #0b1325 260px, var(--wall) 620px);                                        /* blue-hour sky fading to night */
+  max-width: 1180px; margin: 0 auto;
+  padding-block: 36px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Marquee: a black box ringed with vanity globes (drawn by the script) around a backlit letter board.
+   The letters are separate black tiles slid onto the rails, each sitting a hair
+   crooked, the way someone on a ladder put them up. */
+.nrns .sign {
+  position: relative; text-align: center;
+  background: linear-gradient(#141414, #0a0a0a);
+  border: 2px solid #262626;
+  padding: clamp(30px, 3.8vw, 38px) clamp(30px, 3.8vw, 38px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .7), 0 0 60px rgba(255, 196, 120, .08);
+}
+.nrns .board {                          /* the backlit letter board, with its grooved rails */
+  position: relative; z-index: 1; container-type: inline-size;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 calc(var(--row) - 3px), rgba(60, 50, 40, .22) calc(var(--row) - 3px) calc(var(--row) - 1px), rgba(255,255,255,.6) calc(var(--row) - 1px) var(--row)),
+    radial-gradient(ellipse 70% 120% at 50% 40%, var(--ink), var(--ink) 70%, #dcdad5);   /* same white as the awning */
+  --row: clamp(16px, 2.2vw, 26px);
+  border: 3px solid #050505; box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), inset 0 0 26px rgba(0, 0, 0, .12), 0 0 30px rgba(239, 237, 232, .14);
+  padding: calc(var(--row) * 1) 4% calc(var(--row) * .9);
+}
+.nrns .sign h1 {
+  display: flex; justify-content: center; gap: .06em;
+  font-family: "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif; font-weight: 600; text-transform: uppercase;
+  font-size: min(140px, 14cqw); line-height: 1; letter-spacing: 0; color: #111; white-space: nowrap;
+}
+.nrns .lt.sp { width: .3em; }
+.nrns .sign h1 .lt {                    /* one letter tile */
+  display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .12), 0 4px 6px rgba(0, 0, 0, .12);   /* the tile casts a little shadow on the lit board */
+}
+/* Awning: black and white stripes, trimmed in silver */
+.nrns .awning {
+  display: block; height: 66px; position: relative;
+  background:
+    linear-gradient(var(--silver-hi), var(--silver) 50%, var(--silver-lo)) 0 0 / 100% 5px no-repeat,      /* silver trim along the top */
+    repeating-linear-gradient(90deg, var(--ink) 0 39px, var(--silver) 39px 40px, var(--stripe) 40px 79px, var(--silver) 79px 80px)
+      0 0 / 100% 46px no-repeat;
+}
+.nrns .awning::before {                  /* silver piping down both sides */
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 46px;
+  border-left: 3px solid var(--silver); border-right: 3px solid var(--silver);
+}
+.nrns .awning::after {                   /* scalloped edge, every scallop piped in silver */
+  content: ""; position: absolute; left: 0; right: 0; top: 46px; height: 20px;
+  background:
+    radial-gradient(circle at 20px 0, var(--ink) 17px, var(--silver) 17.5px 20px, transparent 20.5px) 0 0 / 80px 20px repeat-x,
+    radial-gradient(circle at 60px 0, var(--stripe) 17px, var(--silver) 17.5px 20px, transparent 20.5px) 0 0 / 80px 20px repeat-x;
+}
+
+/* Tabs: little letter boards, like the marquee without the bulbs.
+   The selected tab is lit; the others are switched off. MEMOIRS sits apart on the right. */
+.nrns .tabs { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; margin-top: 22px; padding-inline: 14px; }
+.nrns .tab { display: inline-block; padding: 4px; background: linear-gradient(#161616, #0a0a0a); border: 2px solid #262626; min-height: 40px; }
+.nrns .tab .tb {
+  display: flex; gap: .05em; padding: 7px 14px 6px;
+  font: 600 18px/1 "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif; letter-spacing: .04em; color: #111; white-space: nowrap;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 9px, rgba(60, 50, 40, .22) 9px 10px, rgba(255,255,255,.55) 10px 11px),
+    radial-gradient(ellipse 80% 140% at 50% 40%, #fffdf6, #f3ecdc 70%, #e4dac4);
+  border: 2px solid #050505;
+  filter: brightness(.42) saturate(.5);             /* switched off */
+  transition: filter .25s;
+}
+.nrns .tab .lt { display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg)); }
+.nrns .tab:hover .tb { filter: brightness(.7) saturate(.7); }
+.nrns .tab[aria-selected="true"] .tb { filter: none; box-shadow: 0 0 22px rgba(255, 236, 200, .28); }   /* lit */
+.nrns .tab.upcoming .tb { filter: brightness(.3) saturate(.4); }
+.nrns .tab.upcoming:hover .tb { filter: brightness(.55) saturate(.6); }
+.nrns .tab.memoirs { margin-left: auto; position: relative; }
+.nrns .tab.memoirs::before {             /* a small diamond sets it apart from the issue tabs */
+  content: "\25C6"; position: absolute; left: -24px; bottom: 16px; font-size: 10px; color: var(--silver);
+}
+.nrns .tab:focus-visible { outline: 2px solid var(--silver-hi); outline-offset: 2px; }
+
+/* The rack: a slim dark frame ringed with vanity globe bulbs (drawn by the script) */
+.nrns .rack {
+  position: relative;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 220, 160, .07), rgba(255, 220, 160, 0) 70%), #0b0b0b;
+  border: 2px solid #1e1e1e; box-shadow: inset 0 0 0 1px rgba(255, 230, 190, .06);
+  padding: 76px 74px 64px;
+}
+.nrns .rack::before, .nrns .rack::after { content: none; }
+.nrns .lights { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: visible; }
+.nrns .lights svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.nrns .lights .halo { mix-blend-mode: screen; }
+.nrns .pockets { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); row-gap: 38px; }
+@media (max-width: 900px) { .nrns .pockets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .nrns .pockets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nrns .rack { padding: 50px 44px 40px; } }
+.nrns .rack-note {                      /* placard for a tab with nothing on it yet */
+  position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: #000; border: 1px solid var(--silver); box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--silver-lo);
+  padding: 18px 28px; text-align: center; color: var(--silver-hi); max-width: calc(100% - 60px);
+  font: 700 13px/1.5 var(--f-mag); letter-spacing: .28em; text-transform: uppercase;
+}
+.nrns .rack-note small { display: block; margin-top: 6px; color: var(--silver); letter-spacing: .14em; font-weight: 400; text-transform: none; font-size: 13px; }
+
+/* One pocket = cover + copies behind, standing on a clear glass shelf, number tag below */
+.nrns .pocket { position: relative; padding: 14px 12px 50px; }
+.nrns .glass {                           /* clear glass shelf: faint top surface, bright front edge with a green-tinted rim */
+  position: absolute; left: 0; right: 0; bottom: 30px; height: 20px; pointer-events: none; z-index: 2;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .26), rgba(255, 255, 255, .08) 55%, rgba(255, 255, 255, .02)),
+    linear-gradient(90deg, rgba(255, 236, 200, .02), rgba(255, 236, 200, .12) 50%, rgba(255, 236, 200, .02));
+  border-top: 1px solid rgba(255, 255, 255, .8);
+  border-bottom: 2px solid rgba(185, 235, 220, .5);                               /* the green-tinted front edge of the glass */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 0 14px rgba(255, 236, 200, .08), 0 16px 20px -8px rgba(0, 0, 0, .7);
+}
+.nrns .pocket::after { content: none; }
+.nrns .cover-btn {
+  position: relative; z-index: 1; display: block; width: 100%; background: #000;
+  aspect-ratio: 816 / 1056; overflow: hidden;
+  transform-origin: 50% 100%; transform: perspective(900px) rotateX(6deg);
+  transition: transform .4s cubic-bezier(.2,.7,.2,1), filter .4s, box-shadow .4s;
+  box-shadow: 0 12px 18px rgba(0,0,0,.55);
+}
+.nrns .stack { position: absolute; left: 12px; right: 12px; top: 14px; bottom: 50px; z-index: 0; transform: perspective(900px) rotateX(6deg); transform-origin: 50% 100%; }
+.nrns .stack::before, .nrns .stack::after { content: ""; position: absolute; inset: 0; background: #1b1b1a; border: 1px solid #2e2d2b; }
+.nrns .stack::before { transform: translate(5px, -5px); }
+.nrns .stack::after { transform: translate(10px, -10px); background: #151514; }
+.nrns .cover-btn:hover, .nrns .cover-btn:focus-visible {
+  transform: perspective(900px) rotateX(0deg) translateY(-18px);
+  box-shadow: 0 20px 30px rgba(0,0,0,.6), 0 0 40px rgba(255, 238, 205, .16);   /* a little limelight */
+}
+.nrns .cover-btn:focus-visible { outline: 2px solid var(--silver-hi); outline-offset: 4px; }
+.nrns .cover-btn img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.nrns .cover-btn::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,.14), rgba(255,255,255,0) 38%, rgba(255,255,255,0) 70%, rgba(255,255,255,.06));
+}
+.nrns .cover-btn.lifted { visibility: hidden; }
+.nrns .tag {                             /* number placard: black card, silver border and lettering */
+  position: absolute; z-index: 3; left: 12px; bottom: 4px;
+  background: #000; color: var(--silver-hi); border: 1px solid var(--silver);
+  font: 700 10.5px/1 var(--f-mag); letter-spacing: .16em;
+  padding: 5px 7px 4px; font-variant-numeric: tabular-nums; pointer-events: none; box-shadow: 0 2px 4px rgba(0,0,0,.7);
+}
+/* A little paper note taped inside an empty issue slot */
+.nrns .slip {
+  position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) rotate(-4deg);
+  background: var(--ink); color: #111; padding: 10px 12px 9px; white-space: nowrap;
+  font: 700 10.5px/1 var(--f-mag); letter-spacing: .2em; text-transform: uppercase;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, .55);
+}
+.nrns .slip::before {                    /* a strip of tape holding it up */
+  content: ""; position: absolute; left: 50%; top: -7px; width: 38px; height: 13px; margin-left: -19px;
+  background: rgba(239, 237, 232, .45); transform: rotate(3deg);
+}
+.nrns .empty { position: relative; z-index: 1; aspect-ratio: 816 / 1056; background: linear-gradient(#141414, #0b0b0b); border: 1px solid #262626; transform: perspective(900px) rotateX(6deg); transform-origin: 50% 100%; }
+
+/* Velvet ropes on vintage stanchions, on a polished black floor (the ropes are the only red) */
+.nrns .carpet { position: relative; height: 150px; margin-top: -24px; pointer-events: none; z-index: 2; }
+.nrns .carpet::before {                  /* polished floor with a pool of spotlight */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 44px;
+  background:
+    radial-gradient(ellipse 55% 100% at 50% 0%, rgba(255, 238, 205, .10), rgba(255, 238, 205, 0) 70%),
+    linear-gradient(#0d0d0d, #151515 55%, #0a0a0a);
+  border-top: 1px solid rgba(185, 189, 196, .35);
+}
+.nrns .post { position: absolute; bottom: 4px; width: 60px; height: 150px; margin-left: -30px; filter: drop-shadow(0 6px 6px rgba(0,0,0,.75)) drop-shadow(0 0 10px rgba(240, 187, 147, .08)); }
+.nrns .post svg { display: block; width: 100%; height: 100%; }
+.nrns .rope { position: absolute; top: 6px; height: 62px; overflow: visible; }
+.nrns .rope svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nrns .rope .r1 { stroke: var(--velvet-dk); stroke-width: 12px; }
+.nrns .rope .r2 { stroke: var(--velvet); stroke-width: 9px; }
+.nrns .rope .r3 { stroke: var(--velvet-hi); stroke-width: 3px; opacity: .75; }
+.nrns .rope.wide { display: none; }
+@media (max-width: 640px) {
+  .nrns .post.mid, .nrns .rope.narrow { display: none; } .nrns .rope.wide { display: block; }
+  .nrns .post { width: 46px; height: 116px; margin-left: -23px; } .nrns .carpet { height: 118px; } .nrns .rope { top: 4px; height: 48px; }
+}
+
+/* Camera flashes from the crowd */
+.nrns .flashes { position: absolute; inset: 0; z-index: 5; pointer-events: none; mix-blend-mode: screen; }
+.nrns .flash {
+  position: absolute; width: 220px; height: 220px; margin: -110px 0 0 -110px; opacity: 0;
+  background:
+    radial-gradient(circle, #ffffff 0 4px, rgba(255, 252, 240, .85) 9px, rgba(255, 246, 225, .35) 24%, rgba(255, 240, 215, 0) 50%),
+    linear-gradient(90deg, rgba(255,255,255,0) 6%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 94%) 50% 50% / 100% 2px no-repeat,
+    linear-gradient(0deg, rgba(255,255,255,0) 18%, rgba(255,255,255,.7) 50%, rgba(255,255,255,0) 82%) 50% 50% / 2px 76% no-repeat;
+}
+.nrns .flash-wash { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at var(--x, 50%) var(--y, 50%), rgba(255, 250, 238, .10), rgba(255, 250, 238, 0) 60%); }
+
+@media (prefers-reduced-motion: reduce) { .nrns .lights .flick { animation: none; } }
+
+/* Stand-in cover for issues whose Canva cover isn't loaded yet */
+.nrns .ph { width: 100%; height: 100%; background: #000; color: var(--ink); display: grid; grid-template-rows: auto auto 1fr; padding: 6% 5% 5%; gap: 4%; text-align: left; container-type: inline-size; }
+.nrns .ph-mast { font-family: var(--f-display); font-size: 14.5cqw; line-height: .85; letter-spacing: -.02em; white-space: nowrap; }
+.nrns .ph-date { font-weight: 700; font-size: 4.4cqw; letter-spacing: .14em; }
+.nrns .ph-photo { background: repeating-linear-gradient(135deg, #191919 0 6px, #141414 6px 12px); display: flex; align-items: flex-end; padding: 7% 7% 16%; }
+.nrns .ph-name { font-weight: 700; font-size: 9.5cqw; line-height: 1; text-transform: uppercase; }
+.nrns .cover-btn.placeholder { filter: saturate(0) brightness(.75); }
+.nrns .cover-btn.placeholder:hover { filter: none; }
+
+.nrns .toast {
+  position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 100002;
+  background: var(--ink); color: #000; font-weight: 700; font-size: 14px; padding: 12px 18px; max-width: calc(100% - 32px);
+  white-space: pre-line; text-align: center; line-height: 1.5;   /* \n in a message starts a new line */
+}
+
+/* ---------- THE READER (full-screen overlay) ---------- */
+.nrns .reader {
+  position: fixed; inset: 0; z-index: 100001; background: rgba(6,6,6,.97);
+  display: grid; grid-template-rows: auto 1fr auto;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.nrns .bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+}
+.nrns .icon-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 14px; border: 1px solid #3a3936; color: var(--ink); font: 700 12px var(--f-mag); letter-spacing: .2em; }
+.nrns .icon-btn:hover { background: #1b1a18; }
+.nrns .icon-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.nrns .icon-btn:disabled { opacity: .35; cursor: default; }
+.nrns .stage { position: relative; min-height: 0; display: grid; place-items: center; padding: 8px 16px; }
+.nrns .sizer { position: relative; }
+.nrns .counter { font-variant-numeric: tabular-nums; min-width: 9ch; text-align: center; }
+.nrns .hint { color: var(--muted); font-weight: 400; letter-spacing: .08em; text-transform: none; font-size: 13px; }
+@media (max-width: 560px) { .nrns .hint, .nrns .site-link { display: none; } }
+
+/* StPageFlip's own stylesheet (it ships separately from the library) */
+.nrns .stf__parent { position: relative; display: block; box-sizing: border-box; transform: translateZ(0); touch-action: pan-y; }
+.nrns .stf__wrapper { position: relative; width: 100%; box-sizing: border-box; }
+.nrns .stf__parent canvas { position: absolute; width: 100%; height: 100%; left: 0; top: 0; }
+.nrns .stf__block { position: absolute; width: 100%; height: 100%; box-sizing: border-box; perspective: 2000px; }
+.nrns .stf__item { display: none; position: absolute; transform-style: preserve-3d; }
+.nrns .stf__outerShadow, .nrns .stf__innerShadow, .nrns .stf__hardShadow, .nrns .stf__hardInnerShadow { position: absolute; left: 0; top: 0; }
+
+/* ============================================================
+   MAGAZINE PAGES
+   Every page is designed on an 816 x 1056 grid (8.5 x 11 in at
+   96 dpi). --p is "one design pixel": 1/816 of the page width,
+   so calc(N * var(--p)) scales the page like a PDF.
+   To copy a position from your Canva file: Canva pixel x 0.528.
+   ============================================================ */
+.nrns .page { container-type: inline-size; background: var(--paper); color: var(--paper-ink); overflow: hidden; }
+.nrns .page.dark { background: var(--night); color: var(--ink); }
+.nrns .sheet { --b: 18;   /* BODY TEXT SIZE in design pixels: change this one number to resize all answers */
+  --p: calc(100cqw / 816); position: absolute; inset: 0; font-family: var(--f-mag); overflow: hidden; text-align: left;
+  font-kerning: normal; font-stretch: normal; font-synthesis: none; letter-spacing: normal; }   /* one family, one kerning, one width */
+.nrns .sheet * { box-sizing: border-box; }
+.nrns .abs { position: absolute; }
+
+.nrns .spaced { font-weight: 700; font-size: calc(42 * var(--p)); letter-spacing: .34em; line-height: 1.3; text-transform: uppercase; }
+.nrns .spaced.canva { font-family: var(--f-canva); font-weight: 600; }
+.nrns .arrow { width: calc(28 * var(--p)); height: calc(28 * var(--p)); }
+.nrns .foot {
+  position: absolute; bottom: calc(44 * var(--p)); left: calc(66 * var(--p)); right: calc(66 * var(--p));
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: calc(11.5 * var(--p)); font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+}
+.nrns .foot.canva { font-family: var(--f-canva); }
+.nrns .folio { font-variant-numeric: tabular-nums; }
+
+/* Every photo inside the magazine prints in black and white.
+   Covers (and finished books made of page images) use .cover-img, so they keep their colour. */
+.nrns .page img:not(.cover-img) { filter: grayscale(1); }
+
+/* Preview ending: "Full issue releases" page */
+.nrns .pv-big { left: calc(66 * var(--p)); right: calc(66 * var(--p)); top: calc(300 * var(--p)); font-weight: 700; font-size: calc(88 * var(--p)); line-height: .95; text-transform: uppercase; }
+.nrns .pv-date { left: calc(66 * var(--p)); top: calc(600 * var(--p)); font-weight: 700; font-size: calc(22 * var(--p)); letter-spacing: .3em; }
+.nrns .pv-link { left: calc(66 * var(--p)); top: calc(700 * var(--p)); font-weight: 700; font-size: calc(17 * var(--p)); letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink); text-decoration: underline; text-underline-offset: .35em; text-decoration-thickness: calc(2 * var(--p)); }
+.nrns .pv-link:hover { text-decoration-thickness: calc(4 * var(--p)); }
+
+/* Cover */
+.nrns .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* Copyright page + back cover, after To Be Human */
+.nrns .legal { left: calc(66 * var(--p)); bottom: calc(110 * var(--p)); width: calc(470 * var(--p)); font-family: var(--f-legal); font-size: calc(12.5 * var(--p)); line-height: 1.6; }
+.nrns .legal p { margin-bottom: calc(14 * var(--p)); }
+.nrns .legal b { font-weight: 700; }
+.nrns .back-mark { left: 0; right: 0; bottom: calc(150 * var(--p)); display: grid; justify-items: center; gap: calc(14 * var(--p)); font-family: var(--f-legal); font-weight: 600; font-size: calc(12.5 * var(--p)); letter-spacing: .04em; }
+.nrns .back-mark img { width: calc(78 * var(--p)); height: calc(78 * var(--p)); }
+
+/* The Team (Canva Sans look) */
+.nrns .team { font-family: var(--f-canva); }
+.nrns .team-group { position: absolute; }
+.nrns .role { font-size: calc(14.5 * var(--p)); margin-bottom: calc(14 * var(--p)); }
+.nrns .who { font-size: calc(19 * var(--p)); font-weight: 700; line-height: 1.32; }
+
+/* Editor's letter (Canva Sans look) */
+.nrns .letter { font-family: var(--f-canva); }
+.nrns .letter-photo { left: calc(431 * var(--p)); top: calc(40 * var(--p)); width: calc(302 * var(--p)); height: calc(340 * var(--p)); object-fit: cover; }
+.nrns .letter-hi { left: calc(66 * var(--p)); top: calc(462 * var(--p)); font-weight: 600; font-size: calc(17 * var(--p)); }
+.nrns .letter-body { left: calc(431 * var(--p)); top: calc(458 * var(--p)); width: calc(315 * var(--p)); font-size: calc(14.6 * var(--p)); line-height: 1.68; text-align: justify; }
+.nrns .letter-body p { margin-bottom: 1.35em; }
+.nrns .letter-body p.loud { font-weight: 700; text-transform: uppercase; }
+.nrns .letter-sig { left: calc(423 * var(--p)); top: calc(904 * var(--p)); width: calc(174 * var(--p)); height: auto; }
+.nrns .letter-role { left: calc(431 * var(--p)); top: calc(956 * var(--p)); font-weight: 700; font-size: calc(13.5 * var(--p)); }
+
+/* Name page */
+.nrns .name-stack { left: calc(60 * var(--p)); top: calc(92 * var(--p)); font-weight: 700; font-size: calc(58 * var(--p)); letter-spacing: .42em; line-height: 1.34; }
+.nrns .name-photo { left: calc(393 * var(--p)); top: calc(160 * var(--p)); width: calc(345 * var(--p)); height: calc(743 * var(--p)); object-fit: cover; }
+
+/* In this issue (each item placed by hand: x, y from the data) */
+.nrns .toc-q { position: absolute; display: block; text-align: left; color: inherit; }
+.nrns .toc-q > * { pointer-events: none; }   /* so the click lands on the button itself */
+.nrns .toc-q:hover .toc-t { text-decoration: underline; text-underline-offset: .2em; }
+.nrns .toc-n { display: block; font-weight: 700; font-size: calc(24 * var(--p)); letter-spacing: .36em; margin-bottom: calc(22 * var(--p)); }
+.nrns .toc-t { display: block; font-weight: 700; font-size: calc(21 * var(--p)); line-height: 1.17; text-transform: uppercase; }
+.nrns .toc-img { position: absolute; object-fit: cover; }
+
+/* Big question headings: a giant numeral, then the question */
+.nrns .q-head { left: calc(66 * var(--p)); top: calc(104 * var(--p)); width: calc(330 * var(--p)); }
+.nrns .q-num { display: block; font-weight: 700; font-size: calc(150 * var(--p)); line-height: .78; margin-bottom: calc(22 * var(--p)); }
+.nrns .q-text { font-weight: 700; font-size: calc(var(--qs, 46) * var(--p)); line-height: 1.04; text-transform: uppercase; text-wrap: balance; }
+.nrns .q-side { left: calc(66 * var(--p)); width: calc(317 * var(--p)); }
+.nrns .q-side img { display: block; width: 100%; height: auto; }
+.nrns .q-col { left: calc(433 * var(--p)); top: calc(104 * var(--p)); bottom: calc(96 * var(--p)); width: calc(317 * var(--p)); display: flex; flex-direction: column; }
+.nrns .q-col .col { flex: 1; }
+
+/* Cover feature opener (matches your Canva page) */
+.nrns .op-photo { left: calc(68 * var(--p)); top: calc(150 * var(--p)); width: calc(316 * var(--p)); height: calc(416 * var(--p)); object-fit: cover; }
+.nrns .op-q { left: calc(66 * var(--p)); top: calc(634 * var(--p)); width: calc(340 * var(--p)); display: grid; grid-template-columns: auto 1fr; column-gap: calc(12 * var(--p)); align-items: start; }
+.nrns .op-q .q-num { font-size: calc(96 * var(--p)); margin: 0; line-height: .8; }
+.nrns .op-q .q-text { font-size: calc(48 * var(--p)); line-height: 1.16; }
+.nrns .op-col { left: calc(433 * var(--p)); top: calc(560 * var(--p)); bottom: calc(80 * var(--p)); width: calc(303 * var(--p)); display: flex; flex-direction: column; }
+.nrns .op-col .col { flex: 1; }
+
+/* Flow pages */
+.nrns .rh {
+  position: absolute; top: calc(44 * var(--p)); left: calc(66 * var(--p)); right: calc(66 * var(--p));
+  display: flex; justify-content: space-between; gap: calc(20 * var(--p));
+  font-size: calc(10.5 * var(--p)); font-weight: 700; letter-spacing: .3em; text-transform: uppercase;
+  padding-bottom: calc(10 * var(--p)); border-bottom: calc(1.5 * var(--p)) solid currentColor;
+}
+.nrns .rh i { font-style: italic; letter-spacing: .12em; }
+.nrns .cols { position: absolute; top: calc(104 * var(--p)); bottom: calc(96 * var(--p)); left: calc(66 * var(--p)); right: calc(66 * var(--p)); display: grid; grid-template-columns: 1fr 1fr; column-gap: calc(44 * var(--p)); }
+.nrns .col { position: relative; overflow: hidden; min-height: 0; height: 100%; }
+.nrns .col.abs { position: absolute; }   /* layout boxes are placed by hand */
+.nrns .col > :first-child { margin-top: 0; }
+.nrns .col p { margin: 0 0 .85em; font-size: calc(var(--b) * var(--p)); line-height: 1.65; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.nrns .col p.split { margin-bottom: 0; }   /* a paragraph that continues in the next box */
+.nrns .col p.li { position: relative; padding-left: 1.3em; }
+.nrns .col p.li::before { content: "\2014"; position: absolute; left: 0; }
+.nrns .col p.li.cont::before { content: none; }
+.nrns .pq { margin: calc(4 * var(--p)) 0 calc(22 * var(--p)); padding-top: calc(16 * var(--p)); border-top: calc(4 * var(--p)) solid currentColor; font-weight: 700; font-size: calc(34 * var(--p)); line-height: 1.12; text-transform: uppercase; }
+.nrns .fig { margin: calc(6 * var(--p)) 0 calc(18 * var(--p)); }
+.nrns .fig img { display: block; width: 100%; height: auto; max-height: calc(470 * var(--p)); object-fit: cover; }
+
+/* Full-page photo */
+.nrns .photo-full { left: 0; top: 0; width: 100%; height: calc(840 * var(--p)); object-fit: cover; }
+.nrns .photo-cap { left: calc(66 * var(--p)); right: calc(66 * var(--p)); top: calc(868 * var(--p)); }
+.nrns .photo-cap small { display: block; font-weight: 700; font-size: calc(10.5 * var(--p)); letter-spacing: .3em; margin-bottom: calc(10 * var(--p)); text-transform: uppercase; }
+.nrns .photo-cap span { display: block; font-weight: 700; font-size: calc(19 * var(--p)); line-height: 1.3; text-transform: uppercase; }
+
+/* Next issue */
+.nrns .next-name { left: calc(66 * var(--p)); right: calc(66 * var(--p)); top: calc(330 * var(--p)); font-weight: 700; font-size: calc(96 * var(--p)); line-height: .95; text-transform: uppercase; }
+.nrns .next-date { left: calc(66 * var(--p)); top: calc(560 * var(--p)); font-weight: 700; font-size: calc(15 * var(--p)); letter-spacing: .3em; }
+
+/* Off-screen measuring room where the paginator lays pages out */
+.nrns .measure { position: fixed; left: -10000px; top: 0; width: 816px; visibility: hidden; pointer-events: none; }
+.nrns .measure .page { position: relative; width: 816px; height: 1056px; }
+
+.nrns-flyer { position: fixed; z-index: 100003; pointer-events: none; box-shadow: 0 30px 60px rgba(0,0,0,.7); }
+
+@media (prefers-reduced-motion: reduce) { .nrns .cover-btn { transition: none; } }
+
+/* ============================================================
+   COLOR-BLOCK LAYOUTS (inside the interview)
+   Each question gets one of four designed layouts; overflow
+   goes to two "continued" layouts. Black blocks, bleed photos
+   and pull-quote bars fill the page; white space is on purpose.
+   ============================================================ */
+.nrns .blk { position: absolute; background: #000; color: var(--ink); }
+.nrns .inv, .nrns .inv p { color: var(--ink); }
+.nrns .lbl {                              /* small kicker with a rule running off the page edge */
+  position: absolute; left: 0; top: calc(52 * var(--p)); width: calc(270 * var(--p));
+  padding: 0 0 calc(9 * var(--p)) calc(66 * var(--p)); border-bottom: calc(1.5 * var(--p)) solid currentColor;
+  font-size: calc(11 * var(--p)); font-weight: 700; letter-spacing: .3em; text-transform: uppercase; white-space: nowrap;
+}
+.nrns .pg { position: absolute; font-size: calc(14 * var(--p)); font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.nrns .photo { position: absolute; object-fit: cover; display: block; }
+
+/* Big question block, reused by every layout */
+.nrns .qb .q-num { display: block; font-weight: 700; font-size: calc(var(--ns, 120) * var(--p)); line-height: .78; margin-bottom: calc(18 * var(--p)); }
+.nrns .qb .q-text { font-weight: 700; font-size: calc(var(--qs, 44) * var(--p)); line-height: 1.04; text-transform: uppercase; text-wrap: balance; }
+.nrns .qb.row { display: grid; grid-template-columns: auto 1fr; column-gap: calc(18 * var(--p)); align-items: start; }
+.nrns .qb.row .q-num { margin: 0; }
+
+/* Pull-quote bar */
+.nrns .bar-q { position: absolute; background: #000; color: var(--ink); display: flex; align-items: center; padding: 0 calc(56 * var(--p)) 0 calc(40 * var(--p)); }
+.nrns .bar-q span { font-weight: 700; font-size: calc(var(--bs, 24) * var(--p)); line-height: 1.25; text-transform: uppercase; }
+
+/* Continued pages: a black rail with the running title */
+.nrns .rail-t { position: absolute; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: 700; font-size: calc(13 * var(--p)); letter-spacing: .34em; text-transform: uppercase; white-space: nowrap; }
+.nrns .cont-n { position: absolute; font-weight: 700; font-size: calc(120 * var(--p)); line-height: .78; }
+.nrns .cont-k { position: absolute; font-weight: 700; font-size: calc(11 * var(--p)); letter-spacing: .3em; text-transform: uppercase; }
+
+/* Statement pages: one big answer */
+.nrns .stmt { position: absolute; overflow: hidden; font-weight: 400; font-size: calc(var(--as, 30) * var(--p)); line-height: 1.4; }
+.nrns .stmt p { margin: 0 0 .6em; }
+.nrns .stmt.bold { font-weight: 700; line-height: 1.15; }   /* big bold answer that fills the page */
+
+/* Spotlight panel (e.g. the writer a guest recommends) */
+.nrns .lead p { font-size: calc(var(--b) * 1.2 * var(--p)); line-height: 1.5; text-align: justify; }
+.nrns .rec { background: #000; color: var(--ink); padding: calc(26 * var(--p)) calc(40 * var(--p)) calc(32 * var(--p)) calc(30 * var(--p)); }
+.nrns .rec small { display: block; font-weight: 700; font-size: calc(11 * var(--p)); letter-spacing: .3em; text-transform: uppercase; margin-bottom: calc(16 * var(--p)); }
+.nrns .rec strong { display: block; font-weight: 700; font-size: calc(60 * var(--p)); line-height: .95; text-transform: uppercase; }
+.nrns .bar-q .feat small { display: block; font-weight: 700; font-size: calc(11 * var(--p)); letter-spacing: .3em; text-transform: uppercase; margin-bottom: calc(14 * var(--p)); }
+.nrns .bar-q .feat strong { display: block; font-weight: 700; font-size: calc(64 * var(--p)); line-height: .95; text-transform: uppercase; }
+
+/* Opener: writer and publication beside the portrait */
+.nrns .op-id { left: calc(433 * var(--p)); top: calc(150 * var(--p)); width: calc(317 * var(--p)); }
+.nrns .op-id strong { display: block; font-weight: 700; font-size: calc(46 * var(--p)); line-height: .98; text-transform: uppercase; }
+.nrns .op-id em { display: block; margin-top: calc(14 * var(--p)); font-weight: 700; font-style: italic; font-size: calc(24 * var(--p)); }
+
+/* Eyebrow: grows to fit "Writer | Publication" */
+.nrns .lbl { width: auto; padding-right: calc(30 * var(--p)); }
+
+/* Statement pages: medium-weight answer with a black bar, centred in the white window */
+.nrns .stmt.framed { display: flex; flex-direction: column; justify-content: center; font-weight: 500; line-height: 1.36; }
+.nrns .stmt-in { border-left: calc(9 * var(--p)) solid currentColor; padding-left: calc(30 * var(--p)); }
+.nrns .stmt-in p:last-child { margin-bottom: 0; }
+
+/* Friend quotes: quoted voices set as pull quotes (they can continue in the next column) */
+.nrns .col p.fq { position: relative; margin: 0 0 calc(14 * var(--p)); padding: calc(10 * var(--p)) 0 0 calc(24 * var(--p));
+  border-top: calc(2 * var(--p)) solid currentColor;
+  font-weight: 500; font-size: calc(var(--b) * .95 * var(--p)); line-height: 1.36; }
+.nrns .col p.fq::before { content: "\201C"; position: absolute; left: 0; top: calc(6 * var(--p)); font-weight: 700; font-size: 2em; line-height: 1; }
+.nrns .col p.fq.cont { border-top: 0; padding-top: 0; }
+.nrns .col p.fq.cont::before { content: none; }
+.nrns .col p.fq.split { margin-bottom: 0; }
+.nrns .page.tight1 .col p.fq { font-size: calc(var(--b) * .9 * var(--p)); line-height: 1.32; margin-bottom: calc(10 * var(--p)); }
+.nrns .page.tight2 .col p.fq { font-size: calc(var(--b) * .86 * var(--p)); line-height: 1.3; margin-bottom: calc(8 * var(--p)); }
+@media (max-width: 640px) {
+  .nrns .tabs { padding-inline: 8px; gap: 4px; }
+  .nrns .tab { padding: 3px; } .nrns .tab .tb { font-size: 14px; padding: 6px 9px 5px; }
+  .nrns .tab.memoirs::before { display: none; }
+}
+
+
+/* Way back out to the street (the newsstand is its own page now) */
+.nrns-back { position: absolute; z-index: 6; top: 10px; left: max(16px, env(safe-area-inset-left, 0px));
+  font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  color: #b9bdc4; text-decoration: none; padding: 6px 0; }
+.nrns-back:hover { color: #f1f2f4; }
+.nrns-back:focus-visible { outline: 2px solid #f1f2f4; outline-offset: 3px; }

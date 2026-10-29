@@ -1,0 +1,358 @@
+html, body { min-height: 100%; }
+body { background: #0d1220; }
+/* ============================================================
+   NOT RISING · THE TRADING POST — STOREFRONT STYLES
+   Every rule starts with .nrsf so nothing leaks into the rest of the site.
+   Sizes use "cqw" = 1% of the storefront's own width, so the whole
+   building scales like a picture. Below 640px wide it switches to the
+   narrow phone layout (see the @container rule near the bottom).
+   ============================================================ */
+.nrsf {
+  /* black and white, warm light, red accents */
+  --ink: #111111;
+  --paper: #f4f1ea;
+  --cream: #efe6cf;
+  --brass: #c9a25a;
+  --red: #ff3a3a;
+  --glass: #14110e;
+  --wood: #0c0c0c;
+  /* the bay grid, shared by the shopfront and the pavement */
+  --pad: 2.4cqw;  --gap: 2.4cqw;  --cols: 17.5cqw 1.3fr 1fr 17.5cqw;
+  container: nrsf / inline-size;          /* named, so the phone rule below always measures the whole storefront */
+  position: relative; overflow: hidden; isolation: isolate;
+  background: #0d1220; color: var(--ink);
+  font-family: "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif;
+  margin: 0 auto;
+}
+.nrsf *, .nrsf *::before, .nrsf *::after { box-sizing: border-box; }
+.nrsf [hidden] { display: none !important; }
+.nrsf :is(h1, h2, p) { margin: 0; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: none; border: 0; background: none; max-width: none; }
+.nrsf a { color: inherit; text-decoration: none; }
+.nrsf img { max-width: none; border: 0; padding: 0; border-radius: 0; box-shadow: none; background: none; }
+
+/* White-painted brick (a small tile drawn as an image, repeated) */
+.nrsf .nrsf-scene, .nrsf .nrsf-bays {
+  background-color: #ecebe5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='48'%3E%3Crect width='72' height='48' fill='%23efeee8'/%3E%3Crect x='38' y='2' width='32' height='20' fill='%23e7e5dd'/%3E%3Crect x='2' y='26' width='32' height='20' fill='%23f3f2ee'/%3E%3Crect x='54' y='26' width='16' height='20' fill='%23e4e2d9'/%3E%3Cg stroke='%23d3d0c6' stroke-width='2'%3E%3Cpath d='M0 1H72M0 25H72M1 0V24M37 0V24M19 24V48M55 24V48'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 6cqw 4cqw;
+}
+.nrsf .nrsf-scene { position: relative; }
+.nrsf .nrsf-scene::after {                       /* blue-hour dusk: the edges fall into shadow so the warm lights glow */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 6;
+  background: radial-gradient(ellipse 75% 70% at 50% 58%, rgba(13, 18, 32, 0) 55%, rgba(13, 18, 32, .55) 100%),
+              linear-gradient(rgba(13, 18, 32, .28), rgba(13, 18, 32, 0) 30%);
+}
+
+/* ---------- UPSTAIRS ---------- */
+.nrsf .nrsf-upper { position: relative; display: grid; justify-items: center; gap: 3cqw; padding: 11cqw 6cqw 3cqw; }
+.nrsf .nrsf-window2 {
+  width: 30cqw; aspect-ratio: 1.55; display: grid; grid-template-columns: repeat(3, 1fr); gap: .8cqw;
+  background: var(--wood); padding: .9cqw; box-shadow: 0 1.4cqw 0 -.6cqw #cfccc2, 0 .2cqw 0 #bdb9ae;
+}
+.nrsf .nrsf-window2 span { background: linear-gradient(160deg, #2c3550, #141a2a 60%, #0d111c); }
+.nrsf .nrsf-window2 span:nth-child(5) { background: radial-gradient(circle at 40% 70%, rgba(255, 196, 120, .55), rgba(255, 196, 120, 0) 60%), linear-gradient(160deg, #3a2e28, #15110e); }   /* someone left a lamp on */
+
+/* The antique swinging sign on its iron bracket */
+.nrsf .nrsf-bracket { position: absolute; right: 7cqw; top: 13cqw; width: 18cqw; }
+.nrsf .nrsf-bracket svg { display: block; width: 100%; height: auto; }
+.nrsf .nrsf-hanging { position: absolute; left: 22%; right: 6%; top: 1.6cqw; transform-origin: 50% 0; animation: nrsf-swing 5.5s ease-in-out infinite alternate; }
+.nrsf .nrsf-hanging::before, .nrsf .nrsf-hanging::after {   /* the two chains */
+  content: ""; position: absolute; top: 0; width: .35cqw; height: 2.4cqw;
+  background: repeating-linear-gradient(#2a2a2a 0 .35cqw, #6b6b6b .35cqw .55cqw);
+}
+.nrsf .nrsf-hanging::before { left: 18%; } .nrsf-hanging::after { right: 18%; }
+.nrsf .nrsf-hanging-board {
+  margin-top: 2.4cqw; padding: 1.4cqw 1cqw; text-align: center; border-radius: .5cqw;
+  font-family: Cinzel, "Trajan Pro", Georgia, serif; font-weight: 700; color: #e9d7a8; font-size: 1.55cqw; line-height: 1.25; letter-spacing: .12em;
+  background:
+    repeating-linear-gradient(92deg, rgba(0,0,0,0) 0 .9cqw, rgba(0,0,0,.18) .9cqw 1cqw),        /* wood grain */
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.08), rgba(0,0,0,.25) 80%),
+    linear-gradient(#3b2414, #22140b);
+  box-shadow: inset 0 0 0 .35cqw #1a0e06, inset 0 0 0 .55cqw #b08a45, inset 0 0 0 .75cqw #1a0e06, 0 1cqw 1.6cqw rgba(0,0,0,.45);
+  text-shadow: 0 .1cqw 0 rgba(0,0,0,.6);
+}
+@keyframes nrsf-swing { from { transform: rotate(-2.2deg); } to { transform: rotate(2.2deg); } }
+
+/* GRAND OPENING letter-board marquee with globe bulbs */
+.nrsf .nrsf-marquee { position: relative; width: 66cqw; padding: 2.4cqw 3cqw; background: linear-gradient(#161616, #0a0a0a); border: .2cqw solid #262626; box-shadow: 0 1.6cqw 3cqw rgba(0,0,0,.4); }
+.nrsf .nrsf-globes { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.nrsf .nrsf-globes svg, .nrsf .nrsf-strand svg, .nrsf .nrsf-frame svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.nrsf .nrsf-board {
+  position: relative; z-index: 1; container-type: inline-size;
+  --row: 2cqw;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 calc(var(--row) - 3px), rgba(60,50,40,.22) calc(var(--row) - 3px) calc(var(--row) - 1px), rgba(255,255,255,.6) calc(var(--row) - 1px) var(--row)),
+    radial-gradient(ellipse 70% 120% at 50% 40%, #fffdf6, #f3ecdc 70%, #e4dac4);
+  border: 3px solid #050505; box-shadow: inset 0 0 26px rgba(150,120,70,.25), 0 0 30px rgba(255,236,200,.2);
+  padding: 1.4cqw 3% 1.2cqw;
+}
+.nrsf .nrsf-tiles { display: flex; justify-content: center; gap: .06em; white-space: nowrap;
+  font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: 9.5cqw; line-height: 1; color: #111; }
+.nrsf .nrsf-tiles .lt { display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg)); text-shadow: 0 2px 0 rgba(0,0,0,.12), 0 4px 6px rgba(0,0,0,.12); }
+.nrsf .nrsf-tiles .sp { width: .32em; }
+
+/* ---------- THE SHOPFRONT ---------- */
+.nrsf .nrsf-front { position: relative; }
+.nrsf .nrsf-cornice { height: 2cqw; margin-inline: var(--pad); background: linear-gradient(#fbfaf6, #e0ddd3 55%, #c8c4b8); box-shadow: 0 .6cqw .8cqw rgba(0,0,0,.25); }
+.nrsf .nrsf-fascia {
+  margin-inline: var(--pad); padding: 1.4cqw 2cqw 1.6cqw; text-align: center; position: relative; z-index: 2;
+  background: linear-gradient(#141414, #050505); border: .5cqw solid #000; box-shadow: inset 0 0 0 .3cqw #1f1f1f, inset 0 .3cqw 0 .3cqw rgba(255,255,255,.05);
+  color: var(--cream);
+}
+.nrsf .nrsf-fascia h2 { font-family: Cinzel, "Trajan Pro", Georgia, serif; font-weight: 700; font-size: 6cqw; line-height: 1; letter-spacing: .08em;
+  background: linear-gradient(#fff6dc, #e2cf9f 60%, #bfa66e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nrsf .nrsf-fascia p { margin-top: .9cqw; font-family: Cinzel, Georgia, serif; font-weight: 400; font-size: 1.5cqw; letter-spacing: .32em; text-transform: uppercase; color: #cdbf9c; }
+.nrsf .nrsf-strand { position: relative; z-index: 5; height: 6cqw; margin: -.6cqw var(--pad) -6cqw; pointer-events: none; }
+
+/* The bay grid: brick shows through the gaps, which become the pillars */
+.nrsf .nrsf-bays {
+  display: grid; position: relative;
+  grid-template-columns: var(--cols);
+  grid-template-rows: 13cqw minmax(30cqw, auto) 5cqw;
+  grid-template-areas:
+    "neon  winP winN num"
+    "doorL winP winN doorR"
+    "doorL rsA  rsB  doorR";
+  gap: var(--gap); padding: var(--gap) var(--pad) 0;
+}
+.nrsf .nrsf-neonbox { grid-area: neon; }
+.nrsf .nrsf-numbox { grid-area: num; }
+.nrsf .nrsf-door-l { grid-area: doorL; }
+.nrsf .nrsf-door-r { grid-area: doorR; }
+.nrsf .nrsf-win-posters { grid-area: winP; }
+.nrsf .nrsf-win-news { grid-area: winN; }
+.nrsf .nrsf-riser-a { grid-area: rsA; } .nrsf-riser-b { grid-area: rsB; }
+
+/* Glass in a black wooden frame */
+.nrsf .nrsf-transom, .nrsf .nrsf-win {
+  position: relative; border: .9cqw solid var(--wood);
+  background: radial-gradient(ellipse 80% 70% at 50% 60%, #2d2016, var(--glass) 75%);
+  box-shadow: inset 0 0 0 .2cqw #2a2a2a, 0 .4cqw 0 rgba(0,0,0,.25);
+}
+.nrsf .nrsf-win::after, .nrsf .nrsf-transom::after {   /* a soft diagonal reflection on the glass */
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.07) 38%, rgba(255,255,255,0) 46%, rgba(255,255,255,0) 70%, rgba(255,255,255,.04) 76%, rgba(255,255,255,0) 82%);
+}
+.nrsf .nrsf-riser { background: linear-gradient(#141414, #050505); border: .5cqw solid #000; box-shadow: inset 0 0 0 .5cqw #0b0b0b, inset 0 0 0 .7cqw #262626; }
+
+/* Neon: THE SPEAK lit and blinking, "easy" dead and spray-painted over with UP */
+.nrsf .nrsf-neonbox { container-type: inline-size; display: grid; place-items: center; overflow: visible; z-index: 4; }
+.nrsf .nrsf-neon { font-family: Sacramento, Yellowtail, "Brush Script MT", cursive; font-size: 23cqw; line-height: .95; text-align: center; white-space: nowrap; position: relative; z-index: 1; }
+.nrsf .nrsf-neon .lit { color: #ffe9e6; animation: nrsf-neon 5s infinite;
+  text-shadow: 0 0 .04em #fff, 0 0 .08em var(--red), 0 0 .18em var(--red), 0 0 .42em #ff1a1a, 0 0 .8em #c40000; }
+.nrsf .nrsf-neon .br { display: inline; }
+.nrsf .nrsf-neon .unlit { position: relative; color: #4a2626; text-shadow: 0 0 .02em #6b3030; }
+@keyframes nrsf-neon {
+  0%, 38%, 44%, 49%, 100% { opacity: 1; }
+  40%, 47% { opacity: .2; text-shadow: none; }
+  70%, 76% { opacity: 1; }
+  73% { opacity: .35; text-shadow: 0 0 .06em var(--red); }
+}
+.nrsf .nrsf-graffiti { position: absolute; left: -15%; top: -35%; width: 135%; height: 190%; pointer-events: none; }
+.nrsf .nrsf-graffiti .blot {                     /* black overspray covering "easy" */
+  position: absolute; inset: 10% -4% 0 2%; filter: blur(.04em);
+  background:
+    radial-gradient(ellipse 40% 45% at 30% 50%, rgba(5,5,5,.95), rgba(5,5,5,0) 70%),
+    radial-gradient(ellipse 45% 40% at 70% 45%, rgba(5,5,5,.95), rgba(5,5,5,0) 70%),
+    radial-gradient(ellipse 35% 30% at 55% 80%, rgba(5,5,5,.8), rgba(5,5,5,0) 70%);
+}
+.nrsf .nrsf-graffiti b {
+  position: absolute; left: 4%; top: 6%; transform: rotate(-11deg);
+  font-family: "Permanent Marker", "Marker Felt", cursive; font-weight: 400; font-size: 1.15em; line-height: 1; color: #f7f5ee;
+  -webkit-text-stroke: .045em #070707; paint-order: stroke fill; letter-spacing: .02em;
+  text-shadow: .03em .04em 0 rgba(0,0,0,.6), 0 0 .08em rgba(255,255,255,.35);
+}
+.nrsf .nrsf-graffiti b i {                        /* paint drips running down onto the door */
+  position: absolute; width: .045em; background: #f1efe7; border-radius: 0 0 .05em .05em; box-shadow: 0 0 0 .012em #0a0a0a;
+}
+.nrsf .nrsf-graffiti b i:nth-of-type(1) { left: 14%; top: 80%; height: .5em; }
+.nrsf .nrsf-graffiti b i:nth-of-type(2) { left: 40%; top: 84%; height: .85em; }
+.nrsf .nrsf-graffiti b i:nth-of-type(3) { left: 76%; top: 72%; height: .34em; }
+.nrsf .nrsf-graffiti b i::after { content: ""; position: absolute; left: -35%; bottom: -.04em; width: 170%; height: .07em; border-radius: 50%; background: inherit; }
+
+.nrsf .nrsf-numbox { display: grid; place-items: center; container-type: inline-size; }
+.nrsf .nrsf-numbox span { font-family: Cinzel, Georgia, serif; font-weight: 700; font-size: 52cqw; line-height: 1;
+  background: linear-gradient(#fff3c9, #d9b46a 55%, #a07a35); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 .03em .02em rgba(0,0,0,.6)); }
+
+/* ---------- DOORS ---------- */
+.nrsf .nrsf-door { position: relative; display: block; perspective: 1200px; background: #0b0806; border: .5cqw solid #000; outline: none; }
+.nrsf .nrsf-inside {                              /* warm light behind the door */
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, #ffd79a, #e09a4a 45%, #5a2f12 85%);
+}
+.nrsf .nrsf-door-l .nrsf-inside { background: radial-gradient(ellipse 70% 60% at 50% 45%, #ff7a6a, #b3121a 45%, #2a0306 85%); }   /* the Speakeasy glows red */
+.nrsf .nrsf-leaf {
+  position: absolute; inset: 0; z-index: 1; display: block;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,0) 40%),
+    linear-gradient(#151515, #080808);
+  box-shadow: inset 0 0 0 1.2cqw #0c0c0c, inset 0 0 0 1.35cqw #2a2a2a;
+  transition: transform .75s cubic-bezier(.5, .1, .25, 1), box-shadow .4s;
+  transform-origin: 0 50%;
+}
+.nrsf .nrsf-door-r .nrsf-leaf { transform-origin: 100% 50%; }
+.nrsf .nrsf-leaf::before, .nrsf .nrsf-leaf::after {     /* raised panels */
+  content: ""; position: absolute; left: 22%; right: 22%; border: .25cqw solid #222; box-shadow: inset 0 0 0 .5cqw #0d0d0d, inset 0 0 0 .65cqw #1d1d1d;
+}
+.nrsf .nrsf-leaf::before { top: 12%; height: 38%; }
+.nrsf .nrsf-leaf::after { bottom: 8%; height: 30%; }
+.nrsf .nrsf-leaf .knob { position: absolute; top: 56%; width: 1.4cqw; height: 1.4cqw; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff1c2, var(--brass) 45%, #6d5320 80%); box-shadow: 0 .2cqw .3cqw rgba(0,0,0,.6); z-index: 2; }
+.nrsf .nrsf-door-l .knob { right: 9%; } .nrsf-door-r .knob { left: 9%; }
+.nrsf .nrsf-leaf .slot { position: absolute; left: 28%; right: 28%; top: 54%; height: 1.1cqw; background: linear-gradient(#f3d98f, #a8822f); border-radius: .2cqw; box-shadow: inset 0 .25cqw 0 .15cqw #5b4415; z-index: 2; }
+.nrsf .nrsf-leaf .num { position: absolute; left: 0; right: 0; top: 20%; text-align: center; z-index: 2; font-family: Cinzel, Georgia, serif; font-weight: 700; font-size: 3.6cqw;
+  background: linear-gradient(#fff3c9, #d9b46a 55%, #a07a35); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nrsf .nrsf-note {                                 /* "Hi, Human ♥" card hanging on unit 9 */
+  position: absolute; z-index: 2; left: 18%; right: 18%; top: 20%; transform: rotate(-3deg);
+  background: #f6f1e4; color: #161616; text-align: center; padding: 1cqw .6cqw .9cqw;
+  font-family: "Permanent Marker", "Marker Felt", cursive; font-size: 1.7cqw; line-height: 1.1;
+  box-shadow: 0 .4cqw .6cqw rgba(0,0,0,.5);
+}
+.nrsf .nrsf-note::before { content: ""; position: absolute; left: 50%; top: -2.2cqw; width: 2cqw; height: 2.2cqw; margin-left: -1cqw;
+  border: .15cqw solid #9a9a9a; border-bottom: 0; transform: rotate(45deg) translate(.6cqw, .6cqw); border-radius: .2cqw 0 0 0; }
+.nrsf .nrsf-note b { color: #c4141b; font-family: Arial, sans-serif; }
+.nrsf .nrsf-door:hover .nrsf-leaf, .nrsf .nrsf-door:focus-visible .nrsf-leaf { transform: rotateY(-9deg); }
+.nrsf .nrsf-door-r:hover .nrsf-leaf, .nrsf .nrsf-door-r:focus-visible .nrsf-leaf { transform: rotateY(9deg); }
+.nrsf .nrsf-door.open .nrsf-leaf { transform: rotateY(-80deg); }
+.nrsf .nrsf-door-r.open .nrsf-leaf { transform: rotateY(80deg); }
+.nrsf .nrsf-door:focus-visible, .nrsf .nrsf-win-news:focus-visible, .nrsf .nrsf-poster:focus-visible { outline: .3cqw solid #ffd79a; outline-offset: .3cqw; }
+
+/* ---------- WINDOW 1: POSTERS ---------- */
+.nrsf .nrsf-win-posters { display: grid; place-items: center; padding: 5.4cqw 1.6cqw 1.6cqw; }
+.nrsf .nrsf-posters { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4cqw; width: 100%; }
+.nrsf .nrsf-card.nrsf-card-top { top: 1.4cqw; bottom: auto; transform: translateX(-50%) rotate(1deg); }
+.nrsf .nrsf-poster { position: relative; display: block; container-type: inline-size; aspect-ratio: 864 / 1102; overflow: hidden;
+  box-shadow: 0 .6cqw 1.2cqw rgba(0,0,0,.6); transition: transform .3s; }
+.nrsf .nrsf-poster:hover { transform: translateY(-.4cqw) rotate(-.5deg); }
+.nrsf .nrsf-poster::before { content: ""; position: absolute; left: 42%; right: 42%; top: -1px; height: 5%; background: rgba(240,232,210,.75); z-index: 2; transform: rotate(-3deg); }  /* tape */
+/* The poster artwork sits on an inner layer, so its sizes (cqw) scale with the poster */
+.nrsf .nrsf-p-best, .nrsf .nrsf-p-now { position: absolute; inset: 0; display: block; }
+.nrsf .nrsf-p-best { background:
+    repeating-conic-gradient(from 0deg at 50% 46%, rgba(255,226,170,.07) 0 3deg, rgba(255,226,170,0) 3deg 9deg),
+    radial-gradient(ellipse 70% 55% at 50% 46%, #6a3e18, #2a170a 55%, #0c0805 100%);
+  color: #f3ead6; text-align: center; padding: 6cqw 6cqw 0; }
+.nrsf .nrsf-p-best .rank { font-weight: 700; font-size: 5.5cqw; letter-spacing: .3em; }
+.nrsf .nrsf-p-best .mast { font-family: "Archivo Black", "Arial Black", sans-serif; font-size: 14.5cqw; line-height: .95; letter-spacing: -.01em; margin-top: 1cqw; }
+.nrsf .nrsf-p-best .sub { font-weight: 700; font-size: 4.4cqw; letter-spacing: .14em; margin-top: 1.6cqw; }
+.nrsf .nrsf-p-best img { display: block; width: 33%; margin: 4.5cqw auto 0; box-shadow: -.8cqw 0 0 -.4cqw rgba(255,255,255,.2), 2cqw 3cqw 4cqw rgba(0,0,0,.7); }
+.nrsf .nrsf-p-best .by { position: absolute; left: 0; right: 0; bottom: 12cqw; font-size: 3.9cqw; letter-spacing: .12em; }
+.nrsf .nrsf-p-best .by b { font-weight: 700; }
+.nrsf .nrsf-p-best .title { position: absolute; left: 0; right: 0; bottom: 3.5cqw; font-weight: 400; font-size: 8.6cqw; letter-spacing: .12em; }
+/* Now Playing poster */
+.nrsf .nrsf-p-now { background: #080808; color: var(--cream); text-align: center; display: grid; align-content: center; gap: 3cqw; padding: 8cqw 6cqw;
+  box-shadow: inset 0 0 0 2.5cqw #080808, inset 0 0 0 3cqw #a8946a, inset 0 0 0 4cqw #080808, inset 0 0 0 4.4cqw #a8946a, 0 .6cqw 1.2cqw rgba(0,0,0,.6); }
+.nrsf .nrsf-p-now .k { font-weight: 700; font-size: 5.8cqw; letter-spacing: .34em; }
+.nrsf .nrsf-p-now .at { font-family: Sacramento, cursive; font-size: 17cqw; line-height: .9; color: #ffe9e6;
+  text-shadow: 0 0 .05em #fff, 0 0 .12em var(--red), 0 0 .3em #ff1a1a; }
+.nrsf .nrsf-p-now .act { font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: 12cqw; line-height: 1; letter-spacing: .04em; text-transform: uppercase; }
+.nrsf .nrsf-p-now .soon { font-weight: 700; font-size: 4.6cqw; letter-spacing: .3em; text-transform: uppercase; color: #ff6a5f; }
+.nrsf .nrsf-p-now .addr { font-size: 3.6cqw; letter-spacing: .2em; color: #a8946a; text-transform: uppercase; }
+
+/* ---------- WINDOW 2: THE NEWSSTAND DISPLAY ---------- */
+.nrsf .nrsf-win-news { display: block; overflow: hidden; cursor: pointer; transition: filter .3s; }
+.nrsf .nrsf-win-news:hover { filter: brightness(1.12); }
+.nrsf .nrsf-covers { position: absolute; inset: 1.8cqw 1.8cqw 6cqw; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: max-content; gap: 1.8cqw 1.2cqw; align-content: start; overflow: hidden; }
+.nrsf .nrsf-covers img { display: block; width: 100%; aspect-ratio: 816 / 1056; object-fit: cover; box-shadow: 0 .4cqw .6cqw rgba(0,0,0,.6);
+  border-bottom: .35cqw solid rgba(255,236,200,.35); }   /* each stands on a lit glass shelf */
+.nrsf .nrsf-card { position: absolute; z-index: 2; left: 50%; bottom: 1.4cqw; transform: translateX(-50%) rotate(-1.5deg); white-space: nowrap;
+  background: linear-gradient(#fffdf6, #efe5cf); color: #111; padding: .7cqw 1.6cqw .6cqw; border: .25cqw solid #050505; text-align: center;
+  font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: 2.2cqw; letter-spacing: .06em; text-transform: uppercase; line-height: 1;
+  box-shadow: 0 0 2cqw rgba(255,236,200,.25), 0 .4cqw .8cqw rgba(0,0,0,.5); }
+.nrsf .nrsf-card small { display: block; margin-top: .4cqw; font-family: Arimo, Arial, sans-serif; font-weight: 700; font-size: 1cqw; letter-spacing: .2em; color: #8a1a14; }
+
+/* ---------- STEPS, PUMPKINS, PAVEMENT ---------- */
+.nrsf .nrsf-ground {
+  position: relative; display: grid; grid-template-columns: var(--cols); gap: 0 var(--gap); padding: 0 var(--pad) 0;
+  height: 9cqw; z-index: 3;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 11.6cqw, rgba(0,0,0,.25) 11.6cqw 11.8cqw),
+    linear-gradient(#77756f, #5c5a55 30%, #4a4844);
+}
+.nrsf .nrsf-ground::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: .9cqw; background: linear-gradient(#a9a69e, #7e7b74); }   /* kerb of the building */
+.nrsf .nrsf-step { position: relative; height: 2.2cqw; margin: 0 -1.2cqw; background: linear-gradient(#cfccc4, #a29f97); box-shadow: 0 .5cqw .8cqw rgba(0,0,0,.4); }
+.nrsf .nrsf-step-l { grid-column: 1; } .nrsf-step-r { grid-column: 4; }
+.nrsf .nrsf-pumpkins { position: absolute; right: -2cqw; bottom: 1.6cqw; width: 11cqw; height: 6cqw; }
+.nrsf .nrsf-pumpkins svg { position: absolute; bottom: 0; filter: drop-shadow(0 .4cqw .4cqw rgba(0,0,0,.45)); }
+
+/* ---------- THE SEASONAL FRAME + FALLING LEAVES ---------- */
+.nrsf .nrsf-frame { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+.nrsf .nrsf-frame .sway { transform-box: fill-box; transform-origin: 50% 0; animation: nrsf-breeze 6s ease-in-out infinite alternate; }
+@keyframes nrsf-breeze { from { transform: rotate(-1.6deg); } to { transform: rotate(1.6deg); } }
+.nrsf .nrsf-fall { position: absolute; inset: 0; z-index: 9; pointer-events: none; overflow: hidden; }
+.nrsf .nrsf-fall svg { position: absolute; top: 0; left: 0; }
+
+/* Fade to black when walking through a door */
+.nrsf .nrsf-veil { position: absolute; inset: 0; z-index: 20; background: #000; opacity: 0; pointer-events: none; transition: opacity .55s ease .35s; }
+.nrsf.leaving .nrsf-veil { opacity: 1; }
+.nrsf.leaving .nrsf-scene { transition: transform 1s cubic-bezier(.6, 0, .4, 1); transform: scale(1.6); }
+.nrsf .nrsf-toast { position: absolute; left: 50%; bottom: 3cqw; transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px);
+  background: #f4f1ea; color: #111; font: 700 14px/1.4 Arimo, Arial, sans-serif; padding: 12px 18px; box-shadow: 0 6px 20px rgba(0,0,0,.5); text-align: center; }
+
+/* ---------- PHONE: a narrow storefront, door edges at the sides ---------- */
+@container nrsf (max-width: 640px) {
+  .nrsf { --pad: 2.6cqw; --gap: 2.6cqw; --cols: 11cqw 1fr 1fr 11cqw; }
+  .nrsf .nrsf-scene, .nrsf .nrsf-bays { background-size: 12cqw 8cqw; }
+  .nrsf .nrsf-upper { padding: 20cqw 4cqw 5cqw; gap: 5cqw; }
+  .nrsf .nrsf-window2 { width: 40cqw; justify-self: start; margin-left: 8cqw; }
+  .nrsf .nrsf-bracket { right: 10cqw; top: 22cqw; width: 34cqw; }
+  .nrsf .nrsf-hanging-board { font-size: 2.6cqw; }
+  .nrsf .nrsf-hanging::before, .nrsf .nrsf-hanging::after { height: 4cqw; width: .7cqw; }
+  .nrsf .nrsf-hanging-board { margin-top: 4cqw; }
+  .nrsf .nrsf-marquee { width: 92cqw; padding: 4.4cqw 5cqw; }
+  .nrsf .nrsf-board { --row: 3.4cqw; padding: 2.4cqw 3% 2cqw; }
+  .nrsf .nrsf-fascia { padding: 3cqw 2cqw; }
+  .nrsf .nrsf-fascia h2 { font-size: 11cqw; }
+  .nrsf .nrsf-fascia p { font-size: 2.8cqw; margin-top: 1.6cqw; }
+  .nrsf .nrsf-strand { height: 11cqw; margin-bottom: -11cqw; }
+  .nrsf .nrsf-bays {
+    grid-template-rows: 20cqw auto 9cqw;
+    grid-template-areas:
+      "neon  neon neon num"
+      "doorL winP winN doorR"
+      "doorL rsA  rsB  doorR";
+  }
+  .nrsf .nrsf-transom, .nrsf .nrsf-win { border-width: 1.6cqw; }
+  .nrsf .nrsf-neon { font-size: 15cqw; }
+  .nrsf .nrsf-neon .br { display: none; }
+  .nrsf .nrsf-numbox span { font-size: 56cqw; }
+  /* doors: only the inner edge shows, like a door just out of frame */
+  .nrsf .nrsf-door { overflow: hidden; border-width: 1cqw; }
+  .nrsf .nrsf-leaf { inset: 0 auto 0 auto; width: 34cqw; }
+  .nrsf .nrsf-door-l .nrsf-leaf { right: 0; } .nrsf-door-r .nrsf-leaf { left: 0; }
+  .nrsf .nrsf-leaf .knob { width: 3cqw; height: 3cqw; }
+  .nrsf .nrsf-door-l .knob { right: 2.4cqw; } .nrsf-door-r .knob { left: 2.4cqw; }
+  .nrsf .nrsf-leaf .num, .nrsf .nrsf-leaf .slot, .nrsf .nrsf-note { display: none; }
+  .nrsf .nrsf-win-posters { padding: 13cqw 3cqw 3cqw; place-items: start center; }
+  .nrsf .nrsf-card.nrsf-card-top { top: 3cqw; }
+  .nrsf .nrsf-posters { grid-template-columns: 1fr; gap: 4cqw; }
+  .nrsf .nrsf-covers { inset: 3cqw 3cqw 14cqw; grid-template-columns: 1fr 1fr; gap: 3.5cqw 2.5cqw; }
+  .nrsf .nrsf-card { font-size: 4cqw; padding: 1.4cqw 2.6cqw 1.2cqw; bottom: 3cqw; }
+  .nrsf .nrsf-card small { font-size: 1.9cqw; }
+  .nrsf .nrsf-ground { height: 16cqw; }
+  .nrsf .nrsf-step { height: 3.6cqw; margin: 0 -1cqw; }
+  .nrsf .nrsf-pumpkins { width: 19cqw; height: 11cqw; right: -1cqw; bottom: 3cqw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nrsf .nrsf-hanging, .nrsf .nrsf-frame .sway, .nrsf .nrsf-neon .lit { animation: none; }
+  .nrsf .nrsf-leaf { transition: none; }
+}
+
+/* ============================================================
+   THE SPEAKEASY (opening-soon page) — shortcode [nr_speakeasy]
+   ============================================================ */
+.nrsk { --red: #ff3a3a; container-type: inline-size; position: relative; overflow: hidden; min-height: 80vh; display: grid; place-items: center; text-align: center;
+  padding: 10cqw max(16px, 6cqw); color: var(--cream, #efe6cf);
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, #2a0a0c, #0b0607 70%), #0b0607;
+  font-family: "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; }
+.nrsk * { box-sizing: border-box; }
+.nrsk[hidden] { display: none !important; }
+.nrsk .nrsf-neon { font-size: min(16cqw, 170px); }
+.nrsk .nrsf-neon .br { display: none; }
+.nrsk-copy { margin-top: 6cqw; display: grid; gap: 14px; justify-items: center; }
+.nrsk-copy h1 { margin: 0; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: clamp(28px, 6cqw, 64px); letter-spacing: .06em; text-transform: uppercase; color: #f4ede0; }
+.nrsk-copy p { margin: 0; max-width: 46ch; font-size: clamp(15px, 2cqw, 19px); line-height: 1.6; color: #c9bba0; }
+.nrsk-copy a { margin-top: 12px; display: inline-block; padding: 12px 18px; border: 1px solid #a8946a; color: #efe6cf; text-decoration: none; font-weight: 700; letter-spacing: .2em; font-size: 12px; text-transform: uppercase; }
+.nrsk-copy a:hover { background: #1c1012; }
+.nrsk-copy a:focus-visible { outline: 2px solid #ffd79a; outline-offset: 3px; }
