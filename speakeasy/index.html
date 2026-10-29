@@ -16,6 +16,10 @@ img { max-width: 100%; }
 
 /* SPEAK sparkles: little four-point stars that twinkle over the bright half of the sign.
    Each star grows, turns a quarter turn and fades, on its own delay, so they never blink together. */
+/* The storefront pins this sign over its door glass (position: absolute). On this page that
+   invisible box stretched down over the Back button and swallowed the click, so the sign sits
+   in the normal flow here, and clicks pass straight through it. */
+.nrsk .nrsf-speak { position: static; pointer-events: none; }
 .nrsk .nrsf-speak svg { overflow: visible; } /* let stars on the edge of the sign spill past it instead of being cut off */
 .nrsk-sparkles { filter: drop-shadow(0 0 1.5px #ffe7a8) drop-shadow(0 0 4px rgba(255, 214, 140, .7)); }
 .nrsk-sparkles path {
