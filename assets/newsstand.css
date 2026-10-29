@@ -297,8 +297,8 @@ body {
    each sit a little crooked on their rail, like hand-placed letters. */
 .nrns .toast {
   /* Centered on screen: top/left 50% puts its corner at the middle,
-     translate(-50%,-50%) pulls it back by half its size; rotate tilts it slightly */
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-1.5deg); z-index: 100002;
+     translate(-50%,-50%) pulls it back by half its size, so it sits dead level and centered */
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 100002;
   width: max-content; max-width: calc(100% - 32px);
   padding: 30px 52px 26px;
   /* the board: brightest in the middle, dimmer toward the edges, like a lightbox */
