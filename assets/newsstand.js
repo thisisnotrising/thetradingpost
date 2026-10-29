@@ -718,11 +718,14 @@
 
     let toastTimer;
     let toastBack = null;                                        // the cover that opened the marquee, so focus can go back to it
+    let lastInput = "mouse";                                     // was the last thing the visitor did a click/tap or a key press?
+    document.addEventListener("pointerdown", () => (lastInput = "mouse"), true);
+    document.addEventListener("keydown", () => (lastInput = "key"), true);
     function closeToast() {
       const t = document.getElementById("nrns-toast");
       if (t.hidden) return;
       t.hidden = true;
-      if (toastBack && document.contains(toastBack)) toastBack.focus({ preventScroll: true });
+      if (toastBack && document.contains(toastBack)) toastBack.focus({ preventScroll: true });   // keyboard users go back to the cover they were on
       toastBack = null;
     }
     function toast(msg) {
@@ -761,10 +764,10 @@
       x.setAttribute("aria-label", "Close");
       x.addEventListener("click", closeToast);
 
-      if (t.hidden) toastBack = document.activeElement;          // remember who opened it (first open only)
+      if (t.hidden) toastBack = lastInput === "key" ? document.activeElement : null;   // opened with the keyboard? remember the cover (first open only)
       t.hidden = false;
       t.style.animation = "none"; void t.offsetWidth; t.style.animation = "";   // replay the fade-in when the message changes
-      x.focus({ preventScroll: true });                          // keyboard users land on the x; Enter or Esc closes
+      if (toastBack) x.focus({ preventScroll: true });           // keyboard users land on the x (Enter or Esc closes); mouse clicks skip this, so no focus box on the x
     }
     // Escape key also closes the marquee
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeToast(); });
