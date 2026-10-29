@@ -651,7 +651,8 @@
       else if (!tabs.some(t => t.upcoming)) tabs.push({ key: r.join("-"), label: `${two(r[0])}–${two(r[1])}`, range: r, upcoming: true });
     });
     tabs.push({ key: "memoirs", label: "Memoirs", memoirs: true });
-    tabs.push({ key: "columns", label: "Columns", columns: true, upcoming: true }); // COLUMNS: dimmed like an upcoming tab until the first column arrives
+    // COLUMNS tab: switched off for now. To bring it back, delete the two slashes at the start of the next line.
+    // tabs.push({ key: "columns", label: "Columns", columns: true, upcoming: true }); // COLUMNS: dimmed like an upcoming tab until the first column arrives
 
     function renderTabs(activeKey) {
       tabsEl.innerHTML = "";
