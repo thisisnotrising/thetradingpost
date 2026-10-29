@@ -152,7 +152,7 @@
       // Last page of a preview: when the full issue arrives, and where to read the feature now
       previewEnd: (f, is) => page(`
         ${heading(66, 40, "Preview")}${arrow}
-        <h3 class="pv-big abs">Full<br>issue<br>releases</h3>
+        <h3 class="pv-big abs">Full digital<br>issue<br>release</h3>
         <div class="pv-date abs">${esc(longDate(is.preview.until).toUpperCase())}</div>
         ${f.url ? `<a class="pv-link abs" href="${esc(f.url)}" target="_blank" rel="noopener">Read the feature online →</a>` : ""}
         ${footer("right", false)}`, { dark: true }),
