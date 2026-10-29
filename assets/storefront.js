@@ -771,24 +771,28 @@
       bevel(ctx, 0, 0, w, h, 1.4, "rgba(255,255,255,.12)", "rgba(0,0,0,.7)");
     }
 
-    // The poster window: the Poetic Drift poster on an easel, in front of the bookshop's
-    // shelves, with the street reflected in the glass (like the Notting Hill Bookshop)
+    // A ring of vanity globes round the inside of a window (used by both shop windows).
+    // P.ring = how far in from the glass edge the bulbs sit, P.gap = spacing between bulbs, P.r = bulb radius.
+    function bulbRing(gl, P) {
+      const pts = [], e = P.ring, nx = Math.max(2, Math.round((gl.w - 2 * e) / P.gap)), ny = Math.max(2, Math.round((gl.h - 2 * e) / P.gap));
+      for (let k = 0; k <= nx; k++) { const x = e + (gl.w - 2 * e) * k / nx; pts.push([x, e], [x, gl.h - e]); }      // top and bottom rows
+      for (let k = 1; k < ny; k++) { const y = e + (gl.h - 2 * e) * k / ny; pts.push([e, y], [gl.w - e, y]); }      // left and right columns
+      return `<svg class="nrsf-rackbulbs" style="${pos(0, 0, gl.w, gl.h)}" viewBox="0 0 ${gl.w} ${gl.h}">${DEFS}${pts.map(([x, y]) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="${P.r * 3}" fill="url(#nrsf-halo)"/><circle r="${P.r}" fill="url(#nrsf-globe)"/><ellipse cx="${-P.r * .32}" cy="${-P.r * .38}" rx="${P.r * .32}" ry="${P.r * .2}" fill="#fff" opacity=".7"/></g>`).join("")}</svg>`;
+    }
+
+    // The poster window: the Poetic Drift poster hung straight and centred in the glass,
+    // framed by a ring of bulbs, in front of the bookshop's shelves, with the street reflected in the glass
     function buildPosters(gl) {
       const host = $("nrsf-posters"), best = POSTERS.find(p => p.kind === "bestseller");
       const linkAttrs = p => { const href = LINKS[p.link] || p.link, ext = /^https?:/.test(href); return `href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ` data-link="${esc(p.link)}"`}`; };
-      const bestHTML = (x, y, w) => best ? `<a class="nrsf-poster" ${linkAttrs(best)} style="${pos(x, y, w)}transform:rotate(-1deg)" aria-label="${esc(best.book)} by ${esc(best.author)}: ${esc(best.rank)} NOT RISING Magazine, Best Storyteller">
+      const bestHTML = (x, y, w) => best ? `<a class="nrsf-poster" ${linkAttrs(best)} style="${pos(x, y, w)}" aria-label="${esc(best.book)} by ${esc(best.author)}: ${esc(best.rank)} NOT RISING Magazine, Best Storyteller">
           <span class="nrsf-p-best"><span class="l1"><em>${esc(best.rank)}</em> NOT RISING MAGAZINE</span><span class="l2">BEST STORYTELLER</span>
           <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title">${esc(best.book.toUpperCase())}</span></span></a>` : "";
-      let html = "";
-      if (!G.phone) {
-        const ew = 178, ex = 14, ey = 34, legH = gl.h - ey;
-        html += `<svg class="nrsf-easel" style="${pos(ex, ey - 6, ew, legH + 6)}" viewBox="0 0 ${ew} ${legH + 6}"><g stroke-linecap="round"><path d="M${ew / 2} 0 L18 ${legH}" stroke="#4a2e18" stroke-width="5"/><path d="M${ew / 2} 0 L${ew - 18} ${legH}" stroke="#4a2e18" stroke-width="5"/><path d="M${ew / 2} 0 L${ew / 2} ${legH - 4}" stroke="#2e1c0e" stroke-width="4"/><path d="M8 ${legH - 44} H${ew - 8}" stroke="#5b3a1f" stroke-width="7"/></g></svg>`;
-        html += bestHTML(ex + 9, ey, ew - 18);
-        html += `<span class="nrsf-bed" style="height:${12 * u}px"></span>`;
-      } else {
-        html += bestHTML(8, 10, gl.w - 16);
-        html += `<span class="nrsf-bed" style="height:${10 * u}px"></span>`;
-      }
+      // Same bulb sizes as the newsstand window next door, so the two match
+      const P = G.phone ? { ring: 8, gap: 25, r: 4.2, posterW: 83 } : { ring: 13, gap: 30, r: 6.2, posterW: 172 };
+      const pw = P.posterW, ph = pw * 1102 / 864;               // the poster's height follows from its shape (864 wide : 1102 tall)
+      let html = bestHTML((gl.w - pw) / 2, (gl.h - ph) / 2, pw); // centred: half the leftover space on each side
+      html += bulbRing(gl, P);
       host.innerHTML = html;
     }
 
@@ -812,10 +816,7 @@
         if (col === 0) html += `<span class="nrsf-glass-shelf" style="${pos(P.x0 - 6, cy + ch, P.x1 - P.x0 + 12, 4)}"></span>`;
       });
       // the ring of vanity globes round the inside of the window
-      const pts = [], e = P.ring, nx = Math.max(2, Math.round((gl.w - 2 * e) / P.gap)), ny = Math.max(2, Math.round((gl.h - 2 * e) / P.gap));
-      for (let k = 0; k <= nx; k++) { const x = e + (gl.w - 2 * e) * k / nx; pts.push([x, e], [x, gl.h - e]); }
-      for (let k = 1; k < ny; k++) { const y = e + (gl.h - 2 * e) * k / ny; pts.push([e, y], [gl.w - e, y]); }
-      html += `<svg class="nrsf-rackbulbs" style="${pos(0, 0, gl.w, gl.h)}" viewBox="0 0 ${gl.w} ${gl.h}">${DEFS}${pts.map(([x, y]) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><circle r="${P.r * 3}" fill="url(#nrsf-halo)"/><circle r="${P.r}" fill="url(#nrsf-globe)"/><ellipse cx="${-P.r * .32}" cy="${-P.r * .38}" rx="${P.r * .32}" ry="${P.r * .2}" fill="#fff" opacity=".7"/></g>`).join("")}</svg>`;
+      html += bulbRing(gl, P);
       // "The Newsstand" gilt sign-writing on the glass, arched above the magazines and inside the bulbs
       const w = gl.w, gold = `<defs><linearGradient id="nrsf-gilt-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff3c9"/><stop offset=".5" stop-color="#d9b46a"/><stop offset="1" stop-color="#9a7230"/></linearGradient></defs>`;
       html += `<svg class="nrsf-gilt" style="${pos(0, 0, w, gl.h)}" viewBox="0 0 ${w} ${gl.h}">${gold}` + (G.phone
