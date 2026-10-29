@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOT RISING Newsstand</title>
+<meta name="description" content="Every NOT RISING cover feature, as a magazine you can flip through.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@600&family=Arimo:ital,wght@0,400..700;1,400..700&display=swap">
+<style>
+  /* basic reset: no page margin, phone notches respected */
+  html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
+  body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+<link rel="stylesheet" href="../assets/newsstand.css">
+</head>
+<body>
+<!-- NOT RISING Newsstand: the kiosk (what you see on the page) -->
+<div class="nrns stand" id="nrns-stand" lang="en">
+  <a class="nrns-back" href="../">← 777 Daydream St.</a>
+  <header class="sign"><div class="lights" id="nrns-sign-lights" aria-hidden="true"></div><div class="board"><h1 id="nrns-marquee" aria-label="Now Soaring">NOW SOARING</h1></div></header>
+  <span class="awning" aria-hidden="true"></span>
+  <div class="tabs" role="tablist" id="nrns-tabs" aria-label="Issues"></div>
+  <section class="rack" role="tabpanel" aria-label="Issues on the rack">
+    <div class="pockets" id="nrns-pockets"></div>
+    <div class="rack-note" id="nrns-note" hidden></div>
+    <div class="lights" id="nrns-lights" aria-hidden="true"></div>
+  </section>
+  <!-- Camera flashes are added here by the script -->
+  <div class="flashes" aria-hidden="true"></div>
+</div>
+
+<!-- The reader, the measuring room and the toast. The script moves
+     this block to the end of the page so it can cover the full screen. -->
+<div class="nrns" id="nrns-overlay" lang="en">
+  <div class="reader" id="nrns-reader" role="dialog" aria-modal="true" aria-labelledby="nrns-reader-title" hidden>
+    <div class="bar">
+      <span id="nrns-reader-title"></span>
+      <span class="hint">Click a page, drag a corner, or use the arrow keys</span>
+      <button class="icon-btn" id="nrns-close" type="button" aria-label="Put the magazine back">Close ✕</button>
+    </div>
+    <div class="stage" id="nrns-stage"><div class="sizer" id="nrns-sizer"></div></div>
+    <div class="bar">
+      <a class="site-link" id="nrns-site-link" href="#" target="_blank" rel="noopener">Read the feature online ↗</a>
+      <span style="display:flex;gap:8px;align-items:center;margin-inline:auto">
+        <button class="icon-btn" id="nrns-prev" type="button" aria-label="Previous page">←</button>
+        <span class="counter" id="nrns-counter" aria-live="polite"></span>
+        <button class="icon-btn" id="nrns-next" type="button" aria-label="Next page">→</button>
+      </span>
+    </div>
+  </div>
+  <div class="measure" id="nrns-measure" aria-hidden="true"></div>
+  <div class="toast" id="nrns-toast" role="status" hidden></div>
+</div>
+
+
+<!-- Where the pictures live, then the data, the page-flip library, and the engine -->
+<script>window.NRNS_BASE = "../assets/img/";</script>
+<script src="../assets/data.js"></script>
+<script src="../assets/vendor/page-flip.browser.js"></script>
+<script src="../assets/newsstand.js"></script>
+</body>
+</html>
