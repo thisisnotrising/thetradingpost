@@ -75,7 +75,7 @@ body {
 }
 /* One recipe for every glass panel: sheen on top, tint underneath, and
    backdrop-filter, which blurs whatever is BEHIND the panel (the brick). */
-.nrns .sign, .nrns .rack, .nrns .tab, .nrns .empty {
+.nrns .rack, .nrns .tab, .nrns .empty {
   background: var(--glass-sheen), var(--glass-tint);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
   backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
@@ -97,10 +97,12 @@ body {
    crooked, the way someone on a ladder put them up. */
 .nrns .sign {
   position: relative; text-align: center;
-  /* background and border come from the GLASS recipe above */
+  /* A solid black frame (not glass): it holds the bulbs and the letter board */
+  background: linear-gradient(#161616, #050505);
+  border: 2px solid #000;
   padding: clamp(30px, 3.8vw, 38px) clamp(30px, 3.8vw, 38px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px rgba(0,0,0,.25),   /* light on the top edge, dark inner rim */
-              0 14px 30px rgba(0, 0, 0, .22), 0 0 60px rgba(255, 196, 120, .10);      /* soft shadow on the wall, warm bulb glow */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12),                                     /* a faint highlight on the top edge */
+              0 16px 34px rgba(0, 0, 0, .35), 0 0 60px rgba(255, 196, 120, .10);      /* shadow on the brick, warm bulb glow */
 }
 .nrns .board {                          /* the backlit letter board, with its grooved rails */
   position: relative; z-index: 1; container-type: inline-size;
