@@ -152,8 +152,8 @@ window.NR = {
        Choose them so chapter openers face their photos and the page count is even. */
     "tbh-holiday": {
       kind: "pages", title: "To Be Human · Holiday Special · Episode 1",
-      pageDir: "tbh-holiday/", pageCount: 29, pageExt: "webp", back: "memoir02Back",
-      insideFront: "#ba0c10", insideBack: false
+      pageDir: "tbh-holiday/", pageCount: 32, pageExt: "webp", back: "memoir02Back",
+      insideFront: false, insideBack: false
     },
 
     "jennifer-houle": {
