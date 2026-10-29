@@ -678,8 +678,8 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "cover-btn" + (item.cover ? "" : " placeholder");   // grey stand-in only when there is no cover yet
-        const soon = `${tagText}: ${item.name.toUpperCase()}\nComing ${RELEASE_MONTH} ${n}`;   // issue 17 -> "Coming December 17"
-        btn.setAttribute("aria-label", item.issue ? `Open ${tagText}: ${item.name}` : soon.replace("\n", ". "));
+        const soon = `DIGITAL ISSUE\nCOMING ${RELEASE_MONTH.toUpperCase()} ${n}`;   // issue 17 -> "DIGITAL ISSUE / COMING DECEMBER 17"
+        btn.setAttribute("aria-label", item.issue ? `Open ${tagText}: ${item.name}` : `${tagText}: ${item.name}. ` + soon.replace("\n", " "));
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
           : `<div class="ph"><div class="ph-mast">NOT RISING</div><div class="ph-date">ISSUE ${two(n)} | ${esc(monthYear(item.date).toUpperCase())}</div><div class="ph-photo"><span class="ph-name">${esc(item.name)}</span></div></div>`;
