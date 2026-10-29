@@ -280,8 +280,9 @@
       const a = hash(i, 3.1), b = hash(i, 7.7);
       return `<span class="lt" aria-hidden="true" style="--rot:${((a - .5) * 3.4).toFixed(2)}deg;--dy:${((b - .5) * .06).toFixed(3)}em">${esc(ch)}</span>`;
     }).join("");
-    $("nrsf-marquee").innerHTML = tiles(SIGNS.marquee);
-    $("nrsf-marquee").setAttribute("aria-label", SIGNS.marquee);
+    // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
+    $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
+    $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
     let G, u, W, H, dpr;
     const place = (el, r) => { el.style.left = r.x * u + "px"; el.style.top = r.y * u + "px"; el.style.width = r.w * u + "px"; if (r.h != null) el.style.height = r.h * u + "px"; };

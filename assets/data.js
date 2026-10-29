@@ -283,6 +283,7 @@ window.NRSF = {
   /* The words on the building */
   SIGNS: {
     marquee: "GRAND OPENING",       // letter board under the upstairs window
+    marqueeSub: "Sunday 11.1",      // the smaller second line under it (leave "" for one line)
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the antique swinging sign (split over two lines)

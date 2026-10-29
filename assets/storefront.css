@@ -155,7 +155,11 @@
     linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.22) 50%, rgba(255,255,255,0)) 0 0 / 100% calc(100% / 6) repeat-y,
     radial-gradient(ellipse 70% 120% at 50% 40%, #fffdf6, #f3ecdc 70%, #e4dac4);
   border: 3px solid #050505; box-shadow: inset 0 0 26px rgba(150,120,70,.25), 0 0 30px rgba(255,236,200,.22); }
-.nrsf .nrsf-tiles { display: flex; justify-content: center; gap: .06em; white-space: nowrap; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: min(8.6cqw, 56cqh); line-height: 1; color: #111; }
+.nrsf .nrsf-tiles { display: flex; flex-direction: column; align-items: center; gap: .1em; margin: 0; white-space: nowrap; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: min(8.6cqw, 56cqh); line-height: 1; color: #111; }
+.nrsf .nrsf-tiles .row { display: flex; justify-content: center; gap: .06em; }
+/* with a second line: shrink the headline a little so both rows fit inside the board, and set the second row at about half size */
+.nrsf .nrsf-tiles:has(.sub) { font-size: min(8cqw, 46cqh); }
+.nrsf .nrsf-tiles .sub { font-size: .5em; letter-spacing: .04em; }
 .nrsf .nrsf-tiles .lt { display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg)); text-shadow: 0 2px 0 rgba(0,0,0,.12), 0 4px 6px rgba(0,0,0,.12); }
 .nrsf .nrsf-tiles .sp { width: .32em; }
 
