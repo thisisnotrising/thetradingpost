@@ -717,9 +717,19 @@
     renderShelf(tabs[0]);
 
     let toastTimer;
-    function toast(msg) {
-      // Builds the marquee board fresh each time it opens.
+    let toastBack = null;                                        // the cover that opened the marquee, so focus can go back to it
+    function closeToast() {
       const t = document.getElementById("nrns-toast");
+      if (t.hidden) return;
+      t.hidden = true;
+      if (toastBack && document.contains(toastBack)) toastBack.focus({ preventScroll: true });
+      toastBack = null;
+    }
+    function toast(msg) {
+      // Builds the marquee board. Same message already up? Leave it alone (no rebuild, no twitch).
+      const t = document.getElementById("nrns-toast");
+      if (!t.hidden && t.dataset.msg === msg) return;
+      t.dataset.msg = msg;
       t.innerHTML = "";                                         // clear the last message
       const add = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; t.appendChild(el); return el; };
 
@@ -728,30 +738,36 @@
       orn.setAttribute("aria-hidden", "true");
       orn.innerHTML = "o<b>O</b>o";
 
-      msg.split("\n").forEach(line => {                          // one rail per line of text
+      let k = 0;                                                 // counts every letter on the board
+      msg.split("\n").forEach(line => {                          // one row per line of text
         const row = add("div", "mq-row");
         row.setAttribute("aria-hidden", "true");
         [...line].forEach(ch => {                                // one tile per letter
           const tile = document.createElement("span");
           tile.className = "mq-tile";
           tile.textContent = ch === " " ? "\u00a0" : ch;    // \u00a0 = a space that won't collapse
-          const lift = (Math.random() * 2 - 1).toFixed(1);       // random number from -1 to 1
-          const tilt = (Math.random() * 2 - 1).toFixed(1);
-          tile.style.transform = `translateY(${lift}px) rotate(${tilt}deg)`;   // hand-placed, a little crooked
+          // Hand-placed look: each letter sits a hair off-level. The amounts come from the
+          // letter's position (not Math.random), so the board looks the same every time it opens.
+          const lift = (((k * 7) % 5) - 2) * 4 / 10;             // -0.8 to 0.8 px
+          const tilt = (((k * 3) % 7) - 3) * 3 / 10;             // -0.9 to 0.9 degrees
+          tile.style.transform = `translateY(${lift}px) rotate(${tilt}deg)`;
           row.appendChild(tile);
+          k++;
         });
       });
 
       const x = add("button", "mq-x", "\u00d7");            // \u00d7 = the x-shaped times sign
       x.type = "button";
       x.setAttribute("aria-label", "Close");
-      x.addEventListener("click", () => (t.hidden = true));
+      x.addEventListener("click", closeToast);
 
-      clearTimeout(toastTimer);                                  // stays up until closed (no auto-hide)
+      if (t.hidden) toastBack = document.activeElement;          // remember who opened it (first open only)
       t.hidden = false;
+      t.style.animation = "none"; void t.offsetWidth; t.style.animation = "";   // replay the fade-in when the message changes
+      x.focus({ preventScroll: true });                          // keyboard users land on the x; Enter or Esc closes
     }
     // Escape key also closes the marquee
-    document.addEventListener("keydown", e => { if (e.key === "Escape") document.getElementById("nrns-toast").hidden = true; });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeToast(); });
 
     /* ============================================================
        C2. THE READER
