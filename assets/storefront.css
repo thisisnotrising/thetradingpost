@@ -170,6 +170,12 @@
 .nrsf .nrsf-hs-board { transform-origin: 53% 22.5%; animation: nrsf-swing 5.5s ease-in-out infinite alternate; }
 @keyframes nrsf-swing { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
 
+/* the A-frame floor sign: stands on the pavement in front of the shopfront, lifts a little on hover */
+.nrsf .nrsf-floorsign { z-index: 9; display: block; aspect-ratio: 100 / 172; transform-origin: 50% 100%; transition: transform .3s, filter .3s; filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 4) rgba(0,0,0,.45)); }
+.nrsf .nrsf-floorsign svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.nrsf .nrsf-floorsign:hover, .nrsf .nrsf-floorsign:focus-visible { transform: translateY(calc(var(--u) * -3)); filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 6) rgba(0,0,0,.5)) brightness(1.08); }
+.nrsf .nrsf-floorsign:focus-visible { outline: calc(var(--u) * 3) solid #ffd79a; outline-offset: calc(var(--u) * 2); }
+
 .nrsf .nrsf-marquee { z-index: 7; padding: calc(var(--u) * 26) calc(var(--u) * 32); background: linear-gradient(#171717, #090909); border: 1px solid #262626; }
 .nrsf--phone .nrsf-marquee { padding: calc(var(--u) * 18) calc(var(--u) * 20); }
 .nrsf .nrsf-globes { position: absolute; inset: 0; z-index: 2; pointer-events: none; }

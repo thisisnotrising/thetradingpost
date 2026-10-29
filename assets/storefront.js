@@ -37,6 +37,7 @@
       steps: [{ x: 68, y: 1036, w: 174, h: 20 }, { x: 958, y: 1036, w: 174, h: 20 }],
       neon: doors[0].transom, num: doors[1].transom,
       pumpkins: { x: 1004, y: 1037, w: 116 },
+      floorSign: { x: 210, y: 922, w: 82 },     // A-frame on the pavement in front of the pier between the red door and the poster window
       awning: { x0: 34, x1: 1166, wall: 624, front: 650, spread: .02, lamps: [251, 600, 949] },
       ivy: { side: 84, canopy: 64, droop: 170, keepClear: [{ x: 452, y: 56, w: 296, h: 262 }, { x: 272, y: 330, w: 656, h: 156 }, { x: 790, y: 100, w: 220, h: 220 }, { x: 84, y: 600, w: 1032, h: 520 }] }
     };
@@ -50,7 +51,7 @@
       { side: "r", opening: { x: 310, y: 536, w: 90, h: 352 }, transom: { x: 316, y: 544, w: 78, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: 320, y: 630, w: 70, h: 254 } }
     ];
     return {
-      ref: 400, h: 950, ground: 888, shopTop: 530, phone: true,
+      ref: 400, h: 992, ground: 888, shopTop: 530, phone: true,   // h 992: a deeper pavement so the floor sign stands clear of the doors and windows
       upperWin: { x: 75, y: 104, w: 150, h: 176 }, lintel: { x: 67, y: 86, w: 166, h: 18 }, wsill: { x: 66, y: 280, w: 168, h: 12 },
       sign: { x: 236, y: 120, w: 150 }, marquee: { x: 10, y: 306, w: 380, h: 118 },
       cornice: { x: -4, y: 436, w: 408, h: 22 }, fascia: { x: 6, y: 458, w: 388, h: 72 },
@@ -64,6 +65,7 @@
       steps: [{ x: -4, y: 888, w: 100, h: 14 }, { x: 304, y: 888, w: 100, h: 14 }],
       neon: doors[0].transom, num: doors[1].transom,
       pumpkins: { x: 344, y: 889, w: 48 },
+      floorSign: { x: 66, y: 890, w: 54 },      // out on the pavement, below the red door and the window, so it covers nothing you tap
       awning: { x0: 6, x1: 394, wall: 530, front: 546, spread: .02, lamps: [94, 306] },
       ivy: { side: 34, canopy: 46, droop: 90, keepClear: [{ x: 62, y: 80, w: 176, h: 214 }, { x: 8, y: 302, w: 384, h: 126 }, { x: 230, y: 112, w: 162, h: 166 }, { x: 0, y: 520, w: 400, h: 460 }] }
     };
@@ -282,6 +284,30 @@
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
+    // The A-frame floor sign: a white frame, a black board on two copper clips, cream lettering.
+    // Drawn on a 100 x 172 grid; the board is 70 wide (x 15-85), so text is centred on x = 50.
+    {
+      const [top, big, script] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
+      fs.href = LINKS.ramh;
+      fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")} (opens in a new tab)`);
+      fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
+        <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
+        <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
+        <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
+        <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
+        <rect x="15" y="13" width="70" height="112" rx="1" fill="#141414"/>
+        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(240,232,214,.5)" stroke-width=".6"/>
+        <g fill="#c4652e"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
+        <g fill="#f3ecdd" text-anchor="middle">
+          <path id="nrsf-fs-arc" d="M21 45 Q50 28 79 45" fill="none"/>
+          <text font-family="Cinzel, Georgia, serif" font-weight="700" font-size="5.8" letter-spacing=".8"><textPath href="#nrsf-fs-arc" startOffset="50%">${esc((top || "").toUpperCase())}</textPath></text>
+          <g fill="none" stroke="#f3ecdd" stroke-width=".8" stroke-linejoin="round"><path d="M41 50 Q45.5 47 50 50 Q54.5 47 59 50 V58 Q54.5 55 50 58 Q45.5 55 41 58 Z M50 50 V58"/></g>
+          <text x="50" y="84" font-family="Cinzel, Georgia, serif" font-size="22" textLength="58" lengthAdjust="spacingAndGlyphs">${esc(big || "")}</text>
+          <path d="M28 91 H72" stroke="#f3ecdd" stroke-width=".5"/>
+          <text x="50" y="106" font-family="Sacramento, cursive" font-size="16">${esc(script || "")}</text>
+          <path d="M34 113 H46 M54 113 H66" stroke="#f3ecdd" stroke-width=".5"/><circle cx="50" cy="113" r=".9"/>
+        </g></svg>`;
+    }
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
     let G, u, W, H, dpr;
@@ -922,6 +948,7 @@
       wireLinks();
       drawGlobes($("nrsf-marquee-lights"));
       placeOpenSign(dr.leaf);
+      place($("nrsf-floorsign"), G.floorSign);
     }
 
     /* The glowing OPEN sign, centred in the glass pane of the black door (unit 9).

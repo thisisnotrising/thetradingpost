@@ -277,7 +277,8 @@ window.NRSF = {
   LINKS: {
     tradingPost: "newsstand/",      // right door, unit 9: opens onto the Newsstand (for now)
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
-    newsstand: "newsstand/"         // the magazine window
+    newsstand: "newsstand/",        // the magazine window
+    ramh: "https://robotsatemyhomework.com/ramh-library"   // the A-frame floor sign (opens in a new tab)
   },
 
   /* The words on the building */
@@ -287,6 +288,7 @@ window.NRSF = {
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the antique swinging sign (split over two lines)
+    floorSign: ["inspired by", "RAMH", "library"],   // the A-frame on the pavement: small top line, big middle, script bottom
     leftDoor: "9¾",
     rightDoor: "9"
   },
