@@ -6,95 +6,83 @@
 <title>NOT RISING Trading Post</title>
 <meta name="description" content="777 Daydream St. — the NOT RISING Trading Post, Newsstand and Speakeasy.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Arimo:wght@400;700&family=Cinzel:wght@400;700&family=Oswald:wght@600&family=Permanent+Marker&family=Sacramento&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@600&family=Arimo:ital,wght@0,400..700;1,400..700&family=Cinzel:wght@400;700&family=Sacramento&family=Sancreek&display=swap">
 <style>
-  /* basic reset: no page margin, phone notches respected */
-  html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
-  body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
-  img { max-width: 100%; }
-  [hidden] { display: none !important; }
+/* basic reset: no page margin, phone notches respected */
+html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
 </style>
 <link rel="stylesheet" href="assets/storefront.css">
 </head>
 <body>
-<!-- NOT RISING · The Trading Post storefront. The script fills in the
-     marked spots (letter tiles, bulbs, leaves, posters, covers). -->
+<!-- NOT RISING · The Trading Post, 777 Daydream St.
+     The building is painted by the script onto the canvas below. The doors,
+     windows, signs and lights on top are real page elements, so they can be
+     clicked, read by screen readers, and changed in storefront-data.js. -->
 <div class="nrsf alignfull" id="nrsf" data-season="fall" lang="en">
-  <div class="nrsf-scene">
+  <div class="nrsf-scene" id="nrsf-scene">
+    <canvas class="nrsf-paint" id="nrsf-paint" aria-hidden="true"></canvas>
 
-    <!-- UPSTAIRS: white brick, a sash window, the swinging sign, the marquee -->
-    <div class="nrsf-upper">
-      <div class="nrsf-window2" aria-hidden="true">
-        <span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div class="nrsf-bracket" aria-hidden="true">
-        <svg viewBox="0 0 200 60"><path d="M4 8 H196 M4 8 C40 8 60 50 110 30 C130 22 150 14 196 8" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/><path d="M60 8 c0 -10 16 -10 16 0 M120 8 c0 -10 16 -10 16 0" fill="none" stroke="#111" stroke-width="3"/><circle cx="6" cy="8" r="6" fill="#111"/></svg>
-        <div class="nrsf-hanging"><div class="nrsf-hanging-board"><span data-sign="hanging"></span></div></div>
-      </div>
-      <div class="nrsf-marquee">
-        <div class="nrsf-globes" id="nrsf-marquee-lights" aria-hidden="true"></div>
-        <div class="nrsf-board"><h1 class="nrsf-tiles" id="nrsf-marquee" data-sign="marquee"></h1></div>
-      </div>
+    <!-- Upstairs: the antique swinging sign and the GRAND OPENING marquee -->
+    <div class="nrsf-signbox" id="nrsf-sign" aria-hidden="true"></div><!-- the hanging sign is drawn by the script -->
+    <div class="nrsf-marquee" id="nrsf-marquee-box">
+      <div class="nrsf-globes" id="nrsf-marquee-lights" aria-hidden="true"></div>
+      <div class="nrsf-board"><h1 class="nrsf-tiles" id="nrsf-marquee"></h1></div>
     </div>
 
-    <!-- THE SHOPFRONT -->
-    <div class="nrsf-front">
-      <div class="nrsf-cornice" aria-hidden="true"></div>
-      <div class="nrsf-fascia">
-        <h2><span data-sign="shop"></span></h2>
-        <p data-sign="address"></p>
-      </div>
-      <div class="nrsf-strand" id="nrsf-strand" aria-hidden="true"></div>
-
-      <div class="nrsf-bays">
-        <!-- Left door: the Speakeasy -->
-        <div class="nrsf-transom nrsf-neonbox">
-          <p class="nrsf-neon" aria-label="The Speakeasy, painted over to read: The Speak Up">
-            <span class="lit">The<br class="br"> Speak</span><span class="unlit">easy<span class="nrsf-graffiti" aria-hidden="true"><span class="blot"></span><b>UP<i></i><i></i><i></i></b></span></span>
-          </p>
-        </div>
-        <a class="nrsf-door nrsf-door-l" data-link="speakeasy" href="#" aria-label="Enter the Speakeasy, door 9¾">
-          <span class="nrsf-leaf"><span class="num" data-sign="leftDoor"></span><span class="knob"></span><span class="slot"></span></span>
-          <span class="nrsf-inside" aria-hidden="true"></span>
-        </a>
-
-        <!-- Window 1: posters -->
-        <div class="nrsf-win nrsf-win-posters"><span class="nrsf-card nrsf-card-top" aria-hidden="true">Now Showing</span><div class="nrsf-posters" id="nrsf-posters"></div></div>
-
-        <!-- Window 2: the newsstand display -->
-        <a class="nrsf-win nrsf-win-news" data-link="newsstand" href="#" aria-label="Visit the Newsstand">
-          <span class="nrsf-covers" id="nrsf-covers"></span>
-          <span class="nrsf-card">Newsstand<small>Step inside ↗</small></span>
-        </a>
-
-        <!-- Right door: the Trading Post, unit 9 -->
-        <div class="nrsf-transom nrsf-numbox"><span data-sign="rightDoor"></span></div>
-        <a class="nrsf-door nrsf-door-r" data-link="tradingPost" href="#" aria-label="Enter the Trading Post, unit 9">
-          <span class="nrsf-leaf"><span class="nrsf-note"><span data-sign="doorNote"></span> <b>♥</b></span><span class="knob"></span><span class="slot"></span></span>
-          <span class="nrsf-inside" aria-hidden="true"></span>
-        </a>
-
-        <div class="nrsf-riser nrsf-riser-a" aria-hidden="true"></div>
-        <div class="nrsf-riser nrsf-riser-b" aria-hidden="true"></div>
-      </div>
+    <!-- The fascia lettering -->
+    <div class="nrsf-fascia" id="nrsf-fascia">
+      <h2 data-sign="shop"></h2>
+      <p data-sign="address"></p>
     </div>
 
-    <!-- Steps, pumpkins, pavement -->
-    <div class="nrsf-ground" aria-hidden="true">
-      <span class="nrsf-step nrsf-step-l"></span>
-      <span class="nrsf-step nrsf-step-r"><span class="nrsf-pumpkins" id="nrsf-pumpkins"></span></span>
+    <!-- Glass above the Speakeasy door: a hand-painted sign. "SPEAK" is bright, "EASY" has almost
+         worn away. The door number 9¾ sits on the glass, centred along the bottom. -->
+    <div class="nrsf-glassbox nrsf-signglass" id="nrsf-neon">
+      <p class="nrsf-speak" aria-label="The Speakeasy"><svg class="nrsf-sign-svg" viewBox="22 62 356 172" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="nrsf-sgn-paint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1e6d0"/><stop offset=".5" stop-color="#ead7aa"/><stop offset="1" stop-color="#d9b25c"/></linearGradient><filter id="nrsf-sgn-brush" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.9 1.35"/><feComposite in="SourceGraphic" operator="in"/></filter></defs><g filter="url(#nrsf-sgn-brush)" fill="url(#nrsf-sgn-paint)"><text x="200" y="138" text-anchor="middle" font-family="Sancreek, Rye, Georgia, serif" font-size="64" textLength="364" lengthAdjust="spacingAndGlyphs"><tspan font-size="86">S</tspan>PEAK<tspan class="easy">EAS<tspan font-size="86">Y</tspan></tspan></text><path d="M30 184 C70 164 110 198 160 184 C185 177 205 174 222 180 C200 184 182 192 160 198 C112 212 72 184 30 184 Z"/><path class="easy" d="M236 194 C270 178 300 202 330 184 C350 172 362 156 352 148 C372 154 372 184 352 202 L366 210 L326 224 L334 192 L344 198 C356 186 352 174 344 180 C318 204 282 194 236 194 Z"/></g></svg></p>
+      <span class="nrsf-glassnum" data-sign="leftDoor"></span>
+      <span class="nrsf-glass" aria-hidden="true"></span>
     </div>
+    <!-- Glass above unit 9 -->
+    <div class="nrsf-glassbox nrsf-numbox" id="nrsf-num"><span class="nrsf-glassnum" data-sign="rightDoor"></span><span class="nrsf-glass" aria-hidden="true"></span></div>
+
+    <!-- Window 1: the Poetic Drift poster, the bookshop's shelves behind it -->
+    <div class="nrsf-win nrsf-reflective" id="nrsf-win-posters">
+      <canvas class="nrsf-interior" aria-hidden="true"></canvas>
+      <div class="nrsf-display" id="nrsf-posters"></div>
+      <span class="nrsf-glass" aria-hidden="true"></span>
+    </div>
+    <!-- Window 2: a little copy of the Newsstand: every issue on glass shelves, ringed with bulbs -->
+    <a class="nrsf-win nrsf-win-news nrsf-reflective" id="nrsf-win-news" data-link="newsstand" href="#" aria-label="Visit the Newsstand">
+      <canvas class="nrsf-interior" aria-hidden="true"></canvas>
+      <span class="nrsf-display" id="nrsf-covers"></span>
+      <span class="nrsf-glass" aria-hidden="true"></span>
+    </a>
+
+    <!-- The doors -->
+    <a class="nrsf-door nrsf-door-l" id="nrsf-door-l" data-link="speakeasy" href="#" aria-label="Enter the Speakeasy, door 9¾">
+      <span class="nrsf-inside" aria-hidden="true"></span>
+      <span class="nrsf-leaf"><canvas aria-hidden="true"></canvas></span>
+    </a>
+    <a class="nrsf-door nrsf-door-r" id="nrsf-door-r" data-link="tradingPost" href="#" aria-label="Enter unit 9 (open): the Newsstand">
+      <span class="nrsf-inside" aria-hidden="true"></span>
+      <span class="nrsf-leaf"><canvas aria-hidden="true"></canvas><span class="nrsf-opensign" aria-hidden="true"><svg viewBox="0 -24 60 154"><path d="M16 -24 V5 M44 -24 V5" stroke="#8d8a86" stroke-width=".5"/><g class="tube" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6 H50 Q55 6 55 11 V16 Q51 16 51 20 V110 Q55 110 55 114 V119 Q55 124 50 124 H10 Q5 124 5 119 V114 Q9 114 9 110 V20 Q5 16 5 16 V11 Q5 6 10 6 Z" stroke-width="1.1"/><path d="M12 11 H48 V119 H12 Z" stroke-width=".55" opacity=".7"/><path d="M15 34 c-4 -3 -1 -8 3 -6 c3 2 0 5 -2 3 M45 34 c4 -3 1 -8 -3 -6 c-3 2 0 5 2 3 M15 112 c-4 -3 -1 -8 3 -6 c3 2 0 5 -2 3 M45 112 c4 -3 1 -8 -3 -6 c-3 2 0 5 2 3" stroke-width=".8"/><text x="30" y="25" text-anchor="middle" font-family="Sacramento, cursive" font-size="12" stroke-width=".55">We are</text><g font-family="Cinzel, Georgia, serif" font-size="20" text-anchor="middle" stroke-width="1"><text x="30" y="49">O</text><text x="30" y="70">P</text><text x="30" y="91">E</text><text x="30" y="112">N</text></g></g></svg></span></span>
+    </a>
+
+    <canvas class="nrsf-ivy" id="nrsf-ivy" aria-hidden="true"></canvas>
+    <div class="nrsf-fall" id="nrsf-fall" aria-hidden="true"></div>
   </div>
-
-  <!-- The seasonal frame and falling leaves (drawn by the script) -->
-  <div class="nrsf-frame" id="nrsf-frame" aria-hidden="true"></div>
-  <div class="nrsf-fall" id="nrsf-fall" aria-hidden="true"></div>
-  <div class="nrsf-veil" id="nrsf-veil" aria-hidden="true"></div>
+  <div class="nrsf-veil" aria-hidden="true"></div>
   <div class="nrsf-toast" id="nrsf-toast" role="status" hidden></div>
 </div>
 
-<!-- Where the pictures live, then the data, then the engine -->
-<script>window.NRSF_BASE = "assets/img/"; window.NRNS_BASE = "assets/img/";</script>
+<!-- Where the pictures live, then the data, then the engine.
+     NRSF_BASE is turned into a full web address because the stylesheet also
+     uses it (for the wood grain), and a stylesheet reads short addresses
+     from its own folder, not from this page. -->
+<script>window.NRSF_BASE = new URL("assets/img/", location.href).href; window.NRNS_BASE = "assets/img/";</script>
 <script src="assets/data.js"></script>
 <script src="assets/storefront.js"></script>
 </body>
