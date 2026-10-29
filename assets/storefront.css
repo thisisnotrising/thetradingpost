@@ -117,8 +117,9 @@
 
 /* ---------- Doors ---------- */
 .nrsf .nrsf-door { z-index: 4; display: block; perspective: calc(var(--u) * 900); outline: none; }
-.nrsf .nrsf-inside { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 45%, #ffd79a, #e09a4a 45%, #5a2f12 88%); }
-.nrsf .nrsf-door-l .nrsf-inside { background: radial-gradient(ellipse 70% 60% at 50% 45%, #ff7a6a, #b3121a 45%, #2a0306 88%); }
+/* Behind both doors: pure white light, hottest in the middle (the crack you see when you hover is this) */
+.nrsf .nrsf-inside { position: absolute; inset: 0; background: radial-gradient(ellipse 55% 65% at 50% 40%, #ffffff 0 32%, #f3f3f3 58%, #d2d2d2 100%);
+  transition: box-shadow .7s ease; }
 .nrsf .nrsf-leaf { position: absolute; inset: 0; display: block; transform-origin: 0 50%; transition: transform .8s cubic-bezier(.5, .1, .25, 1);
   box-shadow: inset 0 calc(var(--u) * 8) calc(var(--u) * 10) calc(var(--u) * -6) rgba(0,0,0,.55); }
 .nrsf .nrsf-door-r .nrsf-leaf { transform-origin: 100% 50%; }
@@ -137,7 +138,7 @@
 
 /* ---------- Upstairs signs ---------- */
 .nrsf .nrsf-signbox { z-index: 8; aspect-ratio: 640 / 666; }
-.nrsf .nrsf-signbox img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 5) rgba(0,0,0,.5)) brightness(.92); }
+.nrsf .nrsf-signbox img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 5) rgba(0,0,0,.5)) brightness(.92) grayscale(1) contrast(1.12); } /* grayscale(1) = black and white */
 /* the chains and board swing from the bracket bar */
 .nrsf .nrsf-hs-board { transform-origin: 53% 22.5%; animation: nrsf-swing 5.5s ease-in-out infinite alternate; }
 @keyframes nrsf-swing { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
@@ -169,6 +170,38 @@
 /* ---------- Leaving through a door ---------- */
 .nrsf .nrsf-veil { position: absolute; inset: 0; z-index: 40; background: #000; opacity: 0; pointer-events: none; transition: opacity .55s ease .35s; }
 .nrsf.leaving .nrsf-veil { opacity: 1; }
+/* Through a door, you walk into the light: the veil turns white instead of black */
+.nrsf.into-light .nrsf-veil { background: #fff; transition: opacity .7s ease .25s; }
+
+/* ---------- The white light when a door opens ----------
+   Three layers, all switched on by the "open" class the script puts on the door:
+   1. the doorway itself glows and spills light around the frame (box-shadow on .nrsf-inside)
+   2. ::before = a burst of light with soft rays, centred on the doorway; it swells and the rays slowly turn
+   3. ::after  = a beam of light falling out of the door and across the pavement, widening toward you */
+.nrsf .nrsf-door.open .nrsf-inside { box-shadow: 0 0 calc(var(--u) * 40) calc(var(--u) * 14) rgba(255, 255, 255, .95), 0 0 calc(var(--u) * 140) calc(var(--u) * 40) rgba(255, 255, 255, .5); }
+.nrsf .nrsf-door::before {
+  content: ""; position: absolute; z-index: 3; left: 50%; top: 40%; width: 340%; aspect-ratio: 1; pointer-events: none;
+  translate: -50% -50%; scale: .15; opacity: 0;                      /* starts tiny and invisible */
+  background:
+    radial-gradient(ellipse 48% 2.5% at 50% 50%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0)),   /* the horizontal lens streak */
+    radial-gradient(circle, #fff 0 9%, rgba(255, 255, 255, .95) 16%, rgba(255, 255, 255, .6) 28%, rgba(255, 255, 255, .25) 44%, rgba(255, 255, 255, 0) 66%),   /* the hot white core */
+    repeating-conic-gradient(rgba(255, 255, 255, 0) 0deg 7deg, rgba(255, 255, 255, .42) 9deg 11deg, rgba(255, 255, 255, 0) 13deg 21deg);   /* the rays: bright wedges all the way round */
+  -webkit-mask-image: radial-gradient(circle, #000 22%, transparent 70%); mask-image: radial-gradient(circle, #000 22%, transparent 70%);   /* everything fades out toward the edge */
+  transition: opacity .6s ease, scale 1.1s cubic-bezier(.2, .7, .2, 1);
+  animation: nrsf-rays 16s linear infinite; animation-play-state: paused;
+}
+.nrsf .nrsf-door:hover::before, .nrsf .nrsf-door:focus-visible::before { opacity: .45; scale: .32; }   /* hover: a hint of light through the crack */
+.nrsf .nrsf-door.open::before { opacity: 1; scale: 1; animation-play-state: running; }
+@keyframes nrsf-rays { to { rotate: 360deg; } }
+.nrsf .nrsf-door::after {
+  content: ""; position: absolute; z-index: 3; top: 100%; left: -40%; right: -40%; height: 40%; pointer-events: none;
+  background: linear-gradient(rgba(255, 255, 255, .85), rgba(255, 255, 255, .3) 55%, rgba(255, 255, 255, 0));
+  clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%);               /* door-wide at the threshold, wider at your feet */
+  filter: blur(calc(var(--u) * 2));
+  transform-origin: 50% 0; scale: 1 0; opacity: 0;                   /* folded up at the threshold until the door opens */
+  transition: opacity .6s ease .15s, scale .8s cubic-bezier(.2, .7, .2, 1) .15s;
+}
+.nrsf .nrsf-door.open::after { opacity: 1; scale: 1 1; }
 .nrsf.leaving .nrsf-scene { transition: transform 1s cubic-bezier(.6, 0, .4, 1); transform: scale(1.6); }
 .nrsf .nrsf-toast { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
   background: #f4f1ea; color: #111; font: 700 14px/1.4 Arimo, Arial, sans-serif; padding: 12px 18px; box-shadow: 0 6px 20px rgba(0,0,0,.5); text-align: center; }
@@ -176,20 +209,21 @@
 @media (prefers-reduced-motion: reduce) {
   .nrsf .nrsf-hs-board { animation: none; }
   .nrsf .nrsf-leaf, .nrsf .nrsf-poster { transition: none; }
+  .nrsf .nrsf-door::before, .nrsf .nrsf-door::after { transition: none; animation: none; }
 }
 
 /* ============================================================
    THE SPEAKEASY (opening-soon page) — shortcode [nr_speakeasy]
    ============================================================ */
 .nrsk { container-type: inline-size; position: relative; overflow: hidden; min-height: 80vh; display: grid; place-items: center; text-align: center;
-  padding: 10cqw max(16px, 6cqw); color: #efe6cf;
-  background: radial-gradient(ellipse 60% 50% at 50% 40%, #2a0a0c, #0b0607 70%), #0b0607;
+  padding: 10cqw max(16px, 6cqw); color: #eeeeee;
+  background: radial-gradient(ellipse 60% 50% at 50% 40%, #262626, #060606 70%), #060606;   /* black and white room */
   font-family: "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; }
 .nrsk * { box-sizing: border-box; }
 .nrsk[hidden] { display: none !important; }
 .nrsk-copy { margin-top: 6cqw; display: grid; gap: 14px; justify-items: center; }
-.nrsk-copy h1 { margin: 0; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: clamp(28px, 6cqw, 64px); letter-spacing: .06em; text-transform: uppercase; color: #f4ede0; }
-.nrsk-copy p { margin: 0; max-width: 46ch; font-size: clamp(15px, 2cqw, 19px); line-height: 1.6; color: #c9bba0; }
-.nrsk-copy a { margin-top: 12px; display: inline-block; padding: 12px 18px; border: 1px solid #a8946a; color: #efe6cf; text-decoration: none; font-weight: 700; letter-spacing: .2em; font-size: 12px; text-transform: uppercase; }
-.nrsk-copy a:hover { background: #1c1012; }
-.nrsk-copy a:focus-visible { outline: 2px solid #ffd79a; outline-offset: 3px; }
+.nrsk-copy h1 { margin: 0; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: clamp(28px, 6cqw, 64px); letter-spacing: .06em; text-transform: uppercase; color: #f5f5f5; }
+.nrsk-copy p { margin: 0; max-width: 46ch; font-size: clamp(15px, 2cqw, 19px); line-height: 1.6; color: #bdbdbd; }
+.nrsk-copy a { margin-top: 12px; display: inline-block; padding: 12px 18px; border: 1px solid #8f8f8f; color: #f0f0f0; text-decoration: none; font-weight: 700; letter-spacing: .2em; font-size: 12px; text-transform: uppercase; }
+.nrsk-copy a:hover { background: #1a1a1a; }
+.nrsk-copy a:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
