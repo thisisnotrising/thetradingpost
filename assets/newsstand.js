@@ -718,10 +718,40 @@
 
     let toastTimer;
     function toast(msg) {
+      // Builds the marquee board fresh each time it opens.
       const t = document.getElementById("nrns-toast");
-      t.textContent = msg; t.hidden = false;
-      clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3200);
+      t.innerHTML = "";                                         // clear the last message
+      const add = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; t.appendChild(el); return el; };
+
+      add("span", "mq-sr", msg.replace("\n", ". "));            // what screen readers hear
+      const orn = add("div", "mq-orn");                          // the "oOo" ornament
+      orn.setAttribute("aria-hidden", "true");
+      orn.innerHTML = "o<b>O</b>o";
+
+      msg.split("\n").forEach(line => {                          // one rail per line of text
+        const row = add("div", "mq-row");
+        row.setAttribute("aria-hidden", "true");
+        [...line].forEach(ch => {                                // one tile per letter
+          const tile = document.createElement("span");
+          tile.className = "mq-tile";
+          tile.textContent = ch === " " ? "\u00a0" : ch;    // \u00a0 = a space that won't collapse
+          const lift = (Math.random() * 2 - 1).toFixed(1);       // random number from -1 to 1
+          const tilt = (Math.random() * 2 - 1).toFixed(1);
+          tile.style.transform = `translateY(${lift}px) rotate(${tilt}deg)`;   // hand-placed, a little crooked
+          row.appendChild(tile);
+        });
+      });
+
+      const x = add("button", "mq-x", "\u00d7");            // \u00d7 = the x-shaped times sign
+      x.type = "button";
+      x.setAttribute("aria-label", "Close");
+      x.addEventListener("click", () => (t.hidden = true));
+
+      clearTimeout(toastTimer);                                  // stays up until closed (no auto-hide)
+      t.hidden = false;
     }
+    // Escape key also closes the marquee
+    document.addEventListener("keydown", e => { if (e.key === "Escape") document.getElementById("nrns-toast").hidden = true; });
 
     /* ============================================================
        C2. THE READER
