@@ -643,7 +643,7 @@
     const noteEl = document.getElementById("nrns-note");
 
     // Tabs: every range that holds an issue, plus the next empty range (so readers
-    // can see more is coming), plus MEMOIRS on its own at the right.
+    // can see more is coming), plus MEMOIRS and COLUMNS on their own at the right.
     const hasIssues = ([a, b]) => FEATURES.some((f, i) => i + 1 >= a && i + 1 <= b);
     const tabs = [];
     TABS.forEach(r => {
@@ -651,6 +651,7 @@
       else if (!tabs.some(t => t.upcoming)) tabs.push({ key: r.join("-"), label: `${two(r[0])}–${two(r[1])}`, range: r, upcoming: true });
     });
     tabs.push({ key: "memoirs", label: "Memoirs", memoirs: true });
+    tabs.push({ key: "columns", label: "Columns", columns: true, upcoming: true }); // COLUMNS: dimmed like an upcoming tab until the first column arrives
 
     function renderTabs(activeKey) {
       tabsEl.innerHTML = "";
@@ -697,6 +698,12 @@
       if (t.memoirs) {
         const slots = Math.max(5, Math.ceil(MEMOIRS.length / 5) * 5);
         for (let i = 0; i < slots; i++) pocketsEl.appendChild(pocket(MEMOIRS[i], MEMOIRS[i] ? (MEMOIRS[i].tag || `NO. ${two(i + 1)}`) : "", i + 1));
+        return;
+      }
+      if (t.columns) { // COLUMNS: one row of empty glass sleeves and a "Coming soon" placard
+        for (let i = 0; i < 5; i++) pocketsEl.appendChild(pocket(null, "", i + 1));
+        noteEl.innerHTML = `Columns<small>Coming soon</small>`;
+        noteEl.hidden = false;
         return;
       }
       const [a, b] = t.range;
