@@ -182,8 +182,9 @@
                    Every brick on the building is one of these, picked at random.
        wood.jpg    floorboard grain, used on the doors, the sign and the window ledges.
        lounge.jpg  the coffee lounge seen through the poster window.
-       redbrick.webp her red-brick photo (it tiles seamlessly both ways). Used for the street-level wall and
-                   the piers, sized so one course of brick matches the painted courses upstairs.
+       redbrick-red.webp her red-brick photo (it tiles seamlessly both ways), recoloured deeper and redder to
+                   match her second brick photo. Used for the street-level wall and the piers, sized so one
+                   course of brick matches the painted courses upstairs.
        cobbles.webp her cobblestone photo, made to tile left to right with no seam. Small stones at the
                    top, big ones at the bottom, so it already has the street's perspective built in.
      ------------------------------------------------------------ */
@@ -403,6 +404,55 @@
       ctx.restore();
     }
 
+    /* The black window and door trims, made the same way as the brick (and the metal sign's hammered finish):
+       a grey "height map" first, then every pixel lit by which way it faces the light. Each member of the trim
+       (a rail, a post, a glazing bar, a sill) is a raised block whose edges get rounded off, with the fine
+       "orange peel" bumps of thick gloss paint on top. Black paint barely shows its colour, so the shape is
+       carried by the soft highlights where an edge or a bump turns toward the light.
+       members: [x, y, w, h, height] in building units; height 1 = proud, smaller = set further back. */
+    function trimRelief(ctx, members, albedo = [17, 17, 18]) {
+      if (!members.length) return;
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      members.forEach(([x, y, w, h]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x + w); y1 = Math.max(y1, y + h); });
+      const k = u * dpr, X = Math.floor(x0 * k), Y = Math.floor(y0 * k), Wd = Math.ceil(x1 * k) - X, Hd = Math.ceil(y1 * k) - Y;
+      if (Wd < 2 || Hd < 2) return;
+      const mk = () => { const c = document.createElement("canvas"); c.width = Wd; c.height = Hd; return c; };
+      const hc = mk(), mc = mk(), h = hc.getContext("2d"), m = mc.getContext("2d");
+      h.fillStyle = "#000"; h.fillRect(0, 0, Wd, Hd);
+      [h, m].forEach(c => c.setTransform(k, 0, 0, k, -X, -Y));
+      m.fillStyle = "#fff";
+      members.forEach(([x, y, w, ht, v = 1]) => {
+        const g = (220 * v) | 0; h.fillStyle = `rgb(${g},${g},${g})`; h.fillRect(x, y, w, ht);
+        m.fillRect(x, y, w, ht);
+      });
+      // round every edge (paint and timber are never sharp), then add the orange-peel bumps
+      const hb = mk(), b = hb.getContext("2d", { willReadFrequently: true });
+      b.filter = `blur(${(.9 * k).toFixed(2)}px)`; b.drawImage(hc, 0, 0); b.filter = "none";
+      [[.9, .07], [4, .09]].forEach(([s, al]) => {
+        const p = b.createPattern(noise(), "repeat"); p.setTransform(new DOMMatrix().translate(-X * .41, -Y * .29).scale(s * k / 2));
+        b.globalAlpha = al; b.globalCompositeOperation = "overlay"; b.fillStyle = p; b.fillRect(0, 0, Wd, Hd);
+      });
+      const H = b.getImageData(0, 0, Wd, Hd).data, M = m.getImageData(0, 0, Wd, Hd).data;
+      const out = b.createImageData(Wd, Hd), o = out.data;
+      const S = 3.2, Lx = -.42, Ly = -.58, Lz = .7;                                                        // light from the top left, as on the brick
+      for (let py = 0; py < Hd; py++) {
+        const up = py > 0 ? -Wd : 0, dn = py < Hd - 1 ? Wd : 0;
+        for (let px = 0; px < Wd; px++) {
+          const i = py * Wd + px, q = i * 4;
+          if (!M[q + 3]) continue;
+          const dx = ((H[(i + (px < Wd - 1 ? 1 : 0)) * 4] - H[(i - (px > 0 ? 1 : 0)) * 4]) / 255) * S;
+          const dy = ((H[(i + dn) * 4] - H[(i + up) * 4]) / 255) * S;
+          const len = Math.sqrt(dx * dx + dy * dy + 1);
+          const lit = Math.max(0, (-dx * Lx - dy * Ly + Lz) / len / Lz);
+          const spec = Math.pow(Math.max(0, lit - .92) * 3.4, 2) * 85;                                        // gloss highlight where a curve faces the light
+          const f = .35 + .65 * Math.min(lit, 1.4);
+          o[q] = albedo[0] * f + spec; o[q + 1] = albedo[1] * f + spec; o[q + 2] = albedo[2] * f + spec * 1.05; o[q + 3] = M[q + 3];
+        }
+      }
+      b.putImageData(out, 0, 0);
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(hb, X, Y); ctx.restore();
+    }
+
     /* The bare brick at street level: Kathi's red-brick photo, repeated. One course in the photo is about
        58 pixels tall, so it is scaled to match the height of one painted course upstairs. The piers ("lift")
        are shifted half a brick so their bricks don't line up with the wall behind, and catch more light. */
@@ -412,9 +462,8 @@
       p.setTransform(new DOMMatrix().translate(lift ? 17 : 0, G.shopTop + (lift ? course / 2 : 0)).scale(k));
       ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
       ctx.fillStyle = p; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-      // the photo is sunlit; settle it into dusk: a little less colour, a little darker, cooler in the shadows
-      ctx.globalCompositeOperation = "saturation"; ctx.fillStyle = "rgba(128,128,128,.22)"; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-      ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = lift ? "rgb(200,192,196)" : "rgb(176,168,176)"; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+      // the photo is sunlit; settle it into dusk: just a little darker
+      ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = lift ? "rgb(222,212,210)" : "rgb(200,190,190)"; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
       ctx.restore();
     }
 
@@ -517,6 +566,12 @@
       // the sill: the shopfront's deep black sill, catching a line of light along its front edge
       ctx.fillStyle = vgrad(ctx, ws.y, ws.y + ws.h, [[0, "#3a3a3c"], [.3, "#1d1d1e"], [.32, "#0d0d0d"], [1, "#050505"]]); ctx.fillRect(ws.x, ws.y, ws.w, ws.h);
       ctx.fillStyle = "rgba(255,255,255,.28)"; ctx.fillRect(ws.x, ws.y, ws.w, .9);
+      {                                                                                                   // the window's trims, lit like the brick
+        const tm = [[w.x, w.y, w.w, rail], [w.x, w.y + w.h - fr, w.w, fr], [w.x, w.y, fr, w.h], [w.x + w.w - fr, w.y, fr, w.h], [ws.x, ws.y, ws.w, ws.h]];
+        for (let k = 1; k < cols; k++) tm.push([gx + k * (pw + bar) - bar, gy0, bar, gh, .75]);           // glazing bars sit a little further back
+        for (let k = 1; k < rows; k++) tm.push([gx, gy0 + k * (ph + bar) - bar, gw, bar, .75]);
+        trimRelief(ctx, tm);
+      }
       ledgeShadow(ctx, ws.x + 4, ws.y + ws.h, ws.w - 8, 22, .5);
       ctx.fillStyle = vgrad(ctx, ws.y + ws.h, ws.y + ws.h + 90, [[0, "rgba(70,70,74,.16)"], [1, "rgba(70,70,74,0)"]]); ctx.fillRect(ws.x + 20, ws.y + ws.h, ws.w - 40, 90);  // rain stains
 
@@ -587,6 +642,8 @@
         ctx.fillStyle = vgrad(ctx, by - 2, o.y + o.h, [[0, "#bcb8ae"], [1, "#77736b"]]); ctx.fillRect(o.x + 4, by - 1, o.w - 8, o.y + o.h - by + 1);
         grain(ctx, o.x + 4, by - 1, o.w - 8, o.y + o.h - by + 1, .35);
         grainWood(ctx, o.x, o.y, o.w, d.bar.y + d.bar.h - o.y, .3, .22);                                           // painted timber surround
+        const side = t.x - o.x;                                                                                     // the architrave round the door, lit like the brick
+        trimRelief(ctx, [[o.x, o.y, side, o.h], [o.x + o.w - side, o.y, side, o.h], [o.x, o.y, o.w, t.y - o.y], [o.x + side, d.bar.y, o.w - side * 2, d.bar.h, .9]]);
       });
 
       // 7. The shopfront joinery: rails, posts, the deep sill and the panelled stallriser
@@ -612,6 +669,12 @@
       timber(f.x, f.y, f.w, f.sill.y - f.y); timber(ri.x, ri.y, ri.w, ri.h);
       const pad = G.phone ? 7 : 12;
       f.glass.forEach(gl => panel(ctx, gl.x + pad, ri.y + pad + 4, gl.w - pad * 2, ri.h - pad * 2 - 4, [26, 26, 28], G.phone ? 4 : 7));
+      {                                                                                                   // the shopfront's trims, lit like the brick
+        const tm = [[f.x, f.y, f.w, f.rail], [s.x, s.y, s.w, s.h]];
+        f.posts.forEach(px => tm.push([px, f.y + f.rail, f.postW, s.y - f.y - f.rail, .9]));
+        if (f.transomBand) tm.push([f.x, f.bar.y, f.w, f.bar.h, .9]);
+        trimRelief(ctx, tm);
+      }
 
       // 8. The pavement, the steps and the base of the building
       // Cobblestones, like the café photo: dark, damp granite setts laid in staggered rows,
@@ -1216,7 +1279,7 @@
 
     // Load the photo textures first, then paint
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
-    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick.webp")]);
+    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick-red.webp")]);
     const fontsReady = document.fonts
       ? Promise.all(["700 20px Cinzel", "400 20px Sancreek", "600 20px Oswald", "400 20px \"Archivo Black\""].map(f => document.fonts.load(f).catch(() => {})))
       : Promise.resolve();
