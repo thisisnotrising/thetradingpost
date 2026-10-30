@@ -287,8 +287,8 @@ window.NRSF = {
     marqueeSub: "Sunday 11.1",      // the smaller second line under it (leave "" for one line)
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
-    hanging: "NOT RISING",          // the antique swinging sign (split over two lines)
-    floorSign: ["inspired by", "RAMH", "library"],   // the A-frame on the pavement: small top line, big middle, script bottom
+    hanging: "THIS IS NOT RISING",  // the white metal swinging sign (split over two lines: THIS IS / NOT RISING)
+    floorSign: ["inspired by", "RAMH", "library"],   // the A-frame poster: small top line, big middle (the third word is read aloud only; the library photo shows it)
     leftDoor: "9¾",
     rightDoor: "9"
   },
