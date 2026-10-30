@@ -37,7 +37,7 @@
       steps: [{ x: 68, y: 1036, w: 174, h: 20 }, { x: 958, y: 1036, w: 174, h: 20 }],
       neon: doors[0].transom, num: doors[1].transom,
       pumpkins: { x: 1004, y: 1037, w: 116 },
-      floorSign: { x: 210, y: 922, w: 82 },     // A-frame on the pavement in front of the pier between the red door and the poster window
+      floorSign: { x: 236, y: 886, w: 128 },    // poster-sized A-frame on the pavement, in front of the poster window (clear of the red door)
       awning: { x0: 34, x1: 1166, wall: 624, front: 650, spread: .02, lamps: [251, 600, 949] },
       ivy: { side: 84, canopy: 64, droop: 170, keepClear: [{ x: 452, y: 56, w: 296, h: 262 }, { x: 272, y: 330, w: 656, h: 156 }, { x: 790, y: 100, w: 220, h: 220 }, { x: 84, y: 600, w: 1032, h: 520 }] }
     };
