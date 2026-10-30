@@ -182,6 +182,8 @@
                    Every brick on the building is one of these, picked at random.
        wood.jpg    floorboard grain, used on the doors, the sign and the window ledges.
        lounge.jpg  the coffee lounge seen through the poster window.
+       redbrick.webp her red-brick photo (it tiles seamlessly both ways). Used for the street-level wall and
+                   the piers, sized so one course of brick matches the painted courses upstairs.
        cobbles.webp her cobblestone photo, made to tile left to right with no seam. Small stones at the
                    top, big ones at the bottom, so it already has the street's perspective built in.
      ------------------------------------------------------------ */
@@ -401,8 +403,24 @@
       ctx.restore();
     }
 
+    /* The bare brick at street level: Kathi's red-brick photo, repeated. One course in the photo is about
+       58 pixels tall, so it is scaled to match the height of one painted course upstairs. The piers ("lift")
+       are shifted half a brick so their bricks don't line up with the wall behind, and catch more light. */
+    function photoWall(ctx, x0, y0, x1, y1, lift = 0) {
+      const course = G.phone ? 11 : 13.9, k = course / 58;
+      const p = ctx.createPattern(TEX.redbrick, "repeat");
+      p.setTransform(new DOMMatrix().translate(lift ? 17 : 0, G.shopTop + (lift ? course / 2 : 0)).scale(k));
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+      ctx.fillStyle = p; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+      // the photo is sunlit; settle it into dusk: a little less colour, a little darker, cooler in the shadows
+      ctx.globalCompositeOperation = "saturation"; ctx.fillStyle = "rgba(128,128,128,.22)"; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+      ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = lift ? "rgb(200,192,196)" : "rgb(176,168,176)"; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+      ctx.restore();
+    }
+
     function bricks(ctx, x0, y0, x1, y1, lift = 0, painted = false) {
       if (painted) return whitewash(ctx, x0, y0, x1, y1);
+      if (TEX.redbrick) return photoWall(ctx, x0, y0, x1, y1, lift);
       const bh = G.phone ? 13 : 16, bw = G.phone ? 38 : 46, j = G.phone ? 2.4 : 3, row = bh + j;
       ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
       ctx.fillStyle = painted ? "#cfccc4" : MORTAR; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);   // the mortar
@@ -528,6 +546,7 @@
       const fi = G.phone ? 5 : 8;
       bevel(ctx, fa.x + fi, fa.y + fi, fa.w - fi * 2, fa.h - fi * 2, 1.4, "rgba(0,0,0,.7)", "rgba(255,255,255,.12)");   // sunk moulding round the lettering
       bevel(ctx, fa.x, fa.y, fa.w, fa.h, 1.2, "rgba(255,255,255,.1)", "rgba(0,0,0,.8)");
+      grainWood(ctx, fa.x, fa.y, fa.w, fa.h, .3, .3); grain(ctx, fa.x, fa.y, fa.w, fa.h, .15, .35);              // the fascia is painted timber too
       ledgeShadow(ctx, fa.x, fa.y, fa.w, 18, .7);                                                                   // the cornice shades the top of the board
       ctx.fillStyle = vgrad(ctx, co.y, co.y + co.h, [[0, "#3a3a3c"], [.12, "#1a1a1c"], [.3, "#0c0c0d"], [.45, "#2a2a2c"], [.55, "#121213"], [1, "#050505"]]); ctx.fillRect(co.x, co.y, co.w, co.h);
       ctx.fillStyle = "rgba(255,255,255,.22)"; ctx.fillRect(co.x, co.y, co.w, 1.2);
@@ -567,10 +586,12 @@
         ctx.fillStyle = "#030303"; ctx.beginPath(); ctx.moveTo(rx0, ry); ctx.lineTo(rx1, ry); ctx.lineTo(lf.x + lf.w, lf.y); ctx.lineTo(lf.x, lf.y); ctx.fill();          // soffit
         ctx.fillStyle = vgrad(ctx, by - 2, o.y + o.h, [[0, "#bcb8ae"], [1, "#77736b"]]); ctx.fillRect(o.x + 4, by - 1, o.w - 8, o.y + o.h - by + 1);
         grain(ctx, o.x + 4, by - 1, o.w - 8, o.y + o.h - by + 1, .35);
+        grainWood(ctx, o.x, o.y, o.w, d.bar.y + d.bar.h - o.y, .3, .22);                                           // painted timber surround
       });
 
       // 7. The shopfront joinery: rails, posts, the deep sill and the panelled stallriser
       const f = G.front;
+      const timber = (x, y, w, h) => { grainWood(ctx, x, y, w, h, .35, .22); grain(ctx, x, y, w, h, .18, .35); };   // painted wood: grain under the black paint
       ctx.fillStyle = "#0b0b0c"; ctx.fillRect(f.x, f.y, f.w, f.h);
       bevel(ctx, f.x, f.y, f.w, f.h, 1.4, "rgba(255,255,255,.14)", "rgba(0,0,0,.7)");
       ctx.fillStyle = vgrad(ctx, f.y, f.y + f.rail, [[0, "#2a2a2c"], [.25, "#141415"], [1, "#060606"]]); ctx.fillRect(f.x, f.y, f.w, f.rail);
@@ -588,6 +609,7 @@
       const ri = f.riser;
       ctx.fillStyle = "#0b0b0c"; ctx.fillRect(ri.x, ri.y, ri.w, ri.h);
       ledgeShadow(ctx, ri.x, ri.y, ri.w, 14, .8);
+      timber(f.x, f.y, f.w, f.sill.y - f.y); timber(ri.x, ri.y, ri.w, ri.h);
       const pad = G.phone ? 7 : 12;
       f.glass.forEach(gl => panel(ctx, gl.x + pad, ri.y + pad + 4, gl.w - pad * 2, ri.h - pad * 2 - 4, [26, 26, 28], G.phone ? 4 : 7));
 
@@ -718,33 +740,47 @@
        D. THE IVY: Boston ivy, which really does climb brick and turn crimson in fall
        ============================================================ */
     // One Boston ivy leaf: three pointed lobes with fine teeth. Drawn once, reused at any size.
+    const LEAFPTS = [];                                   // the outline points, kept so the halves can be cut from them
     const LEAVES = [0, 1, 2].map(v => {
       const deep = [.58, .5, .66][v], spread = [.62, .7, .55][v];
       const pts = [[0, 0], [-.42, -.06], [-spread, -.5], [-.22, -deep], [-.08, -.86], [0, -1], [.08, -.86], [.22, -deep], [spread, -.5], [.42, -.06], [0, 0]];
-      const p = new Path2D();
+      const p = new Path2D(), outline = [[0, 0]];
       p.moveTo(0, 0);
       for (let i = 1; i < pts.length; i++) {               // each edge as a curve, with tiny serrations
         const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], n = 4;
         for (let k = 1; k <= n; k++) {
           const t = k / n, x = lerp(x0, x1, t), y = lerp(y0, y1, t), nx = -(y1 - y0), ny = x1 - x0, l = Math.hypot(nx, ny) || 1;
           const bulge = Math.sin(t * Math.PI) * .07, tooth = k % 2 ? .018 : -.012;
-          p.lineTo(x + nx / l * (bulge + tooth), y + ny / l * (bulge + tooth));
+          p.lineTo(x + nx / l * (bulge + tooth), y + ny / l * (bulge + tooth)); outline.push([x + nx / l * (bulge + tooth), y + ny / l * (bulge + tooth)]);
         }
       }
-      p.closePath();
+      p.closePath(); LEAFPTS.push(outline);
       return p;
     });
+    // Each leaf cut down its middle vein: [left half, right half]. Squashing every point onto the vein from
+    // one side leaves exactly the other half. Used to shade the half that is folded away from the light.
+    const HALVES = LEAFPTS.map(o => [Math.min, Math.max].map(f => { const h = new Path2D(); o.forEach(([x, y], k) => k ? h.lineTo(f(x, 0), y) : h.moveTo(f(x, 0), y)); h.closePath(); return h; }));
     const VEINS = new Path2D("M0 0 L0 -0.95 M0 -0.18 L-0.55 -0.48 M0 -0.18 L0.55 -0.48 M0 -0.5 L-0.2 -0.66 M0 -0.5 L0.2 -0.66");
 
-    function drawLeaf(ctx, x, y, s, rot, col, shade, variant) {
+    /* One Boston ivy leaf, lit like the brick: the real leaf is folded slightly along its middle vein, so the
+       half turned away from the light (top left) is darker; the tips are browner, the veins are raised and
+       catch the light, and there is a waxy shine. Kept to a few quick fills, because there are thousands. */
+    function drawLeaf(ctx, x, y, s, rot, col, shade, variant, n = 0) {
       ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
-      const g = ctx.createLinearGradient(0, 0, .2, -1);
-      g.addColorStop(0, rgb(col, shade * .62)); g.addColorStop(.55, rgb(col, shade)); g.addColorStop(1, rgb(col, shade * 1.18));
       const path = LEAVES[variant];
+      const g = ctx.createLinearGradient(0, 0, .2, -1);
+      g.addColorStop(0, rgb(col, shade * .6)); g.addColorStop(.55, rgb(col, shade)); g.addColorStop(1, rgb(col, shade * 1.15));
       ctx.fillStyle = g; ctx.fill(path);
-      ctx.lineWidth = .025; ctx.strokeStyle = `rgba(20,4,4,${.45 * shade})`; ctx.stroke(path);
-      ctx.lineWidth = .022; ctx.strokeStyle = `rgba(255,214,190,${.22 * shade})`; ctx.stroke(VEINS);
-      ctx.fillStyle = `rgba(255,255,255,${.07 * shade})`; ctx.beginPath(); ctx.ellipse(-.14, -.58, .1, .2, -.4, 0, 7); ctx.fill();
+      const away = Math.sin(rot + .8) > 0 ? 0 : 1;                                                         // which half faces away from the light
+      ctx.fillStyle = `rgba(22,4,6,${.2 + hash(n, 2) * .14})`; ctx.fill(HALVES[variant][away]);
+      ctx.fillStyle = `rgba(255,232,205,${.07 * shade})`; ctx.fill(HALVES[variant][1 - away]);
+      const tip = ctx.createRadialGradient(0, -.4, .28, 0, -.4, .72);                                     // the tips turn brown first
+      tip.addColorStop(0, "rgba(60,20,8,0)"); tip.addColorStop(1, `rgba(60,22,8,${.22 + hash(n, 4) * .3})`);
+      ctx.fillStyle = tip; ctx.fill(path);
+      ctx.fillStyle = `rgba(255,248,236,${.13 * shade})`; ctx.beginPath(); ctx.ellipse(.16 * (away ? -1 : 1), -.56, .1, .2, (away ? -.4 : .4), 0, 7); ctx.fill();   // waxy shine
+      ctx.lineWidth = .03; ctx.strokeStyle = `rgba(40,8,6,${.3 * shade})`; ctx.translate(.012, .012); ctx.stroke(VEINS); ctx.translate(-.012, -.012);   // raised veins:
+      ctx.lineWidth = .02; ctx.strokeStyle = `rgba(255,214,190,${.28 * shade})`; ctx.stroke(VEINS);                                             // dark side, light side
+      ctx.lineWidth = .028; ctx.strokeStyle = `rgba(30,6,4,${.48 * shade})`; ctx.stroke(path);              // the serrated edge
       ctx.restore();
     }
 
@@ -853,7 +889,7 @@
           const z = l.s * 1.5;
           ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.scale(1, .6);
           ctx.drawImage(SP[1][(hash(i, 5) * LEAF.n) | 0], -z / 2, -z / 2, z, z); ctx.restore();
-        } else drawLeaf(ctx, l.x, l.y, l.s, l.rot, col, shade, i % 3);   // Boston ivy on the walls
+        } else drawLeaf(ctx, l.x, l.y, l.s, l.rot, col, shade, i % 3, i);   // Boston ivy on the walls
       });
       // Dusk settles over the ivy too
       ctx.globalCompositeOperation = "source-atop";
@@ -1180,7 +1216,7 @@
 
     // Load the photo textures first, then paint
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
-    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp")]);
+    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick.webp")]);
     const fontsReady = document.fonts
       ? Promise.all(["700 20px Cinzel", "400 20px Sancreek", "600 20px Oswald", "400 20px \"Archivo Black\""].map(f => document.fonts.load(f).catch(() => {})))
       : Promise.resolve();
