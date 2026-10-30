@@ -51,7 +51,7 @@
       { side: "r", opening: { x: 310, y: 536, w: 90, h: 352 }, transom: { x: 316, y: 544, w: 78, h: 72 }, bar: { y: 616, h: 10 }, leaf: { x: 320, y: 630, w: 70, h: 254 } }
     ];
     return {
-      ref: 400, h: 1040, ground: 888, shopTop: 530, phone: true,   // h 992: a deeper pavement so the floor sign stands clear of the doors and windows
+      ref: 400, h: 1060, ground: 888, shopTop: 530, phone: true,   // h 992: a deeper pavement so the floor sign stands clear of the doors and windows
       upperWin: { x: 75, y: 104, w: 150, h: 176 }, lintel: { x: 67, y: 86, w: 166, h: 18 }, wsill: { x: 66, y: 280, w: 168, h: 12 },
       sign: { x: 236, y: 120, w: 150 }, marquee: { x: 10, y: 306, w: 380, h: 118 },
       cornice: { x: -4, y: 436, w: 408, h: 22 }, fascia: { x: 6, y: 458, w: 388, h: 72 },
@@ -65,7 +65,7 @@
       steps: [{ x: -4, y: 888, w: 100, h: 14 }, { x: 304, y: 888, w: 100, h: 14 }],
       neon: doors[0].transom, num: doors[1].transom,
       pumpkins: { x: 344, y: 889, w: 48 },
-      floorSign: { x: 58, y: 908, w: 70 },      // out on the pavement, below the red door and the window, so it covers nothing you tap
+      floorSign: { x: 47, y: 890, w: 92 },      // poster-sized on the pavement, below the red door and the window, so it covers nothing you tap
       awning: { x0: 6, x1: 394, wall: 530, front: 546, spread: .02, lamps: [94, 306] },
       ivy: { side: 34, canopy: 46, droop: 90, keepClear: [{ x: 62, y: 80, w: 176, h: 214 }, { x: 8, y: 302, w: 384, h: 126 }, { x: 230, y: 112, w: 162, h: 166 }, { x: 0, y: 520, w: 400, h: 460 }] }
     };
@@ -284,29 +284,30 @@
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
-    // The A-frame floor sign: a white frame, a black board on two copper clips, cream lettering.
-    // Drawn on a 100 x 172 grid; the board is 70 wide (x 15-85), so text is centred on x = 50.
+    // The A-frame floor sign: a black frame on two dark clips holding a black poster, white lettering,
+    // and the library photo (img/ramh-library.webp) framing the bottom of the poster.
+    // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85), so text is centred on x = 50.
     {
-      const [top, big, script] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
+      const [top, big] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
       fs.href = LINKS.ramh;
       fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")} (opens in a new tab)`);
       fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
         <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
-        <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
-        <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
-        <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
-        <rect x="15" y="13" width="70" height="112" rx="1" fill="#141414"/>
-        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(240,232,214,.5)" stroke-width=".6"/>
-        <g fill="#c4652e"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
-        <g fill="#f3ecdd" text-anchor="middle">
-          <path id="nrsf-fs-arc" d="M21 45 Q50 28 79 45" fill="none"/>
-          <text font-family="Cinzel, Georgia, serif" font-weight="700" font-size="5.8" letter-spacing=".8"><textPath href="#nrsf-fs-arc" startOffset="50%">${esc((top || "").toUpperCase())}</textPath></text>
-          <g fill="none" stroke="#f3ecdd" stroke-width=".8" stroke-linejoin="round"><path d="M41 50 Q45.5 47 50 50 Q54.5 47 59 50 V58 Q54.5 55 50 58 Q45.5 55 41 58 Z M50 50 V58"/></g>
-          <text x="50" y="84" font-family="Cinzel, Georgia, serif" font-size="22" textLength="58" lengthAdjust="spacingAndGlyphs">${esc(big || "")}</text>
-          <path d="M28 91 H72" stroke="#f3ecdd" stroke-width=".5"/>
-          <text x="50" y="106" font-family="Sacramento, cursive" font-size="16">${esc(script || "")}</text>
-          <path d="M34 113 H46 M54 113 H66" stroke="#f3ecdd" stroke-width=".5"/><circle cx="50" cy="113" r=".9"/>
-        </g></svg>`;
+        <path d="M15 6 L23 165 M85 6 L77 165" stroke="#5a564e" stroke-width="3" stroke-linecap="round"/>
+        <g stroke="#141414" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
+        <path d="M11 9 L5.6 166" stroke="#3a3a3a" stroke-width="1.4"/>
+        <rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
+        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.55)" stroke-width=".6"/>
+        <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
+        <g fill="#f4f1ea" text-anchor="middle">
+          <text x="50" y="34" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="6.2" letter-spacing=".9">${esc((top || "").toUpperCase())}</text>
+          <text x="50" y="64" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="30" letter-spacing="1">${esc(big || "")}</text>
+          <path d="M28 71 H72" stroke="#f4f1ea" stroke-width=".6"/>
+        </g>
+        <defs><clipPath id="nrsf-fs-clip"><rect x="21" y="78" width="58" height="38" rx="1"/></clipPath></defs>
+        <image href="${img("ramh-library.webp")}" x="21" y="78" width="58" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#nrsf-fs-clip)"/>
+        <rect x="21" y="78" width="58" height="38" rx="1" fill="none" stroke="#f4f1ea" stroke-width=".6"/>
+      </svg>`;
     }
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
@@ -548,23 +549,21 @@
        the chains and the board swing from it.
        ============================================================ */
     function hangingSign(words) {
+      // Split the words into two lines of about equal length: "THIS IS NOT RISING" -> "THIS IS" / "NOT RISING"
       const parts = (words || "").trim().split(/\s+/);
-      const top = parts[0] || "", bottom = parts.slice(1).join(" ");
+      const mid = Math.ceil(parts.length / 2);
+      const top = parts.slice(0, mid).join(" "), bottom = parts.slice(mid).join(" ");
+      // two short chains from the bracket to the board, four links each
       const chainX = [168, 472], links = chainX.map(x => [213, 231, 249, 267].map((y, i) => `<ellipse cx="${x}" cy="${y}" rx="${i % 2 ? 5 : 8}" ry="${i % 2 ? 8 : 5}" fill="none" stroke="#242019" stroke-width="3"/>`).join("")).join("");
+      // a white enamelled metal sign: white board, black rim and a thin inner line, black lettering
       return `<img class="nrsf-hs-bracket" src="${img("sign-bracket.webp")}" alt="">` +
         `<svg class="nrsf-hs-board" viewBox="0 0 640 666" aria-hidden="true">` +
-        `<defs><linearGradient id="nrsf-wood-base" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e1812"/><stop offset=".55" stop-color="#100c09"/><stop offset="1" stop-color="#030202"/></linearGradient>` +
-        `<filter id="nrsf-wood-grain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="4" seed="11" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0"/></filter></defs>` +
         `<ellipse cx="320" cy="648" rx="300" ry="16" fill="rgba(0,0,0,.4)"/>${links}` +
-        `<rect x="16" y="284" width="608" height="350" rx="6" fill="url(#nrsf-wood-base)"/>` +
-        `<rect x="16" y="284" width="608" height="350" rx="6" filter="url(#nrsf-wood-grain)"/>` +
-        `<path d="M126 300 V588 M514 300 V588" stroke="#000" stroke-width="1" opacity=".35"/>` +
-        `<rect x="16" y="284" width="608" height="350" rx="6" fill="none" stroke="#f4f1ea" stroke-width="5"/>` +
-        `<rect x="34" y="302" width="572" height="314" fill="none" stroke="#f4f1ea" stroke-width="1.4" opacity=".8"/>` +
-        `<g fill="#f4f1ea"><circle cx="44" cy="312" r="4"/><circle cx="596" cy="312" r="4"/><circle cx="44" cy="596" r="4"/><circle cx="596" cy="596" r="4"/></g>` +
-        `<text x="320" y="425" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="128" letter-spacing="8" fill="#f4f1ea">${esc(top.toUpperCase())}</text>` +
-        `<path d="M250 462 H390" stroke="#f4f1ea" stroke-width="2"/><path d="M320 452 L331 462 L320 472 L309 462 Z" fill="#f4f1ea"/>` +
-        `<text x="320" y="582" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="104" letter-spacing="6" fill="#f4f1ea">${esc(bottom.toUpperCase())}</text>` +
+        `<rect x="16" y="284" width="608" height="350" rx="6" fill="#f7f5ef"/>` +
+        `<rect x="16" y="284" width="608" height="350" rx="6" fill="none" stroke="#141414" stroke-width="7"/>` +
+        `<rect x="30" y="298" width="580" height="322" fill="none" stroke="#141414" stroke-width="1.6"/>` +
+        `<text x="320" y="420" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="118" letter-spacing="8" fill="#141414">${esc(top.toUpperCase())}</text>` +
+        `<text x="320" y="572" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="94" letter-spacing="4" fill="#141414">${esc(bottom.toUpperCase())}</text>` +
         `</svg>`;
     }
     function pumpkin(ctx, cx, by, w, tilt) {
