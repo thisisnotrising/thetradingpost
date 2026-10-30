@@ -39,6 +39,8 @@ window.NR = {
     memoir01Back: "memoir01-back.webp",
     memoir02: "memoir02-cover.webp",
     memoir02Back: "memoir02-back.webp",
+    memoir03: "memoir03-cover.webp",          // To Be Human: Season 1 (Kathi)
+    memoir04: "memoir04-cover.webp",          // To Be Human: Season 3 (Amanda Jane Lee)
     cover14: "issue14-cover.webp",
     cover15: "issue15-cover.webp",
     cover16: "issue16-cover.webp",
@@ -60,10 +62,14 @@ window.NR = {
      Issue 17 -> "Coming December 17". */
   RELEASE_MONTH: "December",
 
-  /* MEMOIRS: its own tab, set apart on the right of the menu.
-     "tag" is the little placard under each cover. */
+  /* MEMOIRS: its own tab, set apart on the right of the menu, in reading order.
+     "tag" is the little placard under each cover.
+     No "issue" yet? Clicking the cover puts up the marquee with the "soon" text
+     (each \n starts a new line; keep lines short so they fit on a phone; the board shows it in capitals). */
   MEMOIRS: [
+    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", soon: "To Be Human: Season 1\nDigital Issue\nComing Soon" },
     { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2" },
+    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", soon: "To Be Human: Season 3\nDigital Issue\nComing Soon" },
     { name: "To Be Human: Holiday Special · Kathi Eric Dalguntas", tag: "TBH · HOLIDAY", cover: "memoir02", issue: "tbh-holiday" }
   ],
 
