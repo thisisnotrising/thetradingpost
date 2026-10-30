@@ -182,6 +182,8 @@
                    Every brick on the building is one of these, picked at random.
        wood.jpg    floorboard grain, used on the doors, the sign and the window ledges.
        lounge.jpg  the coffee lounge seen through the poster window.
+       cobbles.webp her cobblestone photo, made to tile left to right with no seam. Small stones at the
+                   top, big ones at the bottom, so it already has the street's perspective built in.
      ------------------------------------------------------------ */
   const ATLAS = { n: 124, cols: 16, w: 60, h: 20 };
   const MORTAR = "#aaa196";
@@ -284,7 +286,7 @@
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
-    // The A-frame floor sign: a black frame on two dark clips holding a black poster, white lettering,
+    // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster, white lettering,
     // and the library photo (img/ramh-library.webp) framing the bottom of the poster.
     // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85), so text is centred on x = 50.
     {
@@ -293,9 +295,9 @@
       fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")} (opens in a new tab)`);
       fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
         <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
-        <path d="M15 6 L23 165 M85 6 L77 165" stroke="#5a564e" stroke-width="3" stroke-linecap="round"/>
-        <g stroke="#141414" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
-        <path d="M11 9 L5.6 166" stroke="#3a3a3a" stroke-width="1.4"/>
+        <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
+        <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
+        <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
         <rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
         <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.55)" stroke-width=".6"/>
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
@@ -318,7 +320,89 @@
     /* ============================================================
        C. THE BUILDING
        ============================================================ */
+    /* The whitewashed upper wall, made the way the metal sign's hammered finish is made: first a "height map"
+       is drawn in grey (bricks raised, joints sunk, the paint lumpy), then every pixel is lit according to which
+       way its little slope faces the light (from the top left). That is what makes the paint look thick, the
+       edges soft, and the joints recessed, like Kathi's white-brick photo.
+       soldier = true lays one row of bricks standing on end (the course over the window). */
+    function whitewash(ctx, x0, y0, x1, y1, soldier = false) {
+      // work in device pixels, but cap the work on very big screens (it is then drawn slightly enlarged)
+      const full = u * dpr, area = (x1 - x0) * (y1 - y0) * full * full, k = full * Math.min(1, Math.sqrt(2.6e6 / area));
+      const X = Math.round(x0 * k), Y = Math.round(y0 * k), Wd = Math.round(x1 * k) - X, Hd = Math.round(y1 * k) - Y;
+      if (Wd < 3 || Hd < 3) return;
+      const hc = document.createElement("canvas"); hc.width = Wd; hc.height = Hd;
+      let h = hc.getContext("2d");
+      // 1. The height map. Dark = low (the joints), light = high (brick faces under thick paint)
+      h.fillStyle = "#6a6a6a"; h.fillRect(0, 0, Wd, Hd);                                                     // joints mostly filled with paint, so not very deep
+      h.setTransform(k, 0, 0, k, -X, -Y);
+      const j = G.phone ? 2 : 2.4;
+      const n = soldier ? Math.max(1, Math.round((x1 - x0) / (G.phone ? 10 : 13))) : 0;
+      const bw = soldier ? (x1 - x0) / n - j : (G.phone ? 27 : 35), bh = soldier ? y1 - y0 - j : (G.phone ? 9 : 11.5), row = bh + j;
+      const r0 = soldier ? 0 : Math.floor(y0 / row) - 1, r1 = soldier ? 0 : Math.ceil(y1 / row);
+      for (let r = r0; r <= r1; r++) {
+        const y = soldier ? y0 + j / 2 : r * row + j / 2, off = soldier ? x0 + j / 2 : (r % 2 ? .5 : 0) * (bw + j);
+        for (let c = soldier ? 0 : Math.floor((x0 - off) / (bw + j)) - 1; ; c++) {
+          const x = c * (bw + j) + off; if (x > x1 || (soldier && c >= n)) break;
+          const a = hash(r * 1.7 + 5, c * .9 + (soldier ? 40 : 0)), b = hash(c * 2.3, r * .4 + 1);
+          const v = (175 + a * 55) | 0;                                                                        // some bricks stand a little prouder
+          h.fillStyle = `rgb(${v},${v},${v})`;
+          rr(h, x + (a - .5) * .9, y + (b - .5) * .6, bw + (b - .5) * 1.8, bh + (a - .5) * .9, 1.4); h.fill();
+          if (!soldier) {                                                                                      // paint bridging the joints here and there
+            const q = hash(c * 4.1, r * 2.9), t = (v - 25) | 0;
+            h.fillStyle = `rgb(${t},${t},${t})`;
+            if (q > .3) { h.beginPath(); h.ellipse(x + bw * a, y + bh + j / 2, 3 + q * 9, j * .9, 0, 0, 7); h.fill(); }
+            if (q > .62) { h.beginPath(); h.ellipse(x + bw + j / 2, y + bh * b, j * .9, 2 + q * 5, 0, 0, 7); h.fill(); }
+          }
+        }
+      }
+      // paint rounds every edge: blur the whole map once (blurring each brick separately would be very slow)
+      const hb = document.createElement("canvas"); hb.width = Wd; hb.height = Hd;
+      h = hb.getContext("2d", { willReadFrequently: true });
+      h.filter = `blur(${(.7 * k).toFixed(2)}px)`; h.drawImage(hc, 0, 0); h.filter = "none";
+      // lumpy paint: the grain tile blown up at three sizes, so the bumps come in big and small
+      [[5, .5], [13, .4], [1.8, .12]].forEach(([s, al]) => {
+        const p = h.createPattern(noise(), "repeat"); p.setTransform(new DOMMatrix().translate(-X * .37, -Y * .53).scale(s * k / 2));
+        h.globalAlpha = al; h.globalCompositeOperation = "overlay"; h.fillStyle = p; h.fillRect(0, 0, Wd, Hd);
+      });
+      // 2. Light every pixel. The slope comes from the neighbours' heights; a pixel tilted toward the light is
+      //    brighter, one tilted away is darker, and the low joints also sit in their own shadow.
+      const H = h.getImageData(0, 0, Wd, Hd).data, out = ctx.createImageData(Wd, Hd), o = out.data;
+      const S = 2.3, Lx = -.42, Ly = -.58, Lz = .7;                                                              // light from the top left, a little in front
+      for (let py = 0; py < Hd; py++) {
+        const up = py > 0 ? -Wd : 0, dn = py < Hd - 1 ? Wd : 0;
+        for (let px = 0; px < Wd; px++) {
+          const i = py * Wd + px, hv = H[i * 4] / 255;
+          const dx = ((H[(i + (px < Wd - 1 ? 1 : 0)) * 4] - H[(i - (px > 0 ? 1 : 0)) * 4]) / 255) * S;
+          const dy = ((H[(i + dn) * 4] - H[(i + up) * 4]) / 255) * S;
+          const len = Math.sqrt(dx * dx + dy * dy + 1);
+          let lit = (-dx * Lx - dy * Ly + Lz) / len / Lz;                                                         // 1 on a flat face
+          lit = lit < 0 ? 0 : lit > 1.25 ? 1.25 : lit;
+          const ao = hv < .36 ? .8 : hv > .66 ? 1 : .8 + (hv - .36) / .3 * .2;                                    // joints sit in a little shadow
+          const f = (.3 + .7 * lit) * ao, q = i * 4;
+          o[q] = 248 * f; o[q + 1] = 246 * f; o[q + 2] = 240 * f; o[q + 3] = 255;
+        }
+      }
+      if (k === full) ctx.putImageData(out, X, Y);
+      else {                                                                                                 // big screen: paint it small, then enlarge
+        h.putImageData(out, 0, 0);
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(hb, x0 * full, y0 * full, (x1 - x0) * full, (y1 - y0) * full); ctx.restore();
+      }
+      if (soldier) return;
+      // 3. Big soft patches of thicker and thinner paint, and grime gathering under the eaves
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+      const R = rng(11);
+      for (let i = 0; i < (G.phone ? 10 : 22); i++) {
+        const cx = x0 + R() * (x1 - x0), cy = y0 + R() * (y1 - y0), rad = 40 + R() * 120, dark = R() < .55;
+        const g = ctx.createRadialGradient(cx, cy, 1, cx, cy, rad);
+        g.addColorStop(0, dark ? "rgba(120,108,96,.07)" : "rgba(255,255,252,.08)"); g.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = g; ctx.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+      }
+      ctx.fillStyle = vgrad(ctx, y0, y0 + 90, [[0, "rgba(70,62,56,.22)"], [1, "rgba(70,62,56,0)"]]); ctx.fillRect(x0, y0, x1 - x0, 90);
+      ctx.restore();
+    }
+
     function bricks(ctx, x0, y0, x1, y1, lift = 0, painted = false) {
+      if (painted) return whitewash(ctx, x0, y0, x1, y1);
       const bh = G.phone ? 13 : 16, bw = G.phone ? 38 : 46, j = G.phone ? 2.4 : 3, row = bh + j;
       ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
       ctx.fillStyle = painted ? "#cfccc4" : MORTAR; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);   // the mortar
@@ -362,42 +446,61 @@
         ctx.fillStyle = vgrad(ctx, y, y + len, [[0, "rgba(60,60,66,.10)"], [1, "rgba(60,60,66,0)"]]); ctx.fillRect(x, y, 2 + R() * 4, len);
       }
 
-      // 2. The upstairs window, like the reference photos: a black frame with a grid of
-      //    small square panes, set deep in the brick under a row of bricks standing on end
+      // 2. The upstairs window, built from the same black joinery as the shop windows below: a frame with a
+      //    bevelled edge, a heavy top rail, glazing bars shaded like the shop's posts, and the same deep black sill.
+      //    It sits in a recess in the brick, under a row of whitewashed bricks standing on end.
       const w = G.upperWin, li = G.lintel, ws = G.wsill;
-      ctx.fillStyle = "#17110d"; ctx.fillRect(w.x - 8, w.y - 4, w.w + 16, w.h + 4);                       // the reveal in the brick
-      ctx.fillStyle = hgrad(ctx, w.x - 8, w.x + 4, [[0, "rgba(255,230,210,.14)"], [1, "rgba(255,255,255,0)"]]); ctx.fillRect(w.x - 8, w.y - 4, 12, w.h + 4);
-      ctx.fillStyle = "#cfccc4"; ctx.fillRect(li.x, li.y, li.w, li.h);                                    // soldier course
-      const nS = Math.round(li.w / (G.phone ? 10 : 13)), sw = li.w / nS;
-      for (let k = 0; k < nS; k++) {
-        photoBrick(ctx, li.x + k * sw + 1, li.y + 1, sw - 2, li.h - 2, 900 + k, 7, true);
-        ctx.fillStyle = "rgba(242,240,234,.86)"; ctx.fillRect(li.x + k * sw + 1, li.y + 1, sw - 2, li.h - 2);   // painted white like the wall
-        ctx.fillStyle = "rgba(20,8,4,.3)"; ctx.fillRect(li.x + k * sw + sw - 1, li.y + 1, 1, li.h - 2);
-      }
-      ctx.fillStyle = "rgba(255,255,255,.18)"; ctx.fillRect(li.x, li.y, li.w, 1);
-      ledgeShadow(ctx, w.x - 8, li.y + li.h, w.w + 16, 10, .55);
-      const fr = G.phone ? 6 : 9, bar = G.phone ? 2.4 : 3.2, cols = G.phone ? 3 : 4, rows = G.phone ? 4 : 5;
-      const gx = w.x + fr, gy0 = w.y + fr, gw = w.w - fr * 2, gh = w.h - fr * 2;
-      ctx.fillStyle = vgrad(ctx, gy0, gy0 + gh, [[0, "#3d4560"], [.3, "#2a2224"], [1, "#160e0a"]]); ctx.fillRect(gx, gy0, gw, gh);   // dusk sky reflected above, a room behind
+      const rv = G.phone ? 5 : 8;                                                                          // depth of the recess
+      ctx.fillStyle = "#c2bdb3"; ctx.fillRect(w.x - rv, w.y - 4, w.w + rv * 2, w.h + 4);                   // the brick reveal, painted
+      ctx.fillStyle = hgrad(ctx, w.x - rv, w.x, [[0, "rgba(255,255,250,.35)"], [1, "rgba(120,110,100,.25)"]]); ctx.fillRect(w.x - rv, w.y - 4, rv, w.h + 4);          // left reveal in the light
+      ctx.fillStyle = hgrad(ctx, w.x + w.w, w.x + w.w + rv, [[0, "rgba(30,24,20,.55)"], [1, "rgba(30,24,20,.25)"]]); ctx.fillRect(w.x + w.w, w.y - 4, rv, w.h + 4); // right reveal in shadow
+      whitewash(ctx, li.x, li.y, li.x + li.w, li.y + li.h, true);                                           // soldier course: bricks on end
+      ledgeShadow(ctx, w.x - rv, li.y + li.h, w.w + rv * 2, 12, .5);
+      const fr = G.phone ? 7 : 12, rail = G.phone ? 9 : 15, bar = G.phone ? 3 : 4.5, cols = G.phone ? 3 : 4, rows = G.phone ? 4 : 5;
+      const gx = w.x + fr, gy0 = w.y + rail, gw = w.w - fr * 2, gh = w.h - rail - fr;
+      // the room behind the glass: dusk sky reflected at the top, warm lamplight deeper in
+      ctx.fillStyle = vgrad(ctx, gy0, gy0 + gh, [[0, "#3a4258"], [.28, "#2a2427"], [1, "#150d09"]]); ctx.fillRect(gx, gy0, gw, gh);
       ctx.save(); ctx.beginPath(); ctx.rect(gx, gy0, gw, gh); ctx.clip();
       ctx.globalCompositeOperation = "screen";
       const lamp = ctx.createRadialGradient(gx + gw * .62, gy0 + gh * .72, 1, gx + gw * .62, gy0 + gh * .72, gw * .7);   // a lamp left on upstairs
-      lamp.addColorStop(0, "rgba(255,196,120,.8)"); lamp.addColorStop(.4, "rgba(255,160,80,.3)"); lamp.addColorStop(1, "rgba(255,140,60,0)");
+      lamp.addColorStop(0, "rgba(255,196,120,.85)"); lamp.addColorStop(.4, "rgba(255,160,80,.3)"); lamp.addColorStop(1, "rgba(255,140,60,0)");
       ctx.fillStyle = lamp; ctx.fillRect(gx, gy0, gw, gh);
       ctx.globalCompositeOperation = "source-over";
-      ctx.fillStyle = "rgba(240,228,210,.10)"; ctx.fillRect(gx, gy0, gw * .22, gh);                       // a sheer curtain pulled aside
-      ctx.fillStyle = "rgba(255,255,255,.06)"; ctx.beginPath(); ctx.moveTo(gx, gy0 + gh * .55); ctx.lineTo(gx + gw * .5, gy0); ctx.lineTo(gx + gw * .62, gy0); ctx.lineTo(gx, gy0 + gh * .75); ctx.fill();
+      ctx.fillStyle = hgrad(ctx, gx, gx + gw * .24, [[0, "rgba(236,226,210,.16)"], [.7, "rgba(236,226,210,.10)"], [1, "rgba(236,226,210,0)"]]); ctx.fillRect(gx, gy0, gw * .24, gh);   // a sheer curtain pulled aside
+      grain(ctx, gx, gy0, gw, gh, .1, .4);
+      // reflections on the glass: the sky across the top panes, and a soft diagonal sheen
+      ctx.fillStyle = vgrad(ctx, gy0, gy0 + gh * .45, [[0, "rgba(150,170,205,.22)"], [1, "rgba(150,170,205,0)"]]); ctx.fillRect(gx, gy0, gw, gh * .45);
+      ctx.fillStyle = "rgba(255,255,255,.07)"; ctx.beginPath(); ctx.moveTo(gx, gy0 + gh * .5); ctx.lineTo(gx + gw * .45, gy0); ctx.lineTo(gx + gw * .6, gy0); ctx.lineTo(gx, gy0 + gh * .72); ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.04)"; ctx.beginPath(); ctx.moveTo(gx + gw * .35, gy0 + gh); ctx.lineTo(gx + gw, gy0 + gh * .3); ctx.lineTo(gx + gw, gy0 + gh * .38); ctx.lineTo(gx + gw * .45, gy0 + gh); ctx.fill();
       ctx.restore();
-      const pw = (gw - bar * (cols - 1)) / cols, ph = (gh - bar * (rows - 1)) / rows;                      // the glazing bars
+      const pw = (gw - bar * (cols - 1)) / cols, ph = (gh - bar * (rows - 1)) / rows;
+      // the frame: same black paint, bevel and top rail as the shopfront
       ctx.fillStyle = "#0b0b0c";
-      ctx.fillRect(w.x, w.y, w.w, fr); ctx.fillRect(w.x, w.y + w.h - fr, w.w, fr); ctx.fillRect(w.x, w.y, fr, w.h); ctx.fillRect(w.x + w.w - fr, w.y, fr, w.h);
-      for (let k = 1; k < cols; k++) { const x = gx + k * (pw + bar) - bar; ctx.fillStyle = "#0b0b0c"; ctx.fillRect(x, gy0, bar, gh); ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fillRect(x, gy0, .6, gh); }
-      for (let k = 1; k < rows; k++) { const y = gy0 + k * (ph + bar) - bar; ctx.fillStyle = "#0b0b0c"; ctx.fillRect(gx, y, gw, bar); ctx.fillStyle = "rgba(255,255,255,.12)"; ctx.fillRect(gx, y, gw, .6); }
-      bevel(ctx, w.x, w.y, w.w, w.h, 1.4, "rgba(255,255,255,.12)", "rgba(0,0,0,.6)");
+      ctx.fillRect(w.x, w.y, w.w, rail); ctx.fillRect(w.x, w.y + w.h - fr, w.w, fr); ctx.fillRect(w.x, w.y, fr, w.h); ctx.fillRect(w.x + w.w - fr, w.y, fr, w.h);
+      ctx.fillStyle = vgrad(ctx, w.y, w.y + rail, [[0, "#2a2a2c"], [.25, "#141415"], [1, "#060606"]]); ctx.fillRect(w.x, w.y, w.w, rail);
+      [w.x, w.x + w.w - fr].forEach(px => { ctx.fillStyle = hgrad(ctx, px, px + fr, [[0, "#070707"], [.3, "#2e2e30"], [.5, "#19191a"], [1, "#040404"]]); ctx.fillRect(px, w.y + rail, fr, w.h - rail - fr); });
+      // shadows the frame throws onto the glass, then the glazing bars, each shaded like a little post
+      ctx.fillStyle = vgrad(ctx, gy0, gy0 + 6, [[0, "rgba(0,0,0,.55)"], [1, "rgba(0,0,0,0)"]]); ctx.fillRect(gx, gy0, gw, 6);
+      ctx.fillStyle = hgrad(ctx, gx, gx + 5, [[0, "rgba(0,0,0,.45)"], [1, "rgba(0,0,0,0)"]]); ctx.fillRect(gx, gy0, 5, gh);
+      for (let k = 1; k < cols; k++) {
+        const x = gx + k * (pw + bar) - bar;
+        ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillRect(x + bar, gy0, 1.6, gh);                                           // its shadow on the pane
+        ctx.fillStyle = hgrad(ctx, x, x + bar, [[0, "#070707"], [.3, "#2e2e30"], [.5, "#19191a"], [1, "#040404"]]); ctx.fillRect(x, gy0, bar, gh);
+      }
+      for (let k = 1; k < rows; k++) {
+        const y = gy0 + k * (ph + bar) - bar;
+        ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.fillRect(gx, y + bar, gw, 1.6);
+        ctx.fillStyle = vgrad(ctx, y, y + bar, [[0, "#2a2a2c"], [.3, "#141415"], [1, "#050505"]]); ctx.fillRect(gx, y, gw, bar);
+      }
+      ctx.fillStyle = "#050505"; ctx.fillRect(gx - 1.5, gy0 - 1.5, gw + 3, 1.5); ctx.fillRect(gx - 1.5, gy0 + gh, gw + 3, 1.5);   // the rebate the glass sits in
+      bevel(ctx, w.x, w.y, w.w, w.h, 1.4, "rgba(255,255,255,.14)", "rgba(0,0,0,.7)");
       bevel(ctx, gx, gy0, gw, gh, 1, "rgba(0,0,0,.6)", "rgba(255,255,255,.1)");
-      ctx.fillStyle = vgrad(ctx, ws.y, ws.y + ws.h, [[0, "#f1f0ea"], [.35, "#d6d3ca"], [.4, "#a9a69d"], [1, "#8b887f"]]); ctx.fillRect(ws.x, ws.y, ws.w, ws.h);
+      grain(ctx, w.x, w.y, w.w, w.h, .12);
+      // the sill: the shopfront's deep black sill, catching a line of light along its front edge
+      ctx.fillStyle = vgrad(ctx, ws.y, ws.y + ws.h, [[0, "#3a3a3c"], [.3, "#1d1d1e"], [.32, "#0d0d0d"], [1, "#050505"]]); ctx.fillRect(ws.x, ws.y, ws.w, ws.h);
+      ctx.fillStyle = "rgba(255,255,255,.28)"; ctx.fillRect(ws.x, ws.y, ws.w, .9);
       ledgeShadow(ctx, ws.x + 4, ws.y + ws.h, ws.w - 8, 22, .5);
-      ctx.fillStyle = vgrad(ctx, ws.y + ws.h, ws.y + ws.h + 90, [[0, "rgba(70,70,74,.18)"], [1, "rgba(70,70,74,0)"]]); ctx.fillRect(ws.x + 20, ws.y + ws.h, ws.w - 40, 90);  // rain stains
+      ctx.fillStyle = vgrad(ctx, ws.y + ws.h, ws.y + ws.h + 90, [[0, "rgba(70,70,74,.16)"], [1, "rgba(70,70,74,0)"]]); ctx.fillRect(ws.x + 20, ws.y + ws.h, ws.w - 40, 90);  // rain stains
 
       // 3. Shadow of the marquee on the wall
       ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = sh(22); ctx.shadowOffsetY = sh(12);
@@ -492,26 +595,41 @@
       // Cobblestones, like the café photo: dark, damp granite setts laid in staggered rows,
       // smaller toward the wall and larger toward you, with moss and grit in the joints
       ctx.fillStyle = "#121212"; ctx.fillRect(-10, gy, ref + 20, G.h - gy);
-      const R2 = rng(77);
-      let y = gy + 1, rowH = G.phone ? 7 : 8, row = 0;
-      while (y < G.h) {
-        let x = -R2() * rowH * 2 - (row % 2) * rowH * .8;
-        while (x < ref + 10) {
-          const sw = rowH * (1.35 + R2() * .7), t = R2(), tint = R2();
-          const base = tint < .7 ? [44 + t * 52, 48 + t * 50, 54 + t * 52]                 // blue-grey granite
-                     : tint < .9 ? [62 + t * 46, 56 + t * 40, 50 + t * 34]                 // brown
-                     : [80 + t * 40, 82 + t * 38, 84 + t * 36];                            // a paler stone
-          const gap = Math.max(.9, rowH * .13), sx = x + gap / 2 + (R2() - .5) * gap * .6, sy = y + gap / 2, w = sw - gap, h = rowH - gap;
-          const g = ctx.createLinearGradient(sx, sy, sx, sy + h);
-          g.addColorStop(0, rgb(base, 1.25)); g.addColorStop(.35, rgb(base, 1)); g.addColorStop(1, rgb(base, .6));
-          rr(ctx, sx, sy, w, h, Math.min(w, h) * .3); ctx.fillStyle = g; ctx.fill();
-          if (R2() < .3) { ctx.fillStyle = `rgba(36,48,26,${.25 + R2() * .3})`; ctx.fillRect(sx - gap * .4, sy + h * (.6 + R2() * .3), w * (.3 + R2() * .5), gap * .9); }   // moss in the joint
-          ctx.fillStyle = `rgba(210,220,235,${.06 + R2() * .1})`; ctx.fillRect(sx + w * .15, sy + h * .12, w * .6, Math.max(.5, h * .1));   // damp sheen on top
-          x += sw;
+      if (TEX.cobbles) {
+        // Kathi's cobblestone photo, repeated along the street. It is sized so the bottom of the photo
+        // (the big stones) sits at the bottom of the scene, and the smaller stones run back to the wall.
+        const T = TEX.cobbles, depth = G.h - gy, k = G.phone ? depth / T.height : .34, th = T.height * k;
+        const p = ctx.createPattern(T, "repeat-x");
+        p.setTransform(new DOMMatrix().translate(-10, G.h - th).scale(k));
+        ctx.save(); ctx.beginPath(); ctx.rect(-10, gy, ref + 20, depth); ctx.clip();
+        ctx.fillStyle = p; ctx.fillRect(-10, G.h - th, ref + 20, th);
+        // dusk: darker and cooler than the daylight photo, and wet-looking toward the wall
+        ctx.globalCompositeOperation = "multiply"; ctx.fillStyle = "rgb(150,158,176)"; ctx.fillRect(-10, gy, ref + 20, depth);
+        ctx.globalCompositeOperation = "source-over";
+        ctx.fillStyle = vgrad(ctx, gy, G.h, [[0, "rgba(10,12,20,.45)"], [.5, "rgba(10,12,20,.12)"], [1, "rgba(10,12,20,.25)"]]); ctx.fillRect(-10, gy, ref + 20, depth);
+        ctx.restore();
+      } else {
+        const R2 = rng(77);
+        let y = gy + 1, rowH = G.phone ? 7 : 8, row = 0;
+        while (y < G.h) {
+          let x = -R2() * rowH * 2 - (row % 2) * rowH * .8;
+          while (x < ref + 10) {
+            const sw = rowH * (1.35 + R2() * .7), t = R2(), tint = R2();
+            const base = tint < .7 ? [44 + t * 52, 48 + t * 50, 54 + t * 52]                 // blue-grey granite
+                       : tint < .9 ? [62 + t * 46, 56 + t * 40, 50 + t * 34]                 // brown
+                       : [80 + t * 40, 82 + t * 38, 84 + t * 36];                            // a paler stone
+            const gap = Math.max(.9, rowH * .13), sx = x + gap / 2 + (R2() - .5) * gap * .6, sy = y + gap / 2, w = sw - gap, h = rowH - gap;
+            const g = ctx.createLinearGradient(sx, sy, sx, sy + h);
+            g.addColorStop(0, rgb(base, 1.25)); g.addColorStop(.35, rgb(base, 1)); g.addColorStop(1, rgb(base, .6));
+            rr(ctx, sx, sy, w, h, Math.min(w, h) * .3); ctx.fillStyle = g; ctx.fill();
+            if (R2() < .3) { ctx.fillStyle = `rgba(36,48,26,${.25 + R2() * .3})`; ctx.fillRect(sx - gap * .4, sy + h * (.6 + R2() * .3), w * (.3 + R2() * .5), gap * .9); }   // moss in the joint
+            ctx.fillStyle = `rgba(210,220,235,${.06 + R2() * .1})`; ctx.fillRect(sx + w * .15, sy + h * .12, w * .6, Math.max(.5, h * .1));   // damp sheen on top
+            x += sw;
+          }
+          y += rowH; rowH *= 1.1; row++;
         }
-        y += rowH; rowH *= 1.1; row++;
+        grain(ctx, -10, gy, ref + 20, G.h - gy, .3, .6);
       }
-      grain(ctx, -10, gy, ref + 20, G.h - gy, .3, .6);
       ctx.fillStyle = vgrad(ctx, gy, gy + 16, [[0, "rgba(0,0,0,.55)"], [1, "rgba(0,0,0,0)"]]); ctx.fillRect(0, gy, ref, 16);   // shadow at the foot of the wall
       G.steps.forEach(st => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = sh(8); ctx.shadowOffsetY = sh(5);
@@ -1062,7 +1180,7 @@
 
     // Load the photo textures first, then paint
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
-    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp")]);
+    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp")]);
     const fontsReady = document.fonts
       ? Promise.all(["700 20px Cinzel", "400 20px Sancreek", "600 20px Oswald", "400 20px \"Archivo Black\""].map(f => document.fonts.load(f).catch(() => {})))
       : Promise.resolve();
