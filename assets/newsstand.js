@@ -679,7 +679,8 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "cover-btn" + (item.cover ? "" : " placeholder");   // grey stand-in only when there is no cover yet
-        const soon = `${item.name}: Digital Issue\nComing ${RELEASE_MONTH} ${n}`;   // issue 2 -> "Jennifer Hong: Digital Issue / Coming December 2" (the CSS shows it in capitals)
+        let soon = `${item.name}: Digital Issue\nComing ${RELEASE_MONTH} ${n}`;   // issue 2 -> "Jennifer Hong: Digital Issue / Coming December 2" (the CSS shows it in capitals)
+        if (item.soon) soon = item.soon;                                    // a memoir can say its own "coming soon" line (see MEMOIRS in data.js)
         btn.setAttribute("aria-label", item.issue ? `Open ${tagText}: ${item.name}` : `${tagText}. ` + soon.replace("\n", " "));
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
