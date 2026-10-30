@@ -166,6 +166,7 @@
 /* ---------- Upstairs signs ---------- */
 .nrsf .nrsf-signbox { z-index: 8; aspect-ratio: 640 / 666; }
 .nrsf .nrsf-signbox img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 5) rgba(0,0,0,.5)) brightness(.92) grayscale(1) contrast(1.12); } /* grayscale(1) = black and white */
+.nrsf .nrsf-signbox svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; filter: drop-shadow(0 calc(var(--u) * 6) calc(var(--u) * 5) rgba(0,0,0,.5)); }
 /* the chains and board swing from the bracket bar */
 .nrsf .nrsf-hs-board { transform-origin: 53% 22.5%; animation: nrsf-swing 5.5s ease-in-out infinite alternate; }
 @keyframes nrsf-swing { from { transform: rotate(-1.4deg); } to { transform: rotate(1.4deg); } }
@@ -181,12 +182,7 @@
 .nrsf .nrsf-globes { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .nrsf .nrsf-globes svg { position: absolute; left: 0; top: 0; overflow: visible; }
 .nrsf .nrsf-board { position: relative; z-index: 1; height: 100%; display: grid; place-items: center; container-type: size;
-  background:
-    /* the horizontal tracks the letters slide into: six rows, each ending in a dark groove and a bright lip */
-    linear-gradient(180deg, rgba(0,0,0,0) calc(100% - 3px), rgba(60,50,40,.38) calc(100% - 3px) calc(100% - 1px), rgba(255,255,255,.85) calc(100% - 1px)) 0 0 / 100% calc(100% / 6) repeat-y,
-    /* the backlight glowing a little brighter between the tracks */
-    linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.22) 50%, rgba(255,255,255,0)) 0 0 / 100% calc(100% / 6) repeat-y,
-    radial-gradient(ellipse 70% 120% at 50% 40%, #fffdf6, #f3ecdc 70%, #e4dac4);
+    background: linear-gradient(180deg, rgba(0,0,0,0) calc(100% - 4px), rgba(120,120,120,.55) calc(100% - 4px) calc(100% - 1px), rgba(255,255,255,.95) calc(100% - 1px)) 0 0 / 100% calc(100% / 6) repeat-y, linear-gradient(180deg, rgba(255,255,255,0), rgba(190,190,190,.32) 50%, rgba(255,255,255,0)) 0 0 / 100% calc(100% / 6) repeat-y, radial-gradient(ellipse 70% 120% at 50% 40%, #ffffff, #f8f8f8 70%, #ececec);
   border: 3px solid #050505; box-shadow: inset 0 0 26px rgba(150,120,70,.25), 0 0 30px rgba(255,236,200,.22); }
 .nrsf .nrsf-tiles { display: flex; flex-direction: column; align-items: center; gap: .1em; margin: 0; white-space: nowrap; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: min(8.6cqw, 56cqh); line-height: 1; color: #111; }
 .nrsf .nrsf-tiles .row { display: flex; justify-content: center; gap: .06em; }
