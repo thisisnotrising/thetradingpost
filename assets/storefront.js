@@ -825,26 +825,46 @@
     const HALVES = LEAFPTS.map(o => [Math.min, Math.max].map(f => { const h = new Path2D(); o.forEach(([x, y], k) => k ? h.lineTo(f(x, 0), y) : h.moveTo(f(x, 0), y)); h.closePath(); return h; }));
     const VEINS = new Path2D("M0 0 L0 -0.95 M0 -0.18 L-0.55 -0.48 M0 -0.18 L0.55 -0.48 M0 -0.5 L-0.2 -0.66 M0 -0.5 L0.2 -0.66");
 
-    /* One Boston ivy leaf, lit like the brick: the real leaf is folded slightly along its middle vein, so the
-       half turned away from the light (top left) is darker; the tips are browner, the veins are raised and
-       catch the light, and there is a waxy shine. Kept to a few quick fills, because there are thousands. */
+    /* One Boston ivy leaf in autumn, after Kathi's red-ivy photo: deep crimson with a waxy gloss, lit like the
+       brick. The leaf is folded slightly along its middle vein, so the half turned away from the light (top left)
+       is darker and goes plum-purple; the edges deepen to wine; the veins are raised and catch the light; a red
+       stalk joins it to the vine. Kept to a few quick fills, because there are thousands. */
     function drawLeaf(ctx, x, y, s, rot, col, shade, variant, n = 0) {
       ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s);
       const path = LEAVES[variant];
+      ctx.lineCap = "round"; ctx.lineWidth = .05; ctx.strokeStyle = rgb(col, shade * .55);                  // the red stalk
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(.02, .26); ctx.stroke();
       const g = ctx.createLinearGradient(0, 0, .2, -1);
-      g.addColorStop(0, rgb(col, shade * .6)); g.addColorStop(.55, rgb(col, shade)); g.addColorStop(1, rgb(col, shade * 1.15));
+      g.addColorStop(0, rgb(col, shade * .58)); g.addColorStop(.55, rgb(col, shade)); g.addColorStop(1, rgb(col, shade * 1.12));
       ctx.fillStyle = g; ctx.fill(path);
       const away = Math.sin(rot + .8) > 0 ? 0 : 1;                                                         // which half faces away from the light
-      ctx.fillStyle = `rgba(22,4,6,${.2 + hash(n, 2) * .14})`; ctx.fill(HALVES[variant][away]);
-      ctx.fillStyle = `rgba(255,232,205,${.07 * shade})`; ctx.fill(HALVES[variant][1 - away]);
-      const tip = ctx.createRadialGradient(0, -.4, .28, 0, -.4, .72);                                     // the tips turn brown first
-      tip.addColorStop(0, "rgba(60,20,8,0)"); tip.addColorStop(1, `rgba(60,22,8,${.22 + hash(n, 4) * .3})`);
-      ctx.fillStyle = tip; ctx.fill(path);
-      ctx.fillStyle = `rgba(255,248,236,${.13 * shade})`; ctx.beginPath(); ctx.ellipse(.16 * (away ? -1 : 1), -.56, .1, .2, (away ? -.4 : .4), 0, 7); ctx.fill();   // waxy shine
-      ctx.lineWidth = .03; ctx.strokeStyle = `rgba(40,8,6,${.3 * shade})`; ctx.translate(.012, .012); ctx.stroke(VEINS); ctx.translate(-.012, -.012);   // raised veins:
-      ctx.lineWidth = .02; ctx.strokeStyle = `rgba(255,214,190,${.28 * shade})`; ctx.stroke(VEINS);                                             // dark side, light side
-      ctx.lineWidth = .028; ctx.strokeStyle = `rgba(30,6,4,${.48 * shade})`; ctx.stroke(path);              // the serrated edge
+      ctx.fillStyle = `rgba(46,2,30,${.22 + hash(n, 2) * .14})`; ctx.fill(HALVES[variant][away]);          // shadow side goes plum
+      ctx.fillStyle = `rgba(255,190,200,${.08 * shade})`; ctx.fill(HALVES[variant][1 - away]);
+      const rim = ctx.createRadialGradient(0, -.45, .3, 0, -.45, .74);                                     // edges deepen to wine
+      rim.addColorStop(0, "rgba(60,0,20,0)"); rim.addColorStop(1, `rgba(60,0,22,${.2 + hash(n, 4) * .22})`);
+      ctx.fillStyle = rim; ctx.fill(path);
+      const sx = .17 * (away ? -1 : 1), gl = ctx.createRadialGradient(sx, -.56, .01, sx, -.56, .26);       // waxy gloss on the lit half
+      gl.addColorStop(0, `rgba(255,236,240,${.32 * shade})`); gl.addColorStop(1, "rgba(255,236,240,0)");
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.ellipse(sx, -.56, .16, .26, (away ? -.4 : .4), 0, 7); ctx.fill();
+      ctx.lineWidth = .03; ctx.strokeStyle = `rgba(40,0,14,${.3 * shade})`; ctx.translate(.012, .012); ctx.stroke(VEINS); ctx.translate(-.012, -.012);   // raised veins:
+      ctx.lineWidth = .02; ctx.strokeStyle = `rgba(255,190,200,${.3 * shade})`; ctx.stroke(VEINS);                                              // dark side, light side
+      ctx.lineWidth = .028; ctx.strokeStyle = `rgba(36,0,12,${.5 * shade})`; ctx.stroke(path);              // the serrated edge
       ctx.restore();
+    }
+
+    /* Single ivy leaves drawn once as little pictures: used for the leaves lying on the cobbles and the ones
+       falling past. Every ivy colour, each in a darker and a lighter version, in all three leaf shapes. */
+    let IVYSP = null;
+    function ivySprites() {
+      if (IVYSP) return IVYSP;
+      const pal = S.leaves.map(hex); IVYSP = [];
+      pal.forEach((col, i) => [.75, 1].forEach((sh, j) => {
+        const c = document.createElement("canvas"); c.width = c.height = 96;
+        const x = c.getContext("2d"); x.translate(48, 72);
+        drawLeaf(x, 0, 0, 62, (j ? .3 : -.9), col, sh, (i + j) % 3, i * 2 + j);
+        IVYSP.push(c);
+      }));
+      return IVYSP;
     }
 
     function growIvy() {
@@ -933,7 +953,7 @@
       // The vines themselves
       ctx.lineCap = "round"; ctx.lineJoin = "round";
       vines.forEach((pts, i) => {
-        ctx.strokeStyle = i < 2 ? "#3a2a20" : "#4a3426"; ctx.lineWidth = (i < 2 ? 3.2 : 1.3) * (G.phone ? .7 : 1);
+        ctx.strokeStyle = i < 2 ? "#3c1a18" : "#6a1a20"; ctx.lineWidth = (i < 2 ? 3.2 : 1.3) * (G.phone ? .7 : 1);   // woody trunks, red runners
         ctx.beginPath(); pts.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
       });
       // Two small white pumpkins on the step, in front of the door (switched on in storefront-data.js)
@@ -946,17 +966,17 @@
       leaves.sort((a, b) => a.depth - b.depth).forEach((l, i) => {
         let col = pal[(hash(i, 5) * pal.length) | 0];
         const nearShop = Math.max(0, Math.min(1, (l.y - G.shopTop + 80) / 260));
-        col = mix(col, [255, 170, 90], nearShop * .18);
+        col = mix(col, [255, 120, 90], nearShop * .1);
         const shade = (.5 + l.depth * .55) * (l.y < 120 ? .85 : 1) * (l.ground ? .7 : 1);
-        if (l.ground && SP) {                               // a fallen maple leaf (from the photos), lying flat on the cobbles
-          const z = l.s * 1.5;
-          ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.scale(1, .6);
-          ctx.drawImage(SP[1][(hash(i, 5) * LEAF.n) | 0], -z / 2, -z / 2, z, z); ctx.restore();
+        if (l.ground) {                                     // a fallen ivy leaf, lying flat on the cobbles (squashed by perspective)
+          const IV = ivySprites(), z = l.s * 1.5;
+          ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.scale(1, .6); ctx.globalAlpha = .9;
+          ctx.drawImage(IV[(hash(i, 5) * IV.length) | 0], -z / 2, -z / 2, z, z); ctx.restore();
         } else drawLeaf(ctx, l.x, l.y, l.s, l.rot, col, shade, i % 3, i);   // Boston ivy on the walls
       });
       // Dusk settles over the ivy too
       ctx.globalCompositeOperation = "source-atop";
-      ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, "rgba(10,14,30,.35)"], [.5, "rgba(10,14,30,.08)"], [1, "rgba(10,14,30,.2)"]]); ctx.fillRect(0, 0, G.ref, G.h);
+      ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, "rgba(10,14,30,.22)"], [.5, "rgba(10,14,30,.06)"], [1, "rgba(10,14,30,.16)"]]); ctx.fillRect(0, 0, G.ref, G.h);
       ctx.globalCompositeOperation = "source-over";
       paintLanterns(ctx);
     }
@@ -1211,15 +1231,8 @@
     /* ---------- Falling leaves (from the ivy) on a light breeze ---------- */
     const sprites = [];
     function makeSprites() {
-      const SP = leafSprites();
       sprites.length = 0;
-      if (SP) { try { SP[2].forEach(c => sprites.push(c.toDataURL())); return; } catch { sprites.length = 0; } }   // the real maple leaves
-      S.leaves.forEach((hx, i) => {                          // fallback: painted leaves in the season's colours
-        const c = document.createElement("canvas"); c.width = c.height = 64;
-        const x = c.getContext("2d"); x.translate(32, 56);
-        drawLeaf(x, 0, 0, 50, 0, hex(hx), 1, i % 3);
-        sprites.push(c.toDataURL());
-      });
+      ivySprites().forEach(c => sprites.push(c.toDataURL()));   // single red ivy leaves, like the ones on the wall
     }
     let inView = true;                                       // no leaves fall while the street is scrolled out of sight
     if ("IntersectionObserver" in window) new IntersectionObserver(([e]) => (inView = e.isIntersecting)).observe(root);
