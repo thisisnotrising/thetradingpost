@@ -549,21 +549,37 @@
        the chains and the board swing from it.
        ============================================================ */
     function hangingSign(words) {
-      // Split the words into two lines of about equal length: "THIS IS NOT RISING" -> "THIS IS" / "NOT RISING"
+      // Split the words into two lines of about equal length: "NOT RISING" -> "NOT" / "RISING"
       const parts = (words || "").trim().split(/\s+/);
       const mid = Math.ceil(parts.length / 2);
       const top = parts.slice(0, mid).join(" "), bottom = parts.slice(mid).join(" ");
-      // two short chains from the bracket to the board, four links each
-      const chainX = [168, 472], links = chainX.map(x => [213, 231, 249, 267].map((y, i) => `<ellipse cx="${x}" cy="${y}" rx="${i % 2 ? 5 : 8}" ry="${i % 2 ? 8 : 5}" fill="none" stroke="#242019" stroke-width="3"/>`).join("")).join("");
-      // a white enamelled metal sign: white board, black rim and a thin inner line, black lettering
+      // A laser-cut steel sign (her "Nightingale's Retweet" reference): a shaped plate with a hammered pewter
+      // finish; the letters and a thin line around the edge are cut right through, so the wall shows through them.
+      // The shape: square ends with scooped corners, a raised arch on top and a dropped arch underneath.
+      const plate = "M24 342 A18 18 0 0 0 42 324 L200 324 Q320 270 440 324 L598 324 A18 18 0 0 0 616 342 L616 594 A18 18 0 0 0 598 612 L440 612 Q320 660 200 612 L42 612 A18 18 0 0 0 24 594 Z";
+      const inner = "M40 356 A16 16 0 0 0 56 340 L202 340 Q320 288 438 340 L584 340 A16 16 0 0 0 600 356 L600 580 A16 16 0 0 0 584 596 L438 596 Q320 642 202 596 L56 596 A16 16 0 0 0 40 580 Z";
+      // two chains from the iron arm down to the plate, ten links each, the last one hooked through a hole drilled in the plate
+      const chainX = [168, 472], links = chainX.map(x => [159, 177, 195, 213, 231, 249, 267, 285, 303, 321].map((y, i) => `<ellipse cx="${x}" cy="${y}" rx="${i % 2 ? 5 : 8}" ry="${i % 2 ? 8 : 5}" fill="none" stroke="#242019" stroke-width="3"/>`).join("")).join("");
+      const letters = `font-family="Cinzel, 'Trajan Pro', Georgia, serif" font-weight="700" text-anchor="middle" fill="#000"`;
       return `<img class="nrsf-hs-bracket" src="${img("sign-bracket.webp")}" alt="">` +
-        `<svg class="nrsf-hs-board" viewBox="0 0 640 666" aria-hidden="true">` +
-        `<ellipse cx="320" cy="648" rx="300" ry="16" fill="rgba(0,0,0,.4)"/>${links}` +
-        `<rect x="16" y="284" width="608" height="350" rx="6" fill="#f7f5ef"/>` +
-        `<rect x="16" y="284" width="608" height="350" rx="6" fill="none" stroke="#141414" stroke-width="7"/>` +
-        `<rect x="30" y="298" width="580" height="322" fill="none" stroke="#141414" stroke-width="1.6"/>` +
-        `<text x="320" y="420" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="118" letter-spacing="8" fill="#141414">${esc(top.toUpperCase())}</text>` +
-        `<text x="320" y="572" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="94" letter-spacing="4" fill="#141414">${esc(bottom.toUpperCase())}</text>` +
+        `<svg class="nrsf-hs-board" viewBox="0 0 640 666" aria-hidden="true"><defs>` +
+        // the metal: lit from the top left, darker toward the bottom
+        `<linearGradient id="nrsf-hs-steel" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#5f5a55"/><stop offset=".5" stop-color="#433f3b"/><stop offset="1" stop-color="#2a2725"/></linearGradient>` +
+        // hammered finish: a bumpy surface lit from one side, multiplied onto the metal, plus a fine speckle
+        `<filter id="nrsf-hs-hammer" x="0" y="0" width="100%" height="100%"><feTurbulence type="turbulence" baseFrequency=".07" numOctaves="2" seed="4" result="bump"/>` +
+        `<feDiffuseLighting in="bump" surfaceScale="2.2" lighting-color="#fff" result="lit"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting>` +
+        `<feComposite in="SourceGraphic" in2="lit" operator="arithmetic" k1="1.15" k2="0" k3="0" k4="0" result="hammered"/>` +
+        `<feTurbulence type="fractalNoise" baseFrequency="1.3" numOctaves="1" seed="9" result="grain"/><feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.1" result="specks"/>` +
+        `<feComposite in="specks" in2="hammered" operator="atop" result="speckled"/><feComposite in="speckled" in2="SourceGraphic" operator="in"/></filter>` +
+        // the cutting pattern: white = metal stays, black = cut away
+        `<mask id="nrsf-hs-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="640" height="666"><path d="${plate}" fill="#fff"/>` +
+        `<path d="${inner}" fill="none" stroke="#000" stroke-width="4.5"/>` +
+        `<circle cx="168" cy="334" r="6" fill="#000"/><circle cx="472" cy="334" r="6" fill="#000"/>` +
+        `<text x="320" y="446" font-size="112" letter-spacing="10" ${letters}>${esc(top.toUpperCase())}</text>` +
+        `<text x="320" y="560" font-size="96" letter-spacing="6" textLength="${bottom.length > 6 ? 500 : bottom.length * 82}" lengthAdjust="spacingAndGlyphs" ${letters}>${esc(bottom.toUpperCase())}</text></mask></defs>` +
+        `<g mask="url(#nrsf-hs-cut)"><path d="${plate}" fill="url(#nrsf-hs-steel)" filter="url(#nrsf-hs-hammer)"/>` +
+        `<path d="${plate}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="3"/></g>` +   // a bright rim where the cut edge catches the light
+        links +                     // chains drawn last, so the bottom link sits in its hole in front of the plate
         `</svg>`;
     }
     function pumpkin(ctx, cx, by, w, tilt) {
