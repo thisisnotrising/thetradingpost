@@ -26,7 +26,7 @@
     return {
       ref: 1200, h: 1120, ground: 1036, shopTop: 624,
       upperWin: { x: 470, y: 84, w: 260, h: 214 }, lintel: { x: 458, y: 62, w: 284, h: 22 }, wsill: { x: 456, y: 298, w: 288, h: 14 },
-      sign: { x: 800, y: 110, w: 200 }, marquee: { x: 276, y: 334, w: 648, h: 148 },
+      sign: { x: 800, y: 110, w: 100 }, marquee: { x: 276, y: 334, w: 648, h: 148 },
       cornice: { x: 12, y: 496, w: 1176, h: 32 }, fascia: { x: 34, y: 528, w: 1132, h: 96 },
       corbels: [{ x: 4, y: 508, w: 44, h: 140 }, { x: 1152, y: 508, w: 44, h: 140 }],
       piers: [{ x: 22, w: 58 }, { x: 230, w: 42 }, { x: 928, w: 42 }, { x: 1120, w: 58 }],
@@ -37,7 +37,7 @@
       steps: [{ x: 68, y: 1036, w: 174, h: 20 }, { x: 958, y: 1036, w: 174, h: 20 }],
       neon: doors[0].transom, num: doors[1].transom,
       pumpkins: { x: 1004, y: 1037, w: 116 },
-      floorSign: { x: 236, y: 886, w: 128 },    // poster-sized A-frame on the pavement, in front of the poster window (clear of the red door)
+      floorSign: { x: 210, y: 922, w: 82 },     // A-frame on the pavement in front of the pier between the red door and the poster window
       awning: { x0: 34, x1: 1166, wall: 624, front: 650, spread: .02, lamps: [251, 600, 949] },
       ivy: { side: 84, canopy: 64, droop: 170, keepClear: [{ x: 452, y: 56, w: 296, h: 262 }, { x: 272, y: 330, w: 656, h: 156 }, { x: 790, y: 100, w: 220, h: 220 }, { x: 84, y: 600, w: 1032, h: 520 }] }
     };
@@ -53,7 +53,7 @@
     return {
       ref: 400, h: 1060, ground: 888, shopTop: 530, phone: true,   // h 992: a deeper pavement so the floor sign stands clear of the doors and windows
       upperWin: { x: 75, y: 104, w: 150, h: 176 }, lintel: { x: 67, y: 86, w: 166, h: 18 }, wsill: { x: 66, y: 280, w: 168, h: 12 },
-      sign: { x: 236, y: 120, w: 150 }, marquee: { x: 10, y: 306, w: 380, h: 118 },
+      sign: { x: 236, y: 120, w: 75 }, marquee: { x: 10, y: 306, w: 380, h: 118 },
       cornice: { x: -4, y: 436, w: 408, h: 22 }, fascia: { x: 6, y: 458, w: 388, h: 72 },
       corbels: [{ x: -8, y: 448, w: 20, h: 100 }, { x: 388, y: 448, w: 20, h: 100 }],
       piers: [{ x: 90, w: 8 }, { x: 302, w: 8 }],
