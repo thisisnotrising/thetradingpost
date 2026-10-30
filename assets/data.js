@@ -305,9 +305,9 @@ window.NRSF = {
   SEASON: "auto",
   SEASONS: {
     fall: {
-      // Colours of the Boston ivy painted on the walls. (The leaves that fall and lie on the
-      // cobbles are real maple leaves cut from your trail photos: img/leaves.webp.)
-      leaves: ["#9b1a1a", "#b8241c", "#c8331f", "#7c1420", "#d4561f", "#a0281a", "#e08a2c", "#8a2a16", "#c23a24", "#6f7a2e"],
+      // Colours of the Boston ivy: the leaves on the walls, the ones lying on the cobbles and the ones falling.
+      // Crimson to plum-red, picked from your red-ivy photo.
+      leaves: ["#c41a2c", "#d62a3a", "#a8182a", "#cc2c3a", "#e2365a", "#8f2448", "#b81c3a", "#851432", "#d6343f", "#a82850"],
       falling: true,
       pumpkins: false       // the white pumpkins on the step (true = show them)
     }
