@@ -301,7 +301,7 @@
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
         <g fill="#f4f1ea" text-anchor="middle">
           <text x="50" y="34" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="6.2" letter-spacing=".9">${esc((top || "").toUpperCase())}</text>
-          <text x="50" y="64" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="30" letter-spacing="1">${esc(big || "")}</text>
+          <text x="50" y="62" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="26" textLength="54" lengthAdjust="spacingAndGlyphs">${esc(big || "")}</text>
           <path d="M28 71 H72" stroke="#f4f1ea" stroke-width=".6"/>
         </g>
         <defs><clipPath id="nrsf-fs-clip"><rect x="21" y="78" width="58" height="38" rx="1"/></clipPath></defs>
