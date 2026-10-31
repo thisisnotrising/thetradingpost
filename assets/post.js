@@ -651,7 +651,7 @@
       const pw = Math.min(free1 - free0, 2.2), ph = 0.52, sign = onWall(make(NE.link ? "a" : "div", "nrp-pink", back,
         `<span class="nrp-pink-wash"></span>${NE.lines.map(l => `<span class="nrp-pink-line" data-t="${esc(l)}">${esc(l)}</span>`).join("")}`), { x: (Wm - pw) / 2, y: barH + 0.1, w: pw, h: ph });   // smaller (Oct 2026), centred on the café wall
       sign.style.setProperty("--fs", Math.min(ph / NE.lines.length * .85, pw / Math.max(...NE.lines.map(l => l.length)) * 2.7) * u + "px");   // as big as fits (this script's letters are narrow)
-      if (NE.link) { sign.href = NE.link; sign.target = "_blank"; sign.rel = "noopener"; sign.setAttribute("aria-label", NE.lines.join(" ") + " (Buy Me a Coffee, opens in a new tab)"); sign.classList.add("nrp-hot"); sign.dataset.tip = "Buy me a coffee"; }
+      if (NE.link) { sign.href = NE.link; sign.target = "_blank"; sign.rel = "noopener"; sign.setAttribute("aria-label", NE.lines.join(" ") + " (opens in a new tab)"); sign.classList.add("nrp-hot"); sign.dataset.tip = "Buy me a cosmo"; }
       else sign.setAttribute("aria-label", NE.lines.join(" "));
     }
 
@@ -828,7 +828,7 @@
     // 3.4 to 4.1 (Oct 31), a shorter rod, so the blades sit higher, above the bar and clear of the lounge's pendant.
     // FAN_Z = where it hangs, front to back (0 = the door, 1 = the café): forward enough that, seen from the door,
     // it floats above the NEBULA cafe sign instead of across it, and (Oct 31) from the landing view up high it hangs
-    // below the "buy me a coffee" neon instead of across it.
+    // below the "buy me a cosmo" neon instead of across it.
     {
       const FAN_SPAN = narrow ? 2.7 : 3.4, FAN_Y = 4.1, FAN_Z = narrow ? .22 : .1, ridge = HM + roofH(Wm / 2), h = ridge - FAN_Y;
       const fan = stand(add("nrp-fan", `<i class="nrp-fan-rod"></i><div class="nrp-fan-blades"><div class="nrp-fan-spin">${"<b></b>".repeat(6)}</div></div><i class="nrp-fan-motor"></i>`),

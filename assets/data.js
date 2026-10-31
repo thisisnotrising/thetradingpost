@@ -365,7 +365,7 @@ window.NRPOST = {
   /* NEBULA CAFE's neon, on the front of the stone bar: the words (one line each) and where it leads.
      Leave "link" as "" for a sign that isn't clickable. */
   NEON: {
-    lines: ["buy me a coffee"],
+    lines: ["buy me a cosmo"],
     link: "https://buymeacoffee.com/thisisnotrising"
   },
 
