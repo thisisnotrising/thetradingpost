@@ -840,7 +840,7 @@
 
       const target = [...sizer.querySelectorAll(".stf__item")].find(p => p.style.display !== "none");
       const to = target ? target.getBoundingClientRect() : sizer.getBoundingClientRect();
-      if (reduceMotion || !target) { reader.style.opacity = "1"; btnClose.focus(); peek(); return; }
+      if (reduceMotion || !target) { reader.style.opacity = "1"; btnClose.focus(); return; }
 
       const flyer = document.createElement("img");
       flyer.className = "nrns-flyer";
@@ -860,18 +860,27 @@
       peek();
     }
 
-    /* Phones show one page at a time, so the cover alone looks like a still picture.
-       peek() turns the cover by itself a moment after the magazine lands, so the
-       very first tap shows people it's a flipbook. Wider screens (two-page spreads)
-       are left as they are. Reduced motion: jump to page 2 with no page-turn. */
+    /* Phones show one page at a time, so the cover alone can look like a still picture.
+       peek() keeps the cover where it landed, in the middle of the screen, and nudges:
+       its bottom-right corner peels up a little and settles back, twice, like a page
+       asking to be turned. The peel is a small drawn corner (.peel in newsstand.css)
+       laid over the cover, so it never moves the magazine itself. It goes away the
+       moment the reader touches the magazine or closes it. Wider screens (two-page
+       spreads) are left as they are, and so are devices set to reduce motion. */
     function peek() {
-      if (pageSize().spread || !book) return;
-      const b = book;
-      setTimeout(() => {
-        if (book !== b || reader.hidden || b.getCurrentPageIndex() !== 0) return;   // closed or already turned? leave it
-        if (reduceMotion) { b.turnToNextPage(); updateCounter(b.getCurrentPageIndex()); }
-        else b.flipNext();
-      }, 500);
+      if (pageSize().spread || !book || reduceMotion) return;
+      const page = [...sizer.querySelectorAll(".stf__item")].find(p => p.style.display !== "none");
+      if (!page) return;
+      const r = page.getBoundingClientRect(), s = stage.getBoundingClientRect();
+      const peel = document.createElement("span");
+      peel.className = "peel";
+      peel.setAttribute("aria-hidden", "true");
+      peel.style.left = (r.right - s.left) + "px";            // pinned to the cover's bottom-right corner
+      peel.style.top = (r.bottom - s.top) + "px";
+      stage.appendChild(peel);
+      const gone = () => peel.remove();
+      peel.addEventListener("animationend", gone);
+      stage.addEventListener("pointerdown", gone, { once: true });   // they touched it: stop nudging
     }
 
     function closeReader() {
@@ -881,6 +890,7 @@
         document.documentElement.style.overflow = "";
         if (book) { book.destroy(); book = null; }
         sizer.innerHTML = "";
+        stage.querySelectorAll(".peel").forEach(p => p.remove());   // a nudge still showing? take it away too
         if (openBtn) {
           openBtn.classList.remove("lifted");
           if (!reduceMotion) openBtn.animate([{ transform: "perspective(900px) translateY(-30px)" }, { transform: "perspective(900px) rotateX(6deg)" }], { duration: 420, easing: "cubic-bezier(.3,1.4,.5,1)" });
