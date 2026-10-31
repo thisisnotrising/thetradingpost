@@ -144,9 +144,6 @@
   box-shadow: inset 0 0 calc(var(--u) * .05) rgba(0,0,0,.4); }
 .nrp-galword { display: grid; place-items: center; color: #f1ece2; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; letter-spacing: .16em; line-height: 1; opacity: .92; pointer-events: none;
   text-shadow: 0 calc(var(--u) * .02) calc(var(--u) * .05) rgba(0,0,0,.7); }
-.nrp-wishword { color: #111; font-family: Impact, Anton, "Arial Narrow Bold", sans-serif; font-weight: 400; letter-spacing: .03em; opacity: .95;
-  text-shadow: 0 calc(var(--u) * .01) calc(var(--u) * .02) rgba(0,0,0,.25); white-space: nowrap; text-decoration: none; pointer-events: auto; }
-/* WISHING / WALL: black Impact on the white brick (Anton, a free look-alike, on phones that don't have Impact) */
 
 /* ---------- THE FLOOR ---------- */
 /* Sun through the glass: a bright wash, striped by the shadows of the mullions */
@@ -388,13 +385,9 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
 .nrp-b-leg { transform-origin: 50% 0; background: linear-gradient(90deg, #3f2414, #8c5a35 40%, #6b4126 70%, #3a2112);
   clip-path: polygon(0 0, 100% 0, 72% 100%, 28% 100%); }
 
-/* ---------- THE WISHING WALL (laid out by wishingWall() in post.js) ----------
+/* ---------- THE WISHING WALL: its fonts ----------
    The six spray-paint and marker fonts, kept in assets/fonts/wall (free fonts, trimmed to plain letters; see LICENSES.txt).
-   .nrp-wish   one wish, painted on the brick in solid black (--ink). Every letter also gets a black edge painted round
-               it (-webkit-text-stroke) to make it bolder: --bold is how wide, worked out by thicken() in post.js so even
-               the thin handwriting (Reenie Beanie, Rock Salt) is at least as thick as WHOLENESS
-   b           a word painted bigger (written **like this** in data.js)
-   .by         the signature underneath: "— Name, Human" (its own edge width, --bold-by, because it is a different size) */
+   The wishes themselves are laid out by wallLayout() in post.js: see THE WISHING WALL, UP CLOSE below. */
 @font-face { font-family: "Permanent Marker"; src: url(fonts/wall/permanent-marker.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Sedgwick Ave Display"; src: url(fonts/wall/sedgwick-ave-display.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Rock Salt"; src: url(fonts/wall/rock-salt.woff2) format("woff2"); font-display: swap; }
@@ -402,18 +395,13 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
 @font-face { font-family: "Black Ops One"; src: url(fonts/wall/black-ops-one.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Reenie Beanie"; src: url(fonts/wall/reenie-beanie.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Anton"; src: url(fonts/wall/anton.woff2) format("woff2"); font-display: swap; }   /* the stand-in for Impact */
-.nrp-wish { width: max-content; padding: .06em 0; color: var(--ink); -webkit-text-stroke: var(--bold, 0px) var(--ink);
-  letter-spacing: calc(var(--bold, 0px) * .6);   /* the fattened letters get a little more room, so they don't run together */
-  pointer-events: none; transform-origin: 50% 50%; }
-.nrp-wish b { font-weight: inherit; font-size: calc(var(--bold-k, 1.6) * 1em); line-height: .95; }
-.nrp-wish .by { display: block; margin-top: .25em; font-size: var(--by); -webkit-text-stroke-width: var(--bold-by, 0px);
-  letter-spacing: calc(var(--bold-by, 0px) * .6); white-space: nowrap; }
 
-/* ---------- THE WISHING WALL, UP CLOSE (openWall() and wallLayout() in post.js) ----------
+/* ---------- THE WISHING WALL, in the room and UP CLOSE (wallLayout(), paintRoomWall() and openWall() in post.js) ----------
    .nrwv         the dark room it opens into
    .nrwv-scroll  lets you move around the wall when it is zoomed in
    .nrwv-frame   the space the wall takes up on screen; click it to zoom in or out
    .nrwv-wall    the wall, painted for reading (the same size as in the room)
+   .nrp-wishwall a copy of it, painted on the room's left wall
    .nrwv-block   one wish's block (no frame: the gaps between blocks are bare wall)
    .nrwv-in      the words inside it; ".up" = turned on its side, reading upward
    .nrwv-words   the wish itself (**word** painted bigger), .nrwv-name the "— Name, Human" underneath
@@ -431,6 +419,9 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
 .nrwv-wait { margin: 0; padding: 40px; color: #8d8a86; font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; }
 .nrwv-wall { position: absolute; overflow: hidden; transform-origin: 0 0; background-color: #f2efe9; }
 .nrwv-wall > * { position: absolute; }
+.nrp-wishwall { background: none; pointer-events: none; opacity: 0; transition: opacity .8s ease; }   /* the same wall, painted in the room: fades in */
+.nrp-wishwall.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .nrp-wishwall { transition: none; } }
 .nrwv-probe { white-space: nowrap; visibility: hidden; }
 .nrwv-in { position: absolute; left: 0; display: flex; flex-direction: column; justify-content: center; color: #111; }
 .nrwv-in.up { transform-origin: 0 0; transform: rotate(-90deg); }

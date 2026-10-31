@@ -366,19 +366,16 @@ window.NRPOST = {
     link: "https://buymeacoffee.com/thisisnotrising"
   },
 
-  /* THE WISHING WALL. Every cover feature's answer to the question below, spray-painted on the white brick on
-     both sides of the cowboy. One line each, in their own words, signed "Name, Human".
-     side: "L" = between WISHING and the cowboy, "R" = between the cowboy and WALL. The wishes on each side are laid
-       in rows in this order, top to bottom, and sized up together until they fill the side (post.js, wishingWall()).
+  /* THE WISHING WALL. Every cover feature's answer to the question below, spray-painted on the white brick around
+     the floor-to-ceiling cowboy mural. One line each, in their own words, signed "Name, Human". Each wish gets its
+     own block, laid out by itself (post.js, wallLayout()): a new wish just needs a new line here.
+     name, wish: the words.   **word** = paint that word bigger.
      font: Permanent Marker, Sedgwick Ave Display, Rock Salt, Bebas Neue, Black Ops One or Reenie Beanie
        (saved in assets/fonts/wall, so they always load).
-     size: how big, compared with the others (a capital is roughly this many metres tall before the wall is filled).
-     w: how wide the lines may run before wrapping, in metres.   rot: tilt in degrees (keep it small).
      case: "up" = ALL CAPITALS, "low" = all lower case, leave it out = as written.
-     **word** = paint that word bigger.   ink: the paint colour (keep it black, "#111", so every wish reads clearly).
-     Every wish and name is painted bold and black. In the popup (the wall up close) each wish gets its own block,
-     laid out around the floor-to-ceiling cowboy (post.js, wallLayout()); a new wish finds its place by itself.
-     New issue? Copy a line, change the name and the words, and pick a side. */
+     (side, size, w, rot and ink were for the old layout; they're kept, but the wall no longer uses them:
+      every wish is painted solid black, and the layout decides where it goes and how big.)
+     New issue? Copy a line and change the name, the words and, if you like, the font. */
   QUESTION: "If you could manifest a brighter tomorrow, what would be different by 2030?",
   WISHES: [
     { side: "L", name: "Jennifer Hong",          wish: "I don’t wish people happiness, I wish them **wholeness.**", font: "Sedgwick Ave Display", size: .26, w: 2.6, rot: -3, ink: "#111" },

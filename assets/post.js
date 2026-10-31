@@ -425,17 +425,9 @@
     gal.style.left = lo + "px";
   }
 
-  /* THE WISHING WALL: every cover feature's wish (data.js, WISHES), spray-painted on the white brick.
-     Each side is filled like a paragraph:
-       1. the wishes for that side, in list order, are laid in rows, as many to a row as fit across;
-       2. all the lettering on that side is sized up together until the rows exactly fill it, top to bottom
-          (each try halves the range left to search, so 14 tries find the size);
-       3. the rows are spread evenly down the side and the wishes evenly along each row, each nudged up or down a
-          little (the same nudge every visit) so it reads as painted by many hands, not typeset.
-     Sizes are measured on the flat wall, before it is turned into 3D, so they come out exact.
-     A wish is: its words (**word** painted bigger), then "— Name, Human" underneath.
-     (Click it and the popup paints this same stretch of wall up close, floor to ceiling, with the cowboy running
-      the full height and the wishes laid out in blocks around him: see wallLayout() in STEP 6A.) */
+  /* THE WISHING WALL: every cover feature's wish (data.js, WISHES), spray-painted on the white brick around the
+     cowboy mural, from the Newsstand to the corner by the café, floor to ceiling. It is laid out by wallLayout()
+     (STEP 6A); the same painted wall appears in the room and, up close, in the popup. These are its lettering tools. */
 
   // THE SIX WALL FONTS, MEASURED (Oct 2026), so every wish can be made as easy to read as WHOLENESS.
   // Each number is a share of the font size:
@@ -461,66 +453,6 @@
   const BOLD = .13, BOLD_MIN = .012;
   const thicken = (q, fs, minStem = 0) => Math.max(BOLD_MIN * fs, Math.max(BOLD * fs, minStem) - fontOf(q).stem * fs);
   const caseOf = (t, c) => c === "up" ? t.toUpperCase() : c === "low" ? t.toLowerCase() : t;
-  // ONE WISH, painted (still unplaced). fs = the size of its words, byFs = the size of "— Name, Human",
-  // wrap = how wide its lines may run, minStem = the thinnest stroke allowed. All in pixels.
-  function paintWish(parent, q, fs, byFs, wrap, minStem = 0) {
-    const e = make("div", "nrp-wish", parent,
-      esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") + `<span class="by">— ${esc(q.name)}, Human</span>`);
-    Object.assign(e.style, { font: `${fs}px/${fontOf(q).lh} "${q.font}", "Permanent Marker", cursive`, wordSpacing: fontOf(q).ws + "em", maxWidth: wrap + "px" });
-    e.style.setProperty("--ink", q.ink || "#111");
-    e.style.setProperty("--by", byFs + "px");
-    e.style.setProperty("--bold", thicken(q, fs, minStem) + "px");
-    e.style.setProperty("--bold-by", thicken(q, byFs, minStem) + "px");
-    return e;
-  }
-  // A tilted wish takes up a little more room: ew × eh is the wish itself, bw × bh the box it fills once tilted.
-  const sized = (q, ew, eh) => { const t = Math.abs((q.rot || 0) * Math.PI / 180); return { ew, eh, bw: ew * Math.cos(t) + eh * Math.sin(t), bh: ew * Math.sin(t) + eh * Math.cos(t) }; };
-  const WISH_GAPX = .14, WISH_GAPY = .1;
-  function wishingWall(wall, zones) {
-    const list = DATA.WISHES || [];
-    const paint = (q, scale) => {                                    // one wish, painted at this scale (still unplaced)
-      const sz = q.size * scale * u;
-      return paintWish(wall, q, sz, Math.max(.07 * u, sz * .42), q.w * scale / .8 * u);
-    };
-    // MEASURING, FAST (Oct 2026). A wish's size grows in step with the lettering (its words and the width it may
-    // wrap to both scale together), so each wish is measured ONCE, at the size it has at scale 1, and every other
-    // size is worked out by multiplying. All the wishes on a side are put on the wall together and read together,
-    // so the browser lays the page out once instead of once per wish. (It used to measure every wish again at each
-    // of 14 trial sizes, which was most of the time the room took to appear.)
-    let base = new Map(), baseScale = 1;
-    const measureAll = (side, scale) => {                            // measure a whole side at this scale, in one go
-      const els = side.map(q => paint(q, scale)), dims = els.map(e => [e.offsetWidth / u, e.offsetHeight / u]);
-      els.forEach(e => e.remove()); base = new Map(side.map((q, i) => [q, dims[i]])); baseScale = scale;
-    };
-    const measure = (q, scale) => { const [w0, h0] = base.get(q), k = scale / baseScale; return sized(q, w0 * k, h0 * k); };
-    const rowsFor = (side, scale, W) => { const rows = []; let row = null;
-      side.forEach(q => { const m = measure(q, scale);
-        if (!row || row.w + WISH_GAPX + m.bw > W) rows.push(row = { items: [], w: -WISH_GAPX, h: 0 });
-        row.items.push({ q, m }); row.w += WISH_GAPX + m.bw; row.h = Math.max(row.h, m.bh); });
-      return rows; };
-    const tall = rs => rs.reduce((t, r) => t + r.h, 0) + WISH_GAPY * (rs.length - 1);
-    zones.forEach((z, zi) => {
-      const side = list.filter(q => (q.side || (list.indexOf(q) % 2 ? "R" : "L")) === (zi ? "R" : "L")), W = z.x1 - z.x0, H = z.y1 - z.y0;
-      if (!side.length || W <= .5) return;
-      measureAll(side, 1);
-      let lo = .2, hi = 1.6;
-      for (let k = 0; k < 14; k++) { const mid = (lo + hi) / 2; if (tall(rowsFor(side, mid, W)) <= H) lo = mid; else hi = mid; }
-      // check the chosen size for real (the small "— Name, Human" line doesn't shrink below a minimum, so the
-      // multiplying can be a hair off); if it overflows, step down a little until it fits
-      for (let k = 0; k < 4; k++) { measureAll(side, lo); if (tall(rowsFor(side, lo, W)) <= H) break; lo *= .97; }
-      const rows = rowsFor(side, lo, W), rnd = seeded(2030 + zi), slackY = (H - tall(rows)) / (rows.length + 1);
-      let top = z.y1 - slackY;
-      rows.forEach(row => {
-        const slackX = (W - row.w) / (row.items.length + 1); let x = z.x0 + slackX;
-        row.items.forEach(({ q, m }) => {
-          const cx = x + m.bw / 2, cy = top - row.h / 2 + (rnd() - .5) * (row.h - m.bh), e = paint(q, lo);
-          Object.assign(e.style, { left: ((cx - m.ew / 2) * u) + "px", top: ((HM - cy - m.eh / 2) * u) + "px", transform: `rotate(${q.rot || 0}deg)` });
-          x += m.bw + slackX;
-        });
-        top -= row.h + WISH_GAPY + slackY;
-      });
-    });
-  }
 
   /* ================================================================
      STEP 4 · THE DRAWINGS (little SVG pictures, in centimetres)
@@ -732,29 +664,15 @@
     const news = onWall(make("a", "nrp-news nrp-hot", left), { x: newsX, y: 0, w: newsW, h: HM });
     news.dataset.room = "newsstand"; news.dataset.tip = "Newsstand"; news.setAttribute("aria-label", "The Newsstand: every NOT RISING cover");
     const kio = kiosk(news, newsW * u);
-    // THE GRAFFITI: your stencil (the cowboy with the rifle), lifted off your photo and sprayed straight onto
-    // the painted brick. It is exactly as tall as the Newsstand (same bottom, same top), between the two words.
-    // WISHING [the mural] WALL: the two words sit on the floor line in the same lettering, size and height as
-    // GALLERY across the room (black here, on the white brick), and the mural fills the space between them.
-    const wordFs = WORD_FS * u;                                                            // the same size as GALLERY
-    const word = (txt, x) => { const el = onWall(make("a", "nrp-galword nrp-wishword nrp-hot", left, txt), { x, y: 0.12, w: 1, h: 1.1 });
-      el.style.fontSize = wordFs + "px"; el.style.width = "auto"; el.dataset.room = "wishingWall"; el.dataset.tip = "Wishing Wall"; el.setAttribute("aria-label", "The Wishing Wall"); return el; };
-    const gapW = 0.25, newsEnd = newsX + newsW;                                          // gapW = the space either side of each word
-    const w1 = word("WISHING", newsEnd + gapW), w1w = w1.offsetWidth / u;                 // measure each word once it is on the wall
-    const w2 = word("WALL", 0), w2w = w2.offsetWidth / u;
-    const artX = newsEnd + gapW + w1w + gapW, artH = kio.height, artW = Dm - 0.08 - gapW - w2w - gapW - artX;
-    const sw = Math.min(artW, artH * 768 / 1000), sh = sw * 1000 / 768;                  // 768 x 1000 = the stencil picture's shape
-    const art = onWall(make("div", "nrp-graffiti", left, `<img src="${IMG}post/stencil.webp" alt="Stencil graffiti of a cowboy holding a rifle">`),
-      { x: artX + (artW - sw) / 2, y: kio.bottom + (artH - sh), w: sw, h: sh });          // its top lines up with the Newsstand's top
-    w2.style.left = ((artX + (artW + sw) / 2 + gapW) * u) + "px";                         // WALL right after the mural
-    // THE WISHES, either side of the cowboy: from just past WISHING to a little inside the stencil's left edge (the
-    // picture's edges are mostly bare wall), and from a little inside its right edge to just before the wall's end.
-    // Top to bottom: from just above the WISHING / WALL lettering up to the planters.
-    const mx0 = artX + (artW - sw) / 2, mx1 = mx0 + sw, wy0 = 1.26, wy1 = HM - TILE.planter.hm - .06;
-    const wz = [{ x0: newsEnd + .12, x1: mx0 + .53, y0: wy0, y1: wy1 }, { x0: mx1 - .48, x1: Dm - .06, y0: wy0, y1: wy1 }];
-    wishingWall(left, wz);
-    // the whole painted stretch is clickable (an invisible panel over it): it opens the wall full screen
-    const hot = onWall(make("a", "nrp-wallhot nrp-hot", left), { x: wz[0].x0, y: wy0, w: wz[1].x1 - wz[0].x0, h: wy1 - wy0 });
+    // THE WISHING WALL: everything from the Newsstand to the corner by the café, floor to ceiling. wallLayout()
+    // (STEP 6A) paints it: the cowboy mural running the full height, every wish in its own block around him, and
+    // WISHING / WALL in Impact on the floor line. It takes about a second to work out, so it fades in just after
+    // the room appears; the popup shows the very same wall up close. The whole stretch is clickable (an invisible
+    // panel over it) and opens that popup.
+    const newsEnd = newsX + newsW;
+    SECTION = { x: newsEnd, w: Dm - newsEnd };
+    const hot = onWall(make("a", "nrp-wallhot nrp-hot", left), { x: SECTION.x, y: 0, w: SECTION.w, h: HM - TILE.planter.hm / 2 });
+    paintRoomWall(left, ++buildNo);
     hot.dataset.room = "wishingWall"; hot.dataset.tip = "Read the Wishing Wall"; hot.setAttribute("aria-label", "Open the Wishing Wall full screen");
     onWall(make("div", "nrp-wallshade", left), { x: 0, y: 0, w: Dm, h: HM });
 
@@ -987,7 +905,8 @@
      screen (so it never has to be worked out again).
      ================================================================ */
   const READ = {
-    width: 9.5,      // metres: as wide as the Wishing Wall section in the room (the Newsstand to the corner by the café)
+    width: 9.5,      // metres: the Wishing Wall section's width if the room hasn't been measured yet (it is
+                     // really the Newsstand's end to the corner by the café: 9.5 m on a computer, wider on a phone)
     height: 7.2,     // floor to ceiling, as in the room (HM)
     letter: .1,      // the first try at the smallest letters (a small letter's height; a capital's in ALL-CAPS wishes).
                      // It comes down 4% at a time until every wish fits; WHOLENESS's letters in the room are .14 m
@@ -1095,8 +1014,8 @@
   }
 
   // THE WHOLE LAYOUT. Returns the finished wall (an element, PX pixels to the metre) and its size.
-  async function wallLayout() {
-    const R = READ, W = R.width, list = DATA.WISHES || [], pause = () => new Promise(r => setTimeout(r, 0));
+  async function wallLayout(width) {
+    const R = READ, W = width || R.width, list = DATA.WISHES || [], pause = () => new Promise(r => setTimeout(r, 0));
     const stencil = await load(IMG + "post/stencil.webp"); if (!stencil) return null;
     await document.fonts.load('100px Impact, Anton').catch(() => {});
     const ink = stencilInk(stencil), AR = stencil.naturalWidth / stencil.naturalHeight;
@@ -1217,8 +1136,25 @@
     t.style.gap = (.06 * PX) + "px";
     return { el: wall, w: W * PX, h: H * PX, L };
   }
-  let wallReady = null;                                              // the layout, once it has been started
-  const prepareWall = () => (wallReady = wallReady || wallLayout());
+  // The layout for the wall as wide as the room's Wishing Wall section (SECTION, set by build()). Each width is
+  // worked out once and kept (a phone's room is longer than a computer's, so its section is wider).
+  let SECTION = null, buildNo = 0, wallReady = null;
+  const wallCache = new Map();
+  const prepareWall = () => { const w = +((SECTION && SECTION.w) || READ.width).toFixed(2);
+    if (!wallCache.has(w)) wallCache.set(w, wallLayout(w)); return (wallReady = wallCache.get(w)); };
+  // Paint the room's own wall: a copy of the laid-out wall (all but its ivy: the room has its own), placed on the
+  // left wall at the section and shrunk from 100 pixels to the metre to the room's scale, fading in.
+  function paintRoomWall(left, n) {
+    setTimeout(() => prepareWall().then(res => {
+      if (!res || n !== buildNo || !left.isConnected) return;       // (the room has been rebuilt since: skip)
+      const c = make("div", "nrwv-wall nrp-wishwall", null);
+      [...res.el.children].forEach(ch => { if (!ch.classList.contains("nrp-greens")) c.appendChild(ch.cloneNode(true)); });
+      Object.assign(c.style, { left: SECTION.x * u + "px", top: (HM - READ.height) * u + "px", width: res.w + "px", height: res.h + "px", transform: `scale(${u / PX})` });
+      c.style.setProperty("--bold-k", READ.bold);
+      left.insertBefore(c, left.querySelector(".nrp-wallhot"));
+      requestAnimationFrame(() => requestAnimationFrame(() => c.classList.add("on")));
+    }), 400);
+  }
 
   let wv = null, wvOpener = null, wvZoom = false;
   const coarse = matchMedia("(pointer: coarse)").matches;          // a touch screen (a phone or tablet)
@@ -1384,7 +1320,6 @@
     paintTextures();
     build();
     root.classList.add("ready");
-    setTimeout(prepareWall, 1500);   // lay out the Wishing Wall's popup while you look around (STEP 6A)
     if (!reduceMotion) root.classList.add("walk-in");
   });
   let t, lastW = innerWidth, lastH = innerHeight;
