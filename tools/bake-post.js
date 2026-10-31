@@ -34,7 +34,7 @@ const EYE_CAFE = 75;              // the café close-up's camera: 75% down = sta
 
 // While baking, hide everything that isn't the room itself. The new page puts its own back link,
 // scroll cue and the soft light and vignette on top, so those stay put on screen as you scroll.
-const HIDE = eye => `.nrp-back, .nrp-down, .nrp-toast, .nr-fs, .nrp-sun, .nrp-air { display: none !important; }
+const HIDE = eye => `.nrp-back, .nrp-down, .nrp-toast, .nrp-sun, .nrp-air { display: none !important; }
   html.from-light body::after { display: none !important; }
   .nrp-scene { perspective-origin: 50% ${eye}% !important; }`;
 

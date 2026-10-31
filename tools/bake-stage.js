@@ -137,7 +137,7 @@ const r4 = v => +v.toFixed(4);
       .nrp { height: auto !important; overflow: visible !important; }
       .nrp-scene { position: absolute !important; inset: auto !important; left: 0 !important; top: 0 !important; perspective: none !important; }
       .nrp-room { transform: none !important; translate: none !important; animation: none !important; left: 800px !important; top: 800px !important; }
-      .nrp-back, .nrp-down, .nrp-toast, .nr-fs, .nrp-sun, .nrp-air, .nrp::after { display: none !important; }
+      .nrp-back, .nrp-down, .nrp-toast, .nrp-sun, .nrp-air, .nrp::after { display: none !important; }
       html.from-light body::after { display: none !important; }
       .nrp-hot::after { display: none !important; }` });
     const MARGIN = 800;    // (the room is moved 800 px in from the corner, so cords and glows that reach above it fit)
@@ -200,7 +200,14 @@ const r4 = v => +v.toFixed(4);
         // THE FLOOR: its sparkle is a small picture that repeats (post/obsidian-floor.webp); only its light and shadows are photographed
         const { png, box } = await shoot(p.i, { floor: true });
         const file = `${set}/${wall}.webp`; kb += await encode(png, path.join(OUT, file), null, FLOOR_RES / u); n++;
-        S.walls[wall] = { bands: [{ img: file, x: 0, y: 0, w: r4(box.w / u), h: r4(box.h / u) }], style: toMetres(p.style, u), hot: [] };
+        // (Oct 31) the sparkle is noted as TILES, not as the slab's background: which picture, how big one tile is, and
+        // where the pattern starts (metres; read from the room's own floor style). post/index.html lays it as a grid of
+        // separate pictures, because a background would make a phone paint the whole tilted slab into memory.
+        const num = re => +((p.style.match(re) || [, 0])[1]) / u;
+        const url = (p.style.match(/url\("?([^")]+)"?\)/) || [])[1];
+        const tile = url && { img: url.replace(/^.*?\/img\//, ''), size: r4(num(/background-size:\s*(-?[\d.]+)px/)),
+          x: r4(num(/background-position:\s*(-?[\d.]+)px/)), y: r4(num(/background-position:\s*-?[\d.]+px\s+(-?[\d.]+)px/)) };
+        S.walls[wall] = { bands: [{ img: file, x: 0, y: 0, w: r4(box.w / u), h: r4(box.h / u) }], tile, hot: [] };
       } else {
         // A THING STANDING IN THE ROOM (a plant, a lamp, the bulbs, the lounge, the glass gable): photographed with room
         // around it (pad) so its glow isn't cut off, then stood back in place at its own depth
@@ -226,7 +233,8 @@ const r4 = v => +v.toFixed(4);
    Two sets: "wide" (computers, tablets on their side) and "narrow" (phones).
    Every size and position is in METRES; post/index.html multiplies by --u (pixels per metre) to fit the screen.
    room    the box: Wm wide, Dm deep, HM tall; the floor is laid in two slabs, the near one DNm deep
-   walls   back, left, right, floor, floor-near: each one or more pictures (bands) laid on that surface, and its clickable spots (hot)
+   walls   back, left, right, floor, floor-near: each one or more pictures (bands) laid on that surface, and its clickable spots (hot);
+           the floor slabs also have their sparkle (tile): one small picture, size metres square, repeating from x, y
    pieces  the glass roof slopes (panels) and everything standing in the room (pieces): a picture, where it stands (x, y),
            how big (w, h) and how far back from the door (z)
    live    the ceiling fan and the benches, kept as little 3D objects, with their look (css) */
