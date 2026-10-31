@@ -636,7 +636,7 @@
     const tabsEl = document.getElementById("nrns-tabs");
     const pocketsEl = document.getElementById("nrns-pockets");
     const monthYear = iso => new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    const { MEMOIRS = [], UPCOMING_NOTE = "Coming soon", RELEASE_MONTH = "December" } = window.NR;
+    const { MEMOIRS = [], UPCOMING_NOTE = "Coming soon", RELEASE_MONTH = "December", READ_ONLINE = "" } = window.NR;
     const noteEl = document.getElementById("nrns-note");
 
     // Tabs: every range that holds an issue, plus the next empty range (so readers
@@ -688,7 +688,7 @@
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
           : `<div class="ph"><div class="ph-mast">NOT RISING</div><div class="ph-date">ISSUE ${two(n)} | ${esc(monthYear(item.date).toUpperCase())}</div><div class="ph-photo"><span class="ph-name">${esc(item.name)}</span></div></div>`;
-        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read));   // item.read = the READ ONLINE link, if it has one
+        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read || READ_ONLINE));   // READ ONLINE button: the item's own "read" link, or the features page
         const stack = document.createElement("div");
         stack.className = "stack";
         el.append(stack, btn);
@@ -759,7 +759,7 @@
       });
 
       if (read) {                                                // a READ ONLINE button under the letters
-        const a = add("a", "mq-read", "Read online");
+        const a = add("a", "mq-read", "Read online \u2192");   // \u2192 = the arrow
         a.href = read;
         a.target = "_blank";                                     // opens in a new tab, so the Newsstand stays put
         a.rel = "noopener";

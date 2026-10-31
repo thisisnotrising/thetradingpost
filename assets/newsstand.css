@@ -364,14 +364,20 @@ body {
 }
 .nrns .toast .mq-x:hover, .nrns .toast .mq-x:focus-visible { opacity: 1; }
 
-/* READ ONLINE button under the letters: a small black plate with white letters, like a ticket-booth sign */
+/* READ ONLINE button: hangs just underneath the marquee, centered.
+   It sits outside the board, so it's positioned from the board's bottom edge:
+   100% = the board's height, + 18px for the black case, + 18px of gap.
+   left 50% + translateX(-50%) = dead center under the board.
+   White plate with black letters so it shows up against the dimmed page; hover flips the colours. */
 .nrns .toast .mq-read {
-  display: inline-block; margin-top: 14px; padding: 9px 18px;
-  background: #0d0d0d; color: #fff; text-decoration: none;
+  position: absolute; top: calc(100% + 18px + 18px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; padding: 10px 20px;
+  background: #fff; color: #0d0d0d; text-decoration: none;
   font: 600 clamp(13px, 1.8vw, 16px)/1 "Oswald", "Arimo", sans-serif; letter-spacing: .14em;
-  border: 1px solid #0d0d0d; transition: background .15s, color .15s;
+  border: 1px solid #fff; box-shadow: 0 0 24px rgba(255, 236, 190, .35);
+  transition: background .15s, color .15s;
 }
-.nrns .toast .mq-read:hover, .nrns .toast .mq-read:focus-visible { background: #fff; color: #0d0d0d; }
+.nrns .toast .mq-read:hover, .nrns .toast .mq-read:focus-visible { background: #0d0d0d; color: #fff; }
 
 /* Text for screen readers only (the tile letters are hidden from them) */
 .nrns .toast .mq-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

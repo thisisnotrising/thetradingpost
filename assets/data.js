@@ -57,6 +57,9 @@ window.NR = {
 
   /* Tabs on the rack. A tab only appears once it holds an issue. */
   TABS: [[1, 20], [21, 40], [41, 60]],      // 20 issues per tab
+  /* READ ONLINE button under every "coming soon" marquee: where it goes.
+     (A memoir with its own "read" link uses that one instead.) */
+  READ_ONLINE: "https://thisisnotrising.org/features/",
   /* The first tab with no issues yet still shows, with this placard on it. */
   UPCOMING_NOTE: "New issues arrive in 2027",
   /* Each issue's flip book opens on the day of this month that matches its number:
