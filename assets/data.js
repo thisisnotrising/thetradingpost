@@ -450,6 +450,33 @@ window.NRPOST = {
     { img: "post/gallery/life-exhibit/14-plant-window.webp",       ar: 1.33, alt: "A man in a hoodie at a café table by a sunny window, surrounded by tall leafy plants" },
     { img: "post/gallery/life-exhibit/15-mca-denver.webp",         ar: 1.34, crop: "100% 50%", alt: "Museum of Contemporary Art Denver, in white letters on a dark wooden wall beside a long ramp" },
     { img: "post/gallery/life-exhibit/16-window-blinds.webp",      ar: 1.03, alt: "A man in silhouette eating at a table in front of window blinds" }
-  ]
+  ],
+
+  /* THE POSTER ON THE BLACK WALL (Oct 31, 2026)
+     The storefront window's #1 NOT RISING MAGAZINE / BEST STORYTELLER poster (Poetic Drift by Joel Lymneos),
+     blown up and hung on the blank black brick behind the lounge: the stretch between the back corner (by the café)
+     and the word LIFE.
+     The pictures are the storefront poster itself, redrawn 4 times bigger (3456 x 4408 pixels) with its book cover
+     sharpened by an AI upscaler (tools/render-poster.js), so it stays crisp however big it's seen. Phones get a copy
+     half that size (still twice the original), which is plenty for a phone and easier on its memory.
+     It is hung live by post/index.html, on top of the wall's picture (not baked into it), so it keeps every pixel.
+     WHERE IT HANGS, in metres, for each room shape (wide = computers and tablets on their side, narrow = phones):
+       from, to      the stretch of black wall it fills, measured from the back corner toward the door.
+                     LIFE starts 6.63 m from the corner on wide screens (7.14 m on phones), so "to" stops 0.28 m
+                     short of it: the same gap the Gallery leaves between LIFE and its photos.
+       bottom, top   how high its bottom and top edges are off the floor. The room is 7.2 m tall and the ivy hangs
+                     about 1.5 m down from the top; the longest strands drape over the poster's top edge.
+     The poster is made as big as fits inside that box without stretching (it keeps its 864 : 1102 shape), and is
+     centred in it. To make it bigger or smaller, move these edges.
+     (It fills the full height under the ivy. It can't also fill the full length: the wall is wider than the poster's
+     shape allows, so it sits toward LIFE, the end you see best from the door; the far corner is hidden by the bulbs.) */
+  WALL_POSTER: {
+    img:   "post/poster-best-storyteller.webp",        // computers (3456 x 4408)
+    phone: "post/poster-best-storyteller-phone.webp",  // phones (1728 x 2204)
+    shape: 864 / 1102,                                  // width : height
+    alt: "A towering poster: #1 NOT RISING Magazine, Best Storyteller. New book by Joel Lymneos, Poetic Drift.",
+    wide:   { from: 1.9, to: 6.35, bottom: 0.25, top: 5.8 },
+    narrow: { from: 2.4, to: 6.86, bottom: 0.25, top: 5.8 }
+  }
 };
 
