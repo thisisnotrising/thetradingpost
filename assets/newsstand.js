@@ -840,7 +840,7 @@
 
       const target = [...sizer.querySelectorAll(".stf__item")].find(p => p.style.display !== "none");
       const to = target ? target.getBoundingClientRect() : sizer.getBoundingClientRect();
-      if (reduceMotion || !target) { reader.style.opacity = "1"; btnClose.focus(); return; }
+      if (reduceMotion || !target) { reader.style.opacity = "1"; btnClose.focus(); peek(); return; }
 
       const flyer = document.createElement("img");
       flyer.className = "nrns-flyer";
@@ -857,6 +857,21 @@
       reader.style.opacity = "1";
       flyer.remove();
       btnClose.focus();
+      peek();
+    }
+
+    /* Phones show one page at a time, so the cover alone looks like a still picture.
+       peek() turns the cover by itself a moment after the magazine lands, so the
+       very first tap shows people it's a flipbook. Wider screens (two-page spreads)
+       are left as they are. Reduced motion: jump to page 2 with no page-turn. */
+    function peek() {
+      if (pageSize().spread || !book) return;
+      const b = book;
+      setTimeout(() => {
+        if (book !== b || reader.hidden || b.getCurrentPageIndex() !== 0) return;   // closed or already turned? leave it
+        if (reduceMotion) { b.turnToNextPage(); updateCounter(b.getCurrentPageIndex()); }
+        else b.flipNext();
+      }, 500);
     }
 
     function closeReader() {
@@ -877,6 +892,20 @@
     }
 
     btnClose.addEventListener("click", closeReader);
+
+    /* "The Post →" (top right): onward into THE POST's inner room.
+       Until that room is published at /post/, the link shows a "coming soon"
+       marquee instead of a "page not found". It checks for the room on every
+       click, so the day /post/ goes live, the link just works. */
+    const postLink = document.getElementById("nrns-post");
+    if (postLink) postLink.addEventListener("click", async e => {
+      e.preventDefault();
+      try {
+        const r = await fetch(postLink.href, { method: "HEAD", cache: "no-store" });
+        if (r.ok) { location.href = postLink.href; return; }
+      } catch (err) {}
+      toast("The Post\nOpening soon");
+    });
     btnPrev.addEventListener("click", () => book && book.flipPrev());
     btnNext.addEventListener("click", () => book && book.flipNext());
     document.addEventListener("keydown", e => {
