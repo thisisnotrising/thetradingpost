@@ -223,6 +223,8 @@ body {
 .nrns .stack::before, .nrns .stack::after { content: ""; position: absolute; inset: 0; background: #1b1b1a; border: 1px solid #2e2d2b; }
 .nrns .stack::before { transform: translate(5px, -5px); }
 .nrns .stack::after { transform: translate(10px, -10px); background: #151514; }
+.nrns .stack.paper::before, .nrns .stack.paper::after { background: var(--paper); border-color: rgba(0,0,0,.16); }   /* copies behind a light cover: same paper colour */
+.nrns .stack.paper::after { filter: brightness(.93); }   /* the back copy a shade darker so the two copies read as separate */
 .nrns .cover-btn:hover, .nrns .cover-btn:focus-visible {
   transform: perspective(900px) rotateX(0deg) translateY(-18px);
   box-shadow: 0 20px 30px rgba(0,0,0,.6), 0 0 40px rgba(255, 238, 205, .16);   /* a little limelight */
