@@ -289,30 +289,47 @@
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
-    // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster. On the poster,
-    // "Inspired by" in a fine handwritten script (Sacramento, the font of "We are" on the OPEN sign),
-    // then the Robots Ate My Homework logo (img/ramh-logo.webp), with a tiny hairline ornament under it.
+    // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster. On the poster, in
+    // tall white letters (Oswald): INSPIRED BY / RAMH / LIBRARY, a tiny hairline ornament, and the
+    // Robots Ate My Homework logo (img/ramh-logo.webp) along the bottom.
     // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85) and 112 tall (y 13-125), so everything is
-    // centred on x = 50, and the words + logo sit together around the poster's middle (y 69).
+    // centred on x = 50. The three lines are all stretched to the same width (textLength 54), so they make a neat block.
     // The logo picture is 373 x 76 pixels, so its height is its width divided by 4.91.
+    // The poster is written once (FLOOR_POSTER) and used twice: on the sign, and blown up when you click the sign.
+    let FLOOR_POSTER = "";
     {
-      const [top] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
-      const LW = 61, LH = LW * 76 / 373, LX = 50 - LW / 2, LY = 66;   // the logo's width, height, left edge and top edge
+      const [l1, l2, l3] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
+      const LW = 61, LH = LW * 76 / 373, LX = 50 - LW / 2, LY = 100;  // the logo's width, height, left edge and top edge
+      const line = (y, size, text, adjust) => `<text x="50" y="${y}" font-size="${size}" textLength="54" lengthAdjust="${adjust}">${esc((text || "").toUpperCase())}</text>`;
+      FLOOR_POSTER = `<rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
+        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.4)" stroke-width=".4"/>
+        <g fill="#f4f1ea" text-anchor="middle" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600">
+          ${line(37, 8, l1, "spacing")}
+          ${line(67, 28, l2, "spacingAndGlyphs")}
+          ${line(81, 11, l3, "spacing")}
+        </g>
+        <g stroke="rgba(244,241,234,.6)" stroke-width=".35"><path d="M40 90 H47.5 M52.5 90 H60"/></g>
+        <circle cx="50" cy="90" r=".8" fill="#f4f1ea"/>
+        <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>`;
       fs.href = LINKS.ramh;
-      fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")} (opens in a new tab)`);
+      fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")}: see the sign up close`);
       fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
         <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
         <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
         <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
         <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
-        <rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
-        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.4)" stroke-width=".4"/>
+        ${FLOOR_POSTER}
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
-        <text x="50" y="${LY - 5}" fill="#f4f1ea" text-anchor="middle" font-family="Sacramento, 'Snell Roundhand', cursive" font-size="15">${esc(top || "")}</text>
-        <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>
-        <g stroke="rgba(244,241,234,.6)" stroke-width=".35"><path d="M40 ${LY + LH + 8} H47.5 M52.5 ${LY + LH + 8} H60"/></g>
-        <circle cx="50" cy="${LY + LH + 8}" r=".8" fill="#f4f1ea"/>
       </svg>`;
+      // Clicking the sign doesn't leave the shop: it opens the poster up close first, with a button to the library
+      // (a Cmd/Ctrl/Shift-click still goes straight there, as links usually do)
+      fs.addEventListener("click", e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        e.preventDefault();
+        openLb({ label: `${SIGNS.floorSign.join(" ")}, Robots Ate My Homework`, kind: "is-floorsign",
+          art: `<svg viewBox="15 13 70 112" role="img" aria-label="${esc(SIGNS.floorSign.join(" "))}">${FLOOR_POSTER}</svg>`,
+          button: "Visit the library", href: LINKS.ramh, from: fs });
+      });
     }
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
@@ -1138,14 +1155,20 @@
       if (posterEl && best) posterEl.addEventListener("click", e => { e.preventDefault(); openPoster(best, posterEl); });
     }
 
-    /* ---------- The poster up close ----------
-       A dark overlay with the poster blown up and a BUY IT button under it. It reuses the poster's own
-       artwork (from.innerHTML), so the big one always matches the one in the window.
+    /* ---------- Up close ----------
+       A dark overlay with something blown up and a button under it. Used by the poster in the window
+       (with a BUY IT button) and by the A-frame floor sign (with a VISIT THE LIBRARY button).
+       The poster reuses its own artwork (from.innerHTML), so the big one always matches the one in the window.
        Closes with the x, the Escape key, or a click on the dark backdrop. */
     let lb = null, lbBack = null, keyboardUser = false;
     addEventListener("keydown", () => (keyboardUser = true), true);           // remember whether the visitor is using keys or a mouse/finger,
     addEventListener("pointerdown", () => (keyboardUser = false), true);      // so focus only moves around for keyboard users
     function openPoster(best, from) {
+      openLb({ label: `${best.book} by ${best.author}`, art: from.innerHTML, button: "Buy it", href: LINKS[best.link] || best.link, from });
+    }
+    // label = read aloud; kind = an extra class for the picture's frame (sets its shape); art = what's shown big;
+    // button + href = the button under it (opens in a new tab, so the shop stays open behind); from = what to go back to
+    function openLb({ label, kind = "", art, button, href, from }) {
       if (!lb) {                                                              // build the overlay the first time it's needed
         lb = document.createElement("div");
         lb.className = "nrsf-lb"; lb.hidden = true; lb.tabIndex = -1;
@@ -1154,12 +1177,11 @@
         lb.addEventListener("click", e => { if (e.target === lb) closePoster(); });
         addEventListener("keydown", e => { if (e.key === "Escape" && !lb.hidden) closePoster(); });
       }
-      const href = LINKS[best.link] || best.link;
-      lb.setAttribute("aria-label", `${best.book} by ${best.author}`);
+      lb.setAttribute("aria-label", label);
       lb.innerHTML = `<div class="nrsf-lb-box">
           <button class="nrsf-lb-x" type="button" aria-label="Close">\u00d7</button>
-          <div class="nrsf-lb-poster">${from.innerHTML}</div>
-          <a class="nrsf-lb-buy" href="${esc(href)}" target="_blank" rel="noopener">Buy it</a>
+          <div class="nrsf-lb-poster ${kind}">${art}</div>
+          <a class="nrsf-lb-buy" href="${esc(href)}" target="_blank" rel="noopener">${esc(button)}</a>
         </div>`;
       lb.querySelector(".nrsf-lb-x").addEventListener("click", closePoster);
       lbBack = from;

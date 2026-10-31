@@ -153,6 +153,9 @@
 /* As big as fits: 86% of the screen's width, or short enough to leave room for the button (.784 = the poster's shape, 864 / 1102), never over 560px */
 .nrsf .nrsf-lb-poster { position: relative; container-type: inline-size; aspect-ratio: 864 / 1102;
   width: min(86vw, calc((100vh - 150px) * .784), 560px); box-shadow: 0 20px 60px rgba(0, 0, 0, .7); }
+/* The A-frame floor sign's poster up close: its shape is 70 wide : 112 tall (.625), never over 380px wide */
+.nrsf .nrsf-lb-poster.is-floorsign { aspect-ratio: 70 / 112; width: min(80vw, calc((100vh - 150px) * .625), 380px); }
+.nrsf .nrsf-lb-poster.is-floorsign svg { display: block; width: 100%; height: 100%; }
 .nrsf .nrsf-lb-buy { font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: 18px; line-height: 1; letter-spacing: .16em; text-transform: uppercase;
   background: #f4f1ea; color: #111; padding: 15px 44px; border: 2px solid #f4f1ea; transition: background .2s, color .2s; }
 .nrsf .nrsf-lb-buy:focus-visible { background: transparent; color: #f4f1ea; outline: none; }
