@@ -397,12 +397,13 @@ window.NRPOST = {
     { side: "L", name: "Farida Khalaf",          wish: "I hope we manifest a deeper **empathy.**", font: "Rock Salt", size: .14, w: 1.6, rot: 3, ink: "#111" },
     { side: "R", name: "Pragya",                 wish: "More generosity in the world.", font: "Black Ops One", size: .17, w: 1.7, rot: 0, case: "up", ink: "#111" },
     { side: "R", name: "Constantinos Tachtsidis",wish: "I would like journalism to care more about meaning and less about content quantity.", font: "Bebas Neue", size: .2, w: 1.9, rot: -2, case: "up", ink: "#111" },
-    { side: "R", name: "Marlana",                wish: "Questioning what we’re told life is supposed to look like.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#111" },
+    { side: "R", name: "Marlana",                wish: "More people questioning what we’re told life is supposed to look like and actually experimenting with something different.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#111" },
     { side: "R", name: "Ben Linford",            wish: "Understand what we’ll be giving up if we choose to regress.", font: "Sedgwick Ave Display", size: .15, w: 1.7, rot: 2, ink: "#111" },
     { side: "L", name: "Casey Keen",             wish: "Fewer insurance-driven constraints shaping what care is allowed to look like.", font: "Permanent Marker", size: .12, w: 1.8, rot: -3, ink: "#111" },
     { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", ink: "#111", title: "observer of humans" },
     { side: "L", name: "Maria-Cristina Muntean", wish: "A world that values the time it takes to care about something.", font: "Reenie Beanie", size: .26, w: 1.9, rot: -2, ink: "#111" },
     { side: "R", name: "Anna Levitt",            wish: "Less hustle culture, more knowing who you are as a person.", font: "Rock Salt", size: .12, w: 1.9, rot: 4, case: "low", ink: "#111" },
+    { side: "L", name: "Dan Korus",              wish: "Emotional intelligence would be taught at every level of education.", font: "Sedgwick Ave Display", size: .17, w: 1.9, rot: 2, ink: "#111" },
     { name: "Chief Absurdist Officer",           wish: "War is disincentivized.", font: "Black Ops One", case: "up", place: "under", human: false }
   ],
 
