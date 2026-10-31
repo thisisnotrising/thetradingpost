@@ -289,11 +289,15 @@
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
-    // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster, white lettering,
-    // and the library photo (img/ramh-library.webp) framing the bottom of the poster.
-    // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85), so text is centred on x = 50.
+    // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster. On the poster,
+    // "Inspired by" in a fine handwritten script (Sacramento, the font of "We are" on the OPEN sign),
+    // then the Robots Ate My Homework logo (img/ramh-logo.webp), with a tiny hairline ornament under it.
+    // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85) and 112 tall (y 13-125), so everything is
+    // centred on x = 50, and the words + logo sit together around the poster's middle (y 69).
+    // The logo picture is 373 x 76 pixels, so its height is its width divided by 4.91.
     {
-      const [top, big] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
+      const [top] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
+      const LW = 61, LH = LW * 76 / 373, LX = 50 - LW / 2, LY = 66;   // the logo's width, height, left edge and top edge
       fs.href = LINKS.ramh;
       fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")} (opens in a new tab)`);
       fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
@@ -302,16 +306,12 @@
         <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
         <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
         <rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
-        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.55)" stroke-width=".6"/>
+        <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.4)" stroke-width=".4"/>
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
-        <g fill="#f4f1ea" text-anchor="middle">
-          <text x="50" y="34" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="6.2" letter-spacing=".9">${esc((top || "").toUpperCase())}</text>
-          <text x="50" y="62" font-family="Oswald, 'Arial Narrow', sans-serif" font-weight="600" font-size="26" textLength="54" lengthAdjust="spacingAndGlyphs">${esc(big || "")}</text>
-          <path d="M28 71 H72" stroke="#f4f1ea" stroke-width=".6"/>
-        </g>
-        <defs><clipPath id="nrsf-fs-clip"><rect x="21" y="78" width="58" height="38" rx="1"/></clipPath></defs>
-        <image href="${img("ramh-library.webp")}" x="21" y="78" width="58" height="38" preserveAspectRatio="xMidYMid slice" clip-path="url(#nrsf-fs-clip)"/>
-        <rect x="21" y="78" width="58" height="38" rx="1" fill="none" stroke="#f4f1ea" stroke-width=".6"/>
+        <text x="50" y="${LY - 5}" fill="#f4f1ea" text-anchor="middle" font-family="Sacramento, 'Snell Roundhand', cursive" font-size="15">${esc(top || "")}</text>
+        <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>
+        <g stroke="rgba(244,241,234,.6)" stroke-width=".35"><path d="M40 ${LY + LH + 8} H47.5 M52.5 ${LY + LH + 8} H60"/></g>
+        <circle cx="50" cy="${LY + LH + 8}" r=".8" fill="#f4f1ea"/>
       </svg>`;
     }
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
@@ -934,8 +934,46 @@
         vines.push(pts);
         along(pts, .9, [10 * k, 20 * k], 12 * k, false);
       });
-      // 4. Fallen leaves on the pavement and the steps
-      for (let i = 0; i < (G.phone ? 14 : 34); i++) leaves.push({ x: R() * ref, y: gy + 6 + R() * (G.h - gy - 10), s: (9 + R() * 8) * k, rot: R() * 7, depth: .6 + R() * .4, ground: true });
+      // 4. Ivy on the ground. Fallen leaves gather the way real ones do: heaped in drifts against the shopfront,
+      //    piled in the corners under the two trunks, blown into little heaps, and scattered thinner toward the kerb.
+      //    Then live runners creep out of the corners and over the stones.
+      //    t = how far down the pavement a leaf lies: 0 by the wall (far away, so smaller), 1 at the bottom edge (close, so bigger).
+      const depth = G.h - gy, P = G.phone, F = G.floorSign, feet = F.y + F.w * 1.66;   // feet = where the A-frame stands
+      const behindSign = (x, y) => x > F.x - 4 && x < F.x + F.w + 4 && y > F.y && y < feet - 3;  // hidden behind the sign, so skip it
+      const fallen = (x, y, big = 1, flat = .5 + R() * .25) => {
+        y = Math.max(gy + 2, Math.min(G.h - 3, y));
+        if (behindSign(x, y)) return;
+        const t = (y - gy) / depth;
+        leaves.push({ x, y, s: (7 + t * 7 + R() * 6) * k * big * (P ? 1.7 : 1.15), rot: R() * 7, depth: .55 + R() * .45, ground: true, flat });
+      };
+      for (let i = 0; i < (P ? 50 : 90); i++) fallen(R() * ref, gy + 2 + R() * R() * depth * .3);                // drifts along the wall
+      [[0, 1], [ref, -1]].forEach(([edge, side]) => {                                                      // piles in the two corners
+        for (let i = 0; i < (P ? 22 : 38); i++) fallen(edge + side * Math.pow(R(), 1.6) * band * 1.8, gy + 2 + Math.pow(R(), 1.4) * depth * .6, 1.1);
+      });
+      for (let h = 0; h < (P ? 4 : 6); h++) {                                                              // little heaps the wind left
+        const hx = 30 + R() * (ref - 60), hy = gy + depth * (.3 + R() * .6), n = 6 + R() * 6;
+        for (let i = 0; i < n; i++) fallen(hx + (R() - .5) * 26 * k * 1.6, hy + (R() - .5) * 9 * k * 1.6);
+      }
+      for (let i = 0; i < (P ? 10 : 9); i++) fallen(F.x + R() * F.w, feet + R() * 10 * k);                // a few at the A-frame's feet
+      for (let i = 0; i < (P ? 55 : 80); i++) fallen(R() * ref, gy + 4 + R() * (depth - 6));               // scattered everywhere
+      // Live runners creeping over the stones, from each bottom corner (on phones, in from the screen's edges)
+      [[0, 1], [ref, -1]].forEach(([edge, side], n) => {
+        for (let b = 0; b < 2; b++) {
+          let x = edge + side * (P ? -6 : band * .22), y = P ? G.h - depth * (b ? .12 : .3) : gy + 6 + b * depth * .25;
+          let dir = side > 0 ? .12 + b * .1 : Math.PI - .12 - b * .1;
+          const len = (P ? 90 : 210) * (b ? .6 : 1) * (.8 + R() * .4), pts = [[x, y]];
+          for (let t = 0; t < len; t += 4 * k) {
+            dir += (R() - .5) * .45;
+            const ny = y + Math.sin(dir) * 4 * k;
+            if (ny < gy + 3 || ny > G.h - 3) dir = -dir;                                                     // bounce back onto the pavement
+            x += Math.cos(dir) * 4 * k; y = Math.max(gy + 3, Math.min(G.h - 3, y + Math.sin(dir) * 4 * k));
+            if (behindSign(x, y)) break;
+            pts.push([x, y]);
+            if (R() < .8) fallen(x + (R() - .5) * 10 * k, y + (R() - .5) * 6 * k, 1.15 * (1 - t / len * .4), .62 + R() * .25);
+          }
+          vines.push(pts);
+        }
+      });
       return { vines, leaves };
     }
 
@@ -963,14 +1001,17 @@
         ctx.fillStyle = "rgba(14,20,40,.12)"; ctx.fillRect(p.x - 10, p.y - p.w * .7, p.w + 20, p.w * .75);
       }
       // The leaves, back to front: deeper ones darker, ones near the shop warmer
-      leaves.sort((a, b) => a.depth - b.depth).forEach((l, i) => {
+      // (the ground leaves come last, far ones first, so nearer leaves lie on top of farther ones)
+      leaves.sort((a, b) => (a.ground ? 2 + a.y / 1e4 : a.depth) - (b.ground ? 2 + b.y / 1e4 : b.depth)).forEach((l, i) => {
         let col = pal[(hash(i, 5) * pal.length) | 0];
         const nearShop = Math.max(0, Math.min(1, (l.y - G.shopTop + 80) / 260));
         col = mix(col, [255, 120, 90], nearShop * .1);
         const shade = (.5 + l.depth * .55) * (l.y < 120 ? .85 : 1) * (l.ground ? .7 : 1);
         if (l.ground) {                                     // a fallen ivy leaf, lying flat on the cobbles (squashed by perspective)
           const IV = ivySprites(), z = l.s * 1.5;
-          ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.rot); ctx.scale(1, .6); ctx.globalAlpha = .9;
+          ctx.save(); ctx.translate(l.x, l.y);
+          ctx.fillStyle = "rgba(0,0,0,.22)"; ctx.beginPath(); ctx.ellipse(1, 2, z * .3, z * .3 * l.flat, 0, 0, 7); ctx.fill();   // its soft shadow on the stones
+          ctx.scale(1, l.flat); ctx.rotate(l.rot); ctx.globalAlpha = .8 + hash(i, 9) * .18;
           ctx.drawImage(IV[(hash(i, 5) * IV.length) | 0], -z / 2, -z / 2, z, z); ctx.restore();
         } else drawLeaf(ctx, l.x, l.y, l.s, l.rot, col, shade, i % 3, i);   // Boston ivy on the walls
       });
@@ -1240,22 +1281,35 @@
       if (!S.falling || reduceMotion) return;
       makeSprites();
       const fallEl = $("nrsf-fall");
-      const drop = () => {
+      // One leaf drifting down. lead (0-1) starts it part of the way down (used when the page opens, so the air
+      // is already full of leaves); push (-1 or 1) is a gust of wind blowing it hard to the left or right.
+      const drop = (lead = 0, push = 0) => {
         if (!G) return;
-        const el = document.createElement("img"), size = (G.phone ? 16 : 22) * u * (.7 + Math.random() * .6) * (G.phone ? 2 : 1);
+        const near = Math.random() < .15, big = G.phone ? 1.25 + Math.random() * .35 : 1.5 + Math.random() * .6;                    // now and then one passes close to you: bigger, faster, a touch out of focus
+        const el = document.createElement("img"), size = (G.phone ? 16 : 22) * u * (near ? big : .55 + Math.random() * .7) * (G.phone ? 2 : 1);
         el.src = sprites[(Math.random() * sprites.length) | 0]; el.alt = ""; el.width = el.height = size;
+        if (near) el.style.filter = `blur(${(.8 * u).toFixed(2)}px)`;
         fallEl.appendChild(el);
-        const x0 = Math.random() * W, drift = (40 + Math.random() * 160) * (Math.random() < .5 ? -1 : 1), spin = 180 + Math.random() * 400, dur = 7000 + Math.random() * 6000;
+        const x0 = push ? (push > 0 ? -.2 : .4) * W + Math.random() * W * .8 : Math.random() * W;
+        const drift = push ? push * (220 + Math.random() * 320) * u : (40 + Math.random() * 160) * (Math.random() < .5 ? -1 : 1);
+        const spin = (180 + Math.random() * 400) * (push ? 1.6 : 1), dur = (near ? 5000 + Math.random() * 3000 : 7000 + Math.random() * 6000) * (push ? .7 : 1);
         const frames = [];
         for (let k = 0; k <= 10; k++) {
           const t = k / 10;
           frames.push({ transform: `translate(${x0 + drift * t + Math.sin(t * Math.PI * 3) * 26}px, ${-40 + (H + 80) * t}px) rotate(${spin * t}deg) rotateX(${Math.sin(t * 7) * 60}deg)`, opacity: t > .92 ? 1 - (t - .92) * 12 : 1 });
         }
-        el.animate(frames, { duration: dur, easing: "linear" }).finished.then(() => el.remove());
+        el.animate(frames, { duration: dur, delay: -lead * dur, easing: "linear" }).finished.then(() => el.remove(), () => el.remove());
       };
-      const loop = () => { if (inView && !document.hidden) drop(); setTimeout(loop, 1000 + Math.random() * 1800); };
-      for (let i = 0; i < 3; i++) setTimeout(drop, i * 600);
-      setTimeout(loop, 2000);
+      const live = () => inView && !document.hidden;
+      // a steady fall: a new leaf every 0.4 to 1.1 seconds (a little slower on phones)
+      const loop = () => { if (live()) drop(); setTimeout(loop, (G && G.phone ? 600 : 400) + Math.random() * 700); };
+      // and every 9 to 18 seconds a gust shakes loose a flurry of 5 to 9 leaves, all blown the same way
+      const gust = () => {
+        if (live()) { const side = Math.random() < .5 ? -1 : 1, n = 5 + Math.random() * 5; for (let i = 0; i < n; i++) setTimeout(() => drop(0, side), i * (100 + Math.random() * 220)); }
+        setTimeout(gust, 9000 + Math.random() * 9000);
+      };
+      for (let i = 0; i < (G && G.phone ? 9 : 14); i++) drop(Math.random() * .9);
+      setTimeout(loop, 600); setTimeout(gust, 5000);
     }
 
     /* ---------- Doors and windows lead somewhere ---------- */

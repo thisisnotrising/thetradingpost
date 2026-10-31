@@ -306,7 +306,7 @@ window.NRSF = {
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the cut-metal swinging sign (split over two lines: NOT / RISING)
-    floorSign: ["inspired by", "RAMH", "library"],   // the A-frame poster: small top line, big middle (the third word is read aloud only; the library photo shows it)
+    floorSign: ["Inspired by", "Robots Ate My Homework"],   // the A-frame poster: the script line, then the name read aloud for the logo (img/ramh-logo.webp shows it)
     leftDoor: "9¾",
     rightDoor: "9"
   },
