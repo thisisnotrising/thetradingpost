@@ -915,16 +915,21 @@
       if (sides.includes("left")) col(edge);
       if (sides.includes("right")) col(W - edge);
       const seen = new Set(), uniq = pts.filter(p => { const id = p.map(v => Math.round(v)).join(","); return !seen.has(id) && seen.add(id); });
-      // One vanity globe: a soft halo, a frosted glass ball, a small highlight
+      // One vintage Edison bulb: a soft halo, a dark socket nub peeking out the base,
+      // amber glass with a glowing filament curve, and a small highlight
       const globe = ([x, y]) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">
         <circle class="halo" r="${r * 3.4}" fill="url(#nrns-halo)"/>
+        <ellipse cx="0" cy="${(r * .72).toFixed(1)}" rx="${(r * .34).toFixed(1)}" ry="${(r * .4).toFixed(1)}" fill="url(#nrns-nub)"/>
         <circle r="${r}" fill="url(#nrns-globe)"/>
-        <circle r="${r}" fill="none" stroke="#fff6dc" stroke-opacity=".5" stroke-width="1"/>
-        <ellipse cx="${-r * .32}" cy="${-r * .38}" rx="${r * .32}" ry="${r * .2}" fill="#fff" opacity=".7"/></g>`;
+        <circle r="${r}" fill="none" stroke="#fff3cf" stroke-opacity=".5" stroke-width="1"/>
+        <path d="M ${(-r * .26).toFixed(1)} ${(-r * .22).toFixed(1)} Q 0 ${(r * .22).toFixed(1)} ${(r * .26).toFixed(1)} ${(-r * .22).toFixed(1)}" fill="none" stroke="#fff6da" stroke-width="${Math.max(1, r * .11).toFixed(2)}" stroke-linecap="round" filter="url(#nrns-fglow)"/>
+        <ellipse cx="${-r * .32}" cy="${-r * .38}" rx="${r * .32}" ry="${r * .2}" fill="#fff" opacity=".55"/></g>`;
       el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
         <defs>
-          <radialGradient id="nrns-globe" cx=".45" cy=".42" r=".62"><stop offset="0" stop-color="#fffef8"/><stop offset=".55" stop-color="#fff0c8"/><stop offset=".85" stop-color="#ffd98a"/><stop offset="1" stop-color="#e9b25a"/></radialGradient>
+          <radialGradient id="nrns-globe" cx=".44" cy=".4" r=".62"><stop offset="0" stop-color="#fffdf2"/><stop offset=".3" stop-color="#ffe7a8"/><stop offset=".6" stop-color="#ffbf5e"/><stop offset=".85" stop-color="#e68a3a"/><stop offset="1" stop-color="#b0631f"/></radialGradient>
           <radialGradient id="nrns-halo"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".55"/><stop offset=".35" stop-color="#ffc874" stop-opacity=".2"/><stop offset="1" stop-color="#ffb050" stop-opacity="0"/></radialGradient>
+          <radialGradient id="nrns-nub" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#6b5033"/><stop offset="1" stop-color="#2a1d10"/></radialGradient>
+          <filter id="nrns-fglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".6"/></filter>
         </defs>
         ${uniq.map(globe).join("")}</svg>`;
     }
