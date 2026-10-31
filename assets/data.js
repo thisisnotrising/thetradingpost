@@ -379,6 +379,7 @@ window.NRPOST = {
      place: "under" = this wish is painted on its own, centred right under the cowboy mural, like its caption
        (the cowboy is raised a little to leave room). The rest are laid out around him.
      human: false = signed with the name alone, without ", Human".
+     title: "..." = signed with these words in place of "Human", e.g. title: "observer of humans" = "Name, observer of humans".
      (side, size, w, rot and ink were for the old layout; they're kept, but the wall no longer uses them:
       every wish is painted solid black, and the layout decides where it goes and how big.)
      New issue? Copy a line and change the name, the words and, if you like, the font. */
@@ -399,7 +400,7 @@ window.NRPOST = {
     { side: "R", name: "Marlana",                wish: "Questioning what we’re told life is supposed to look like.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#111" },
     { side: "R", name: "Ben Linford",            wish: "Understand what we’ll be giving up if we choose to regress.", font: "Sedgwick Ave Display", size: .15, w: 1.7, rot: 2, ink: "#111" },
     { side: "L", name: "Casey Keen",             wish: "Fewer insurance-driven constraints shaping what care is allowed to look like.", font: "Permanent Marker", size: .12, w: 1.8, rot: -3, ink: "#111" },
-    { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", ink: "#111" },
+    { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", ink: "#111", title: "observer of humans" },
     { side: "L", name: "Maria-Cristina Muntean", wish: "A world that values the time it takes to care about something.", font: "Reenie Beanie", size: .26, w: 1.9, rot: -2, ink: "#111" },
     { side: "R", name: "Anna Levitt",            wish: "Less hustle culture, more knowing who you are as a person.", font: "Rock Salt", size: .12, w: 1.9, rot: 4, case: "low", ink: "#111" },
     { name: "Chief Absurdist Officer",           wish: "War is disincentivized.", font: "Black Ops One", case: "up", place: "under", human: false }

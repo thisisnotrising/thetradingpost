@@ -1083,7 +1083,7 @@
     const ht = q => q.case === "up" ? fontOf(q).cap : fontOf(q).xh;
     const minFs = q => L / ht(q), byFs = q => L / fontOf(q).xh;
     const words = q => esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
-    const signed = q => "— " + esc(q.name) + (q.human === false ? "" : ", Human");   // (human: false in data.js = the name alone)
+    const signed = q => "— " + esc(q.name) + (q.human === false ? "" : ", " + esc(q.title || "Human"));   // (human: false in data.js = the name alone; title: "..." in place of "Human")
     const probe = make("div", "nrwv-probe", wall);
     list.forEach(q => {
       const f = fontOf(q);
