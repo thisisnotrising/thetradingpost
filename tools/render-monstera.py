@@ -1,6 +1,6 @@
 """NOT RISING · THE POST — THE PINK PLANT
 --------------------------------------------------------------------
-A big pink-leaved plant in a white pot with thin gold lines, after Kathi's
+A big pink-leaved plant in a white pot with thin black lines, after Kathi's
 reference photo (heart-shaped leaves, pink in the middle, green at the edges
 and in flecks, with deep rose veins: the look of a pink caladium), built and
 rendered in 3D with Blender (photographic light: a soft skylight, satin
@@ -23,7 +23,7 @@ HOW IT'S MADE
   2. THE PLANT. Each leaf's sheet is curved (it droops a little toward its tip
      and folds a little along the midrib), set on a slender stem that rises
      out of the pot, and turned to face out from the plant.
-  3. THE POT. A white glazed cylinder with thin gold lines crossing in
+  3. THE POT. A white glazed cylinder with thin black lines crossing in
      diamonds, and dark soil.
   4. THE PHOTO. A camera looks at it from a little above, straight on
      (orthographic: no wide-angle stretching, so it stays true to size).
@@ -245,8 +245,8 @@ ramp.color_ramp.elements[0].color = (0.05, 0.13, 0.04, 1); ramp.color_ramp.eleme
 ramp.color_ramp.elements[0].position = 0.25; ramp.color_ramp.elements[1].position = 0.9
 L.new(sep.outputs['Z'], ramp.inputs['Fac']); L.new(ramp.outputs['Color'], b.inputs['Base Color'])
 
-# THE POT: a white glazed cylinder (very slightly narrower at the foot) with thin gold lines crossing in diamonds,
-# after Kathi's photo. It's built ring by ring so the gold pattern can be painted onto it exactly.
+# THE POT: a white glazed cylinder (very slightly narrower at the foot) with bold black lines crossing in diamonds,
+# after Kathi's photo. It's built ring by ring so the line pattern can be painted onto it exactly.
 POT_H, POT_R0, POT_R1, POT_T = 0.44, 0.215, 0.23, 0.012          # height, foot radius, top radius, wall thickness
 GOLD = os.path.join(TMP, 'pot-gold.png')
 gw, gh = 2048, 600                                                # the pattern picture: around the pot x up the pot
@@ -260,17 +260,17 @@ gold = np.zeros_like(uu)
 for f in (tri, 1 - tri):                                          # the two zigzags, crossing: diamonds
     slope = 2 * POT_H / per
     d = np.abs(h_m - f * POT_H) / math.sqrt(1 + slope * slope)
-    gold = np.maximum(gold, smoothstep(0.0016, 0.0009, d))
-for hh in (0.0, POT_H):                                           # a thin gold band at the top and the foot
-    gold = np.maximum(gold, smoothstep(0.003, 0.002, np.abs(h_m - hh)))
+    gold = np.maximum(gold, smoothstep(0.0042, 0.0032, d))     # each line about 7 mm wide, so it still shows from across the room
+for hh in (0.0, POT_H):                                           # a thin band at the top and the foot
+    gold = np.maximum(gold, smoothstep(0.008, 0.006, np.abs(h_m - hh)))
 cv2.imwrite(GOLD, (gold * 255).astype(np.uint8))
 pm, N, L = material('pot')
 N.clear()
 out = N.new('ShaderNodeOutputMaterial')
 white = N.new('ShaderNodeBsdfPrincipled'); white.inputs['Base Color'].default_value = (0.86, 0.85, 0.82, 1)
 white.inputs['Roughness'].default_value = 0.28; white.inputs['Coat Weight'].default_value = 0.3
-metal = N.new('ShaderNodeBsdfPrincipled'); metal.inputs['Base Color'].default_value = (0.95, 0.66, 0.26, 1)
-metal.inputs['Metallic'].default_value = 1.0; metal.inputs['Roughness'].default_value = 0.22
+metal = N.new('ShaderNodeBsdfPrincipled'); metal.inputs['Base Color'].default_value = (0.008, 0.008, 0.008, 1)   # (black lines, Oct 31: was gold)
+metal.inputs['Roughness'].default_value = 0.3
 gt = N.new('ShaderNodeTexImage'); gt.image = bpy.data.images.load(GOLD); gt.image.colorspace_settings.name = 'Non-Color'
 mix = N.new('ShaderNodeMixShader')
 L.new(gt.outputs['Color'], mix.inputs['Fac']); L.new(white.outputs[0], mix.inputs[1]); L.new(metal.outputs[0], mix.inputs[2])

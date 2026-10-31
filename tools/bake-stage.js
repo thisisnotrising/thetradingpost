@@ -48,7 +48,7 @@ const BANDS = {
   narrow: [[0, 3.5, 100], [3.5, 8.5, 250], [8.5, 99, 140]],
 };
 const FLAT_RES = 150;      // the back wall and the glass triangle above it: always far away
-const FLOOR_RES = 40;      // the floor's light and shadows (the floor's own sparkle is a repeating tile)
+const FLOOR_RES = 120;     // the floor's light, shadows and the rug (the floor's own sparkle is a repeating tile; Oct 31: was 40, sharp enough now for the rug)
 const QUALITY = .72;       // WebP quality (0 to 1)
 
 // (Only for baking without internet: LOCAL_FONTS = a folder of @fontsource font packages, used in place of Google Fonts.)

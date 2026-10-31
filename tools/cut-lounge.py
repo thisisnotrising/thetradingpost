@@ -297,6 +297,159 @@ for name, (mask, (x0, y0, x1, y1)) in PIECES.items():
     print('wrote', os.path.relpath(out), im.size, os.path.getsize(out) // 1024, 'KB', ' box in the photo:', (x0, y0, x1, y1))
     if name == 'photo': main_im = im
 
+# ================================================================ LAYERS (Oct 31): THE LOUNGE STANDING ON THE FLOOR
+# The whole lounge as one upright picture looked raised from low down: the rug filled its bottom metre, so the sofa
+# stood on top of it like a poster. So it's also cut into layers, each placed in the room at its own distance:
+#   lounge-rug.webp     the rug, seen from straight above, to lie flat on the floor
+#   lounge-sofa.webp    the long run of the sofa (with its pillows and throws, and the plant behind it)
+#   lounge-return.webp  the short run of the L, coming toward you (its bottom straightened, see below)
+#   lounge-table.webp   the coffee table, with the bottle, flowers and trays on it
+#   lounge-pouf.webp    the woven pouf
+# THE PHOTO'S CAMERA. To put each piece at the right distance, the photo is treated as taken by a simple camera:
+# FOCAL = how many pixels one metre makes, 1 m away; HORIZON = the photo row level with the camera; CAM_H = its height
+# off the floor (m); CX = the column straight ahead. A spot on the floor at photo row y is then DIST(y) metres away.
+FOCAL, HORIZON, CAM_H, CX = 688.0, 390.0, 0.888, 368.0
+DIST = lambda yrow: FOCAL * CAM_H / (yrow - HORIZON)
+LAYER_RES = 2.0                                                     # (each layer is enlarged 2x, so it stays crisp)
+
+def save_layer(name, rgba_full, box):
+    x0, y0, x1, y1 = box
+    im = Image.fromarray(np.clip(rgba_full[y0:y1, x0:x1], 0, 255).astype(np.uint8), 'RGBA')
+    im = im.resize((round(im.width * LAYER_RES), round(im.height * LAYER_RES)), Image.LANCZOS)
+    out = OUT.replace('lounge-photo', 'lounge-' + name)
+    im.save(out, 'WEBP', quality=88, method=6)
+    print('wrote', os.path.relpath(out), im.size, os.path.getsize(out) // 1024, 'KB', ' box in the photo:', box)
+
+yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+base_rgb = rgb2.copy()
+
+# THE TABLE: its top (and what stands on it) and its two front legs and a back leg
+TABLE = (poly([(178, 497), (220, 497), (222, 490), (290, 490), (292, 420), (318, 395), (342, 400), (336, 486), (348, 486),
+               (350, 486), (378, 486), (380, 470), (398, 470), (400, 486), (425, 486), (425, 497), (452, 497), (452, 553), (178, 553)])
+         | poly([(236, 553), (256, 553), (256, 601), (236, 601)]) | poly([(383, 553), (410, 553), (410, 601), (383, 601)])
+         | poly([(262, 553), (280, 553), (280, 578), (262, 578)]))
+# THE SHORT RUN OF THE L: everything of the sofa right of a line along its inside edge (the line its base makes on the
+# rug, from the corner at (495, 548) to the near end at (595, 645)), with the pillows heaped in the corner
+def ret_edge(yrow): return 495 + np.clip(yrow - 548, 0, None) * 0.98
+RET = SOFA & (xx > ret_edge(yy)) & (yy >= 410)
+SOLID = alpha > 0.02
+
+# --- the rug ---------------------------------------------------------------------------------------------------
+# Seen from straight above: for every spot of the rug (X across, Z away from the camera, in metres) look up where
+# the photo shows it. Where something stands on it (or the photo stops), the rug is filled in with a clean patch of
+# its own weave, repeated.
+RUG_X0, RUG_X1, RUG_Z0, RUG_Z1, RUG_RES = -1.55, 0.77, DIST(717), 4.0, 200
+rw, rh = round((RUG_X1 - RUG_X0) * RUG_RES), round((RUG_Z1 - RUG_Z0) * RUG_RES)
+gx, gz = np.meshgrid(RUG_X0 + (np.arange(rw) + .5) / RUG_RES, RUG_Z1 - (np.arange(rh) + .5) / RUG_RES)   # row 0 = the far edge
+mapx = (CX + FOCAL * gx / gz).astype(np.float32); mapy = (HORIZON + FOCAL * CAM_H / gz).astype(np.float32)
+# (not under the table either: the rug there is in the table's shadow, and its legs stand in it)
+cover = (cv2.dilate((TABLE | SOFA | CORNER).astype(np.uint8), np.ones((9, 9), np.uint8)) > 0) | \
+        (cv2.dilate(POUF.astype(np.uint8), np.ones((41, 41), np.uint8)) > 0)          # (and the pouf's shadow)
+seen = (RUG & ~cover & (yy < 714) & ~((xx >= 165) & (xx < 470) & (yy < 615))).astype(np.uint8) * 255
+src = np.clip(rgb, 0, 255).astype(np.float32)
+top = cv2.remap(src, mapx, mapy, cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT)
+ok = cv2.remap(seen, mapx, mapy, cv2.INTER_NEAREST, borderValue=0) > 127
+# a clean patch of the weave: X 0.1 .. 0.6, Z 1.95 .. 2.4 (between the table's right leg and the short run)
+pc0, pc1 = round((0.15 - RUG_X0) * RUG_RES), round((0.55 - RUG_X0) * RUG_RES)
+pr0, pr1 = round((RUG_Z1 - 2.2) * RUG_RES), round((RUG_Z1 - 1.93) * RUG_RES)
+patch = top[pr0:pr1, pc0:pc1]
+tile = np.concatenate([patch, patch[:, ::-1]], 1); tile = np.concatenate([tile, tile[::-1]], 0)   # mirrored, so it repeats seamlessly
+fill = np.tile(tile, (rh // tile.shape[0] + 2, rw // tile.shape[1] + 2, 1))[:rh, :rw]
+fill = fill * (top[ok].mean((0)) / np.maximum(fill.reshape(-1, 3).mean(0), 1))   # (matched to the rug's overall colour)
+okf = cv2.GaussianBlur(ok.astype(np.float32), (0, 0), 2.5)[..., None]
+rug = top * okf + fill * (1 - okf)
+# even out the light: the photo's shadows (under the table and the pouf, by the sofa) would be wrong on the room's
+# floor, so the rug's brightness is levelled (divided by a blurred copy of itself), keeping the weave
+lev = cv2.GaussianBlur(rug, (0, 0), 14)
+rug = rug / np.maximum(lev, 1) * top[ok].mean(0)
+# the braided border: the front strip of the photo's rug (5 cm), laid round all four edges
+bw = round(0.05 * RUG_RES)
+fc0, fc1 = round((-0.9 - RUG_X0) * RUG_RES), round((0.7 - RUG_X0) * RUG_RES)
+band = top[rh - bw:rh, fc0:fc1]
+band_long = np.tile(band, (1, rw // band.shape[1] + 2, 1))[:, :rw]
+band_side = np.tile(np.rot90(band, 1), (rh // band.shape[1] + 2, 1, 1))[:rh]
+rug[rh - bw:] = band_long; rug[:bw] = band_long[::-1]
+rug[:, :bw] = band_side[:, ::-1][:, :bw]; rug[:, rw - bw:] = band_side[:, :bw]
+ra = np.ones((rh, rw), np.float32); ra[[0, -1], :] = .5; ra[:, [0, -1]] = .5
+img_rug = Image.fromarray(np.dstack([np.clip(rug, 0, 255), ra * 255]).astype(np.uint8), 'RGBA')
+out = OUT.replace('lounge-photo', 'lounge-rug'); img_rug.save(out, 'WEBP', quality=88, method=6)
+print('wrote', os.path.relpath(out), img_rug.size, os.path.getsize(out) // 1024, 'KB', f' (rug {RUG_X1 - RUG_X0:.2f} m wide x {RUG_Z1 - RUG_Z0:.2f} m deep)')
+
+# --- the long run of the sofa -------------------------------------------------------------------------------------
+# everything of the sofa (and the plant behind it) except the short run, the table, the pouf and the rug, down to the
+# bottom of its base (row 552). Behind the table and the pouf the photo shows no sofa, so it's filled in row by row
+# from the sofa just to the right (its seat, front and base run straight across).
+BACK = ((SOLID & ~RET & ~TABLE & ~POUF & ~RUG & ~PIECES['pendant'][0] & ~PIECES['plant'][0] & (yy < 553))
+        | (MID_PLANT & SOLID & ~(RET & (yy > 425))))
+hole = (TABLE | POUF) & (yy >= 455) & (yy < 553) & (xx >= 100) & (xx < 495)
+hole &= ~(SOLID & ~SOFA)                                             # (only where the sofa would be)
+srgb = base_rgb.copy()
+sm = cv2.GaussianBlur(base_rgb, (0, 0), 2.5); det = base_rgb - sm
+for yrow in range(455, 553):
+    xs = np.where(hole[yrow])[0]
+    if not len(xs): continue
+    r0 = xs.max() + 1                                                # the first sofa pixel right of the gap
+    col = base_rgb[yrow, r0 + 2:r0 + 14].mean(0)
+    for x in xs:
+        sx = x + 36 * (1 + (r0 - x) // 36)
+        srgb[yrow, x] = col + det[yrow, min(W - 1, sx)]
+back_a = np.where(BACK | hole, np.maximum(alpha, hole.astype(np.float32)), 0)
+# behind the bottle and the flowers (above the seat) the pillows are grown over the gap
+bott = TABLE & SOFA & (yy < 470) & (xx >= 285) & (xx < 350)
+src_ok = (BACK | hole) & ~bott                                       # (grown only from the sofa itself, not the wall)
+filled = cv2.inpaint(np.clip(srgb, 0, 255).astype(np.uint8), (~src_ok).astype(np.uint8), 5, cv2.INPAINT_TELEA).astype(np.float32)
+# (Oct 31) a smooth fill there showed up as a blurry smudge (the bottle stands a little to one side of it once the
+# table is in front), so each row of the gap is filled like a mirror instead: its left half reflects the fur throw
+# just left of it, its right half the yellow pillow just right of it, and they meet with a soft 4-pixel seam
+for yrow in range(H):
+    xs = np.where(bott[yrow])[0]
+    if not len(xs): continue
+    Lx, Rx = xs.min(), xs.max(); mid = (Lx + Rx) / 2
+    for x in xs:
+        lsrc = Lx - 1 - (x - Lx); rsrc = Rx + 1 + (Rx - x)
+        lv = srgb[yrow, lsrc] if lsrc >= 0 and src_ok[yrow, lsrc] else filled[yrow, x]
+        rv = srgb[yrow, rsrc] if rsrc < W and src_ok[yrow, rsrc] else filled[yrow, x]
+        t = np.clip((x - mid) / 4 + .5, 0, 1)                         # 0 = all left, 1 = all right
+        filled[yrow, x] = lv * (1 - t) + rv * t
+srgb[bott] = filled[bott]
+back_a[bott] = 1.0
+# its left end, behind the pouf's top: carried straight down from just above
+for yrow in range(526, 553):
+    m = (xx[yrow] >= 100) & (xx[yrow] < 160) & POUF[yrow]
+    srgb[yrow, m] = srgb[525, m]; back_a[yrow, m] = (SOFA[yrow, m]).astype(np.float32)
+save_layer('sofa', np.dstack([srgb, back_a * 255]), (90, 230, 700, 553))
+
+# --- the short run of the L ---------------------------------------------------------------------------------------
+# Its base runs slanting down toward you in the photo. As a flat piece standing at one distance, that slant would leave
+# its far end floating, so its seat and base are stretched down until the base is level (row 645) the whole way along;
+# the cushions and pillows above (rows above 500) stay as they are.
+ra_ = (SOLID & RET & ~TABLE).astype(np.float32) * alpha
+r_rgba = np.dstack([base_rgb, ra_ * 255]).astype(np.float32)
+LEVEL = 645.0
+def base_at(x): return np.clip(548 + (x - 495) * 0.98, 548, LEVEL)
+mx = np.zeros((H, W), np.float32); my = np.zeros((H, W), np.float32)
+for x in range(W):
+    s = LEVEL - base_at(x)
+    y_src = np.arange(H, dtype=np.float32)
+    ramp = np.clip((y_src - 500) / (base_at(x) - 500), 0, 1)
+    y_out = y_src + s * ramp
+    my[:, x] = np.interp(np.arange(H), y_out, y_src); mx[:, x] = x
+r_out = cv2.remap(r_rgba, mx, my, cv2.INTER_LINEAR, borderValue=0)
+save_layer('return', r_out, (480, 400, 736, 650))
+
+# --- the table and the pouf -----------------------------------------------------------------------------------------
+green_ = (rgb[..., 1] > rgb[..., 0]) & (hsv[..., 1] > 20)           # (the sofa's green, showing behind the table)
+t_a = (TABLE & SOLID & ~(green_ & (yy < 553) & ~((xx >= 290) & (xx < 340)))
+       & ~((yy < 505) & ((xx < 222) | (xx > 425)))).astype(np.float32) * np.maximum(alpha, 0.0)   # (the sofa's shadowed base, at the table's back corners)
+t_rgb = base_rgb.copy()
+t_hole = (TABLE & POUF).astype(np.uint8)                             # (its left end, behind the pouf)
+t_rgb = cv2.inpaint(np.clip(t_rgb, 0, 255).astype(np.uint8), t_hole, 6, cv2.INPAINT_TELEA).astype(np.float32)
+t_a[t_hole > 0] = 1
+save_layer('table', np.dstack([t_rgb, t_a * 255]), (170, 390, 460, 603))
+p_a = (POUF & SOLID).astype(np.float32) * alpha
+save_layer('pouf', np.dstack([base_rgb, p_a * 255]), (18, 524, 218, 662))
+print(f'distances (m) from the photo camera: sofa base {DIST(552):.2f}, short run base {DIST(645):.2f}, table {DIST(601):.2f}, pouf {DIST(660):.2f}, rug front {DIST(717):.2f}')
+
 if PREVIEW:   # the main piece over a checkerboard and over THE POST's dark floor colour, side by side
     im = main_im
     w, h = im.size
