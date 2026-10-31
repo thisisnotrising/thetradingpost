@@ -21,6 +21,10 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
 @keyframes nr-from-light { to { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
 </style>
+<!-- Opened inside THE POST's Newsstand popup (an iframe)? Then hide the signposts out of here: the popup has its own ×,
+     and following them would load the other page inside the popup. -->
+<script>if (window.self !== window.top) document.documentElement.classList.add("in-post");</script>
+<style>.in-post a.nrns-back, .in-post .nrns-foot { display: none !important; }</style>
 <script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
 </head>
 <body>
