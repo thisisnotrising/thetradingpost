@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>THE POST · 777 Daydream St.</title>
 <meta name="description" content="Inside the Trading Post: the Newsstand, the Wishing Wall, Nebula Cafe and the Gallery.">
+<!-- Oswald, for the poster popup's BUY IT button (the same lettering as on the storefront). It loads without holding
+     up the page (media="print" until it arrives, then switched on). -->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" media="print" onload="this.media='all'">
 <!--
   NOT RISING · THE POST, the room inside 777 Daydream St.
   ------------------------------------------------------------------
@@ -19,7 +23,7 @@
 
   THIS FILE HAS THREE PARTS
     PART 1 · THE LOOK       (CSS, in the <style> below): the box, the camera, the buttons, the popups
-    PART 2 · THE BONES      (HTML, in the <body>): an empty stage, the cue, the 4 popups
+    PART 2 · THE BONES      (HTML, in the <body>): an empty stage, the cue, the 5 popups
     PART 3 · THE BEHAVIOUR  (JavaScript, at the bottom): size the room, put up the set, move the camera,
                             open and close popups, the gallery
 
@@ -31,7 +35,8 @@
     The gallery's photos and label, and the wishes' words: assets/data.js, PART 3
     The big poster on the black wall: WALL_POSTER in assets/data.js (where it hangs) and assets/img/post/
       poster-best-storyteller*.webp (the pictures, made by tools/render-poster.js). It's hung live (PART 3, step 2B),
-      not baked, so a re-bake doesn't touch it.
+      not baked, so a re-bake doesn't touch it. Click it and it opens up close with a BUY IT button (popup 5), the
+      same as the poster in the storefront window; the book, author and shop link come from POSTERS in data.js.
   ------------------------------------------------------------------
 -->
 <style>
@@ -96,6 +101,13 @@ html.locked, html.locked body { overflow: hidden; }
   box-shadow: 0 0 0 calc(var(--u) * .012) #3a3a3a, 0 calc(var(--u) * .04) calc(var(--u) * .14) rgba(0,0,0,.85); }
 .poster img { position: static; display: block; width: 100%; height: 100%; }
 .poster-ivy, .poster-light { position: absolute; inset: 0; pointer-events: none; background-repeat: no-repeat; }
+/* The poster is a button too (Oct 31): click it and it opens up close with a BUY IT button (popup 5), exactly like
+   the poster in the storefront window. pointer-events: auto = it answers to the mouse, like the four spots.
+   On hover (or keyboard focus) it brightens a touch, so it reads as something you can pick up. */
+button.poster { margin: 0; border: 0; font: inherit; color: inherit; cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+button.poster img { transition: filter .3s; }
+button.poster:hover img, button.poster:focus-visible img { filter: brightness(1.1); }
+button.poster:focus-visible { outline: calc(var(--u) * .03) solid rgba(255,255,255,.8); outline-offset: calc(var(--u) * .02); }
 
 /* --- The light in the room, laid over the screen (so it stays put while you scroll), the same as the original:
    soft sunbeams from the glass roof, then a warm tint and a gentle vignette. Clicks go straight through. --- */
@@ -187,14 +199,36 @@ dialog.pop[open] { animation: fade-in .35s ease-out; }
 .wall-hint { position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
   font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8d8a86; pointer-events: none; }
 
-/* 3 · Cafe: the Nebula close-up, as big as fits. The pink neon on it is a link to Buy Me a Coffee. */
+/* 3 · Cafe: the Nebula close-up, as big as fits, cut to the arch wall so the black wall and its ivy are the frame.
+   The pink neon on it (buy me a cosmo) is the link to Kathi's Buy Me a Coffee page. */
 dialog.pop-cafe[open] { display: grid; place-items: center; align-content: center; gap: 12px; padding: 56px 16px 20px; }
-.cafe { position: relative; margin: 0; width: min(100%, calc((100vh - 110px) * 1400 / 1516)); width: min(100%, calc((100svh - 110px) * 1400 / 1516)); }
+.cafe { position: relative; margin: 0; width: min(100%, calc((100vh - 110px) * 1400 / 1577)); width: min(100%, calc((100svh - 110px) * 1400 / 1577)); }
 .cafe img { display: block; width: 100%; height: auto; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
 .neon { position: absolute; display: block; border-radius: 40%; color: transparent; font-size: 1px; transition: background .3s; }
 .neon:hover, .neon:focus-visible { outline: none; background: radial-gradient(closest-side, rgba(255,90,150,.35), transparent); }
 .cafe-hint { margin: 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8d8a86; text-align: center; }
 .cafe-hint a { color: #f1ece2; }
+
+/* 5 · The poster up close: a copy of the storefront's ("The poster up close" in assets/storefront.css), so the two
+   posters behave the same: the room dimmed and softly blurred behind, the poster as big as fits, a BUY IT button
+   under it, and a small round x on the poster's top corner.
+     .lb-box     the poster and its button, stacked and centred, 20px apart; it pops in, growing slightly
+     .lb-poster  as big as fits: 86% of the screen's width, or short enough to leave room for the button
+                 (.784 = the poster's shape, 864 / 1102), and never over 560px wide
+     .lb-buy     the button: cream with black letters; with a mouse over it (or keyboard focus) it turns to an outline */
+dialog.pop-poster { background: rgba(6,6,8,.84); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+dialog.pop-poster[open] { display: grid; place-items: center; padding: 16px; }
+.lb-box { position: relative; display: grid; justify-items: center; gap: 20px; outline: none; animation: lb-pop .35s cubic-bezier(.2,.7,.2,1); }
+@keyframes lb-pop { from { opacity: 0; scale: .92; } }
+.lb-poster { display: block; width: min(86vw, calc((100vh - 150px) * .784), 560px); height: auto; aspect-ratio: 864 / 1102;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.lb-buy { font: 600 18px/1 Oswald, "Arial Narrow", sans-serif; letter-spacing: .16em; text-transform: uppercase; text-decoration: none;
+  background: #f4f1ea; color: #111; padding: 15px 44px; border: 2px solid #f4f1ea; transition: background .2s, color .2s; }
+.lb-buy:focus-visible { background: transparent; color: #f4f1ea; outline: none; }
+@media (hover: hover) { .lb-buy:hover { background: transparent; color: #f4f1ea; } }   /* (only with a mouse, so a tap doesn't leave it stuck) */
+.pop-poster .close { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid #555; background: #111; color: #f4f1ea; font: 400 24px/1 Arimo, Arial, sans-serif; display: grid; place-items: center; }
+.pop-poster .close:hover, .pop-poster .close:focus-visible { background: #f4f1ea; color: #111; outline: none; }
 
 /* 4 · Gallery: the whole exhibit on one black brick wall, then each photo big (the viewer) */
 dialog.pop-gallery { overflow-y: auto;
@@ -265,7 +299,7 @@ body.leaving::before { opacity: 1; }
 
 /* Visitors who ask for less motion get none */
 @media (prefers-reduced-motion: reduce) {
-  .cue::after, dialog.pop[open], html.from-light body::after { animation: none; }
+  .cue::after, dialog.pop[open], .lb-box, html.from-light body::after { animation: none; }
   html.from-light body::after { display: none; }
   .spot, .print, body::before, .stage.ready .scene { transition: none; }
   .walk-in .room { animation: none; }
@@ -326,12 +360,23 @@ body.leaving::before { opacity: 1; }
 <dialog class="pop pop-cafe" id="pop-cafe" aria-label="Nebula Cafe">
   <button class="close crystal" type="button" aria-label="Close">×</button>
   <figure class="cafe">
-    <img data-src="../assets/img/post/room/cafe.webp" width="1400" height="1516"
-         alt="Nebula Cafe: NEBULA cafe in warm white neon on white brick under an ivy-hung arch, a pink neon sign below it that reads buy me a coffee, shelves of jars and bottles, Edison bulbs, and a glittering black counter.">
+    <img data-src="../assets/img/post/room/cafe.webp" width="1400" height="1577"
+         alt="Nebula Cafe: NEBULA cafe in warm white neon on white brick under an ivy-hung arch, a pink neon sign below it that reads buy me a cosmo, shelves of jars and bottles, Edison bulbs, and a glittering black counter.">
     <a class="neon" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener"
-       style="left:33.7%; top:58.8%; width:32.5%; height:7.1%">Buy me a coffee (opens Buy Me a Coffee in a new tab)</a>
+       style="left:32.8%; top:58.1%; width:34.4%; height:7.2%">Buy me a cosmo (opens in a new tab)</a>
   </figure>
-  <p class="cafe-hint">The pink neon opens <a href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener">Buy Me a Coffee ↗</a></p>
+  <p class="cafe-hint"><a href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener">Buy Me a Cosmo ↗</a></p>
+</dialog>
+
+<!-- 5 · THE POSTER UP CLOSE: the Best Storyteller poster from the black wall, with a BUY IT button. The same as
+     clicking the poster in the storefront window. PART 3 (step 2B) fills in its picture (the same one hanging on
+     the wall, so nothing new downloads), its name, and the BUY IT link (POSTERS in data.js). -->
+<dialog class="pop pop-poster" id="pop-poster" aria-label="Best Storyteller poster">
+  <div class="lb-box" tabindex="-1" autofocus>   <!-- (autofocus: the popup opens with nothing lit up, as on the storefront) -->
+    <button class="close" type="button" aria-label="Close">×</button>
+    <img class="lb-poster" id="lb-poster" width="864" height="1102" alt="">
+    <a class="lb-buy" id="lb-buy" href="#" target="_blank" rel="noopener">Buy it</a>
+  </div>
 </dialog>
 
 <!-- 4 · THE GALLERY: first the whole exhibit on one wall (the hang), then one photo at a time (the viewer) -->
@@ -467,6 +512,10 @@ body.leaving::before { opacity: 1; }
   // Where the Edison bulbs' warm light is brightest on this wall: metres from the back corner, and up from the floor.
   // (post.js lays a warm patch there, baked into the wall's picture; the poster gets the same light.)
   const BULB_GLOW = { wide: [5.42, 2.86], narrow: [6.56, 2.86] };
+  // The book on the poster, from the storefront's own list (POSTERS in data.js), so the BUY IT button always goes
+  // to the same shop as the storefront's
+  const BEST = ((window.NRSF || {}).POSTERS || []).find(p => p.kind === "bestseller");
+  if (BEST) { $("lb-buy").href = BEST.link; $("pop-poster").setAttribute("aria-label", BEST.book + " by " + BEST.author); }
   function hangPoster() {
     const P = DATA.WALL_POSTER, box = P && P[setName], wall = room.querySelector(".w-right");
     if (!box || !wall) return;
@@ -474,11 +523,15 @@ body.leaving::before { opacity: 1; }
     const h = Math.min(boxH, boxW / P.shape), w = h * P.shape;        // as big as fits, keeping its shape
     const x = box.from + (boxW - w) / 2;                               // centred along the stretch...
     const y = HM - (box.bottom + (boxH - h) / 2) - h;                  // ...and up and down (its top edge, down from the top)
-    const el = document.createElement("div");
-    el.className = "poster";
+    // (a button: clicking it opens popup 5, the poster up close; data-label is the name tag that follows the mouse)
+    const el = document.createElement("button");
+    el.type = "button"; el.className = "poster"; el.dataset.pop = "poster"; el.dataset.label = BEST ? BEST.book : "Best Storyteller";
+    el.setAttribute("aria-label", (P.alt || "The Best Storyteller poster") + " Open it up close");
     Object.assign(el.style, { left: m(x), top: m(y), width: m(w), height: m(h) });
-    const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = P.alt || "";
+    const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = "";
     img.src = IMG + (setName === "narrow" && P.phone ? P.phone : P.img);
+    // popup 5 shows this same picture, big, with the BUY IT button under it
+    const lb = $("lb-poster"); lb.src = img.src; lb.alt = P.alt || "";
     // Over the poster, from the bottom up (the same order as on the wall in post.js): the ivy, then the room's light.
     // Each is sized to what it covers on the wall and slid back by the poster's own position, so it lines up
     // exactly with the wall around the poster.
@@ -486,7 +539,7 @@ body.leaving::before { opacity: 1; }
     //   2.5 m tall, repeating, started 2.3 m in on this wall). ivy-wall-fringe.webp is just its lower part, the long
     //   strands from 1.2 m to 2.5 m down from the top of the wall (a small download). It shows over the poster's top
     //   margin, then fades out (the mask) just above the words. (So keep the poster's top at 6.0 m or lower.)
-    const ivy = document.createElement("div");
+    const ivy = document.createElement("span");
     ivy.className = "poster-ivy";
     const words = .05 + (h - .1) * 55 / 1102;                         // where the lettering starts, down from the poster's top (m)
     const fade = `linear-gradient(#000 ${m(words * .45)}, transparent ${m(words * .9)})`;
@@ -494,7 +547,7 @@ body.leaving::before { opacity: 1; }
       backgroundSize: `${m(6.4)} ${m(1.3)}`, backgroundPosition: `${m(-2.3 - x)} ${m(1.2 - y)}`, maskImage: fade, webkitMaskImage: fade });
     //   THE LIGHT (the same as .nrp-wallshade-r in post.css, plus the bulbs' warm light, kept soft at its edges).
     //   (In a list of backgrounds, the FIRST one is drawn on top.)
-    const light = document.createElement("div");
+    const light = document.createElement("span");
     light.className = "poster-light";
     const [gx, gy] = BULB_GLOW[setName] || [0, 0], gw = 2.9, gh = 4;  // the warm light: centre, and how far it spreads (m)
     Object.assign(light.style, {
@@ -561,11 +614,11 @@ body.leaving::before { opacity: 1; }
   /* STEP 5 · THE BUTTONS' NAME TAG: follows the mouse over a button; for keyboard visitors it sits on the button */
   const showTag = (text, x, y) => { tag.textContent = text; tag.style.left = x + "px"; tag.style.top = y + "px"; tag.hidden = false; };
   room.addEventListener("pointermove", e => {
-    const b = e.target.closest(".spot");
+    const b = e.target.closest(".spot, .poster");
     if (b && e.pointerType === "mouse") showTag(b.dataset.label, e.clientX, e.clientY); else tag.hidden = true;
   });
   room.addEventListener("pointerleave", () => (tag.hidden = true));
-  room.addEventListener("focusin", e => { const b = e.target.closest(".spot"); if (!b) return; const r = b.getBoundingClientRect(); showTag(b.dataset.label, r.left + r.width / 2, r.top + r.height / 2); });
+  room.addEventListener("focusin", e => { const b = e.target.closest(".spot, .poster"); if (!b) return; const r = b.getBoundingClientRect(); showTag(b.dataset.label, r.left + r.width / 2, r.top + r.height / 2); });
   room.addEventListener("focusout", () => (tag.hidden = true));
 
   /* STEP 6 · OPEN AND CLOSE THE POPUPS
