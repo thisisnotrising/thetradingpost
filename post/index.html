@@ -5,76 +5,612 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>THE POST · 777 Daydream St.</title>
 <meta name="description" content="Inside the Trading Post: the Newsstand, the Wishing Wall, Nebula Cafe and the Gallery.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- The web fonts load without holding up the page (media="print" until loaded, then switched on); the room's own
-     lettering doesn't wait for them. Only the families THE POST uses are asked for. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&family=Sacramento&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&family=Sacramento&display=swap"></noscript>
-<!-- START THESE DOWNLOADS AT ONCE: the room can't be built until it has the Wishing Wall's six fonts (the wall is
-     measured in them) and the two photos the glass roof is painted from, so the browser fetches them right away,
-     side by side with everything else, instead of discovering them later. -->
-<link rel="preload" href="../assets/fonts/wall/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/wall/sedgwick-ave-display.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/wall/rock-salt.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/wall/bebas-neue.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/wall/black-ops-one.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/wall/reenie-beanie.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/img/post/sky.webp" as="image">
-<link rel="preload" href="../assets/img/post/roof-glass.webp" as="image">
+<!--
+  NOT RISING · THE POST, the room inside 777 Daydream St.
+  ------------------------------------------------------------------
+  THE BIG IDEA: A STAGE SET
+  The room is a real 3D box, exactly like the original: walls, floor and a
+  glass roof, tilted into place, with a camera that comes down through the
+  room as you scroll. But every surface, and everything standing in the
+  room, is ONE finished picture. Nothing is painted while the visitor
+  waits; the browser holds the pictures up in 3D and moves the camera.
+  Four invisible buttons sit on the walls (Newsstand, Wishing Wall, Cafe,
+  Gallery); each one opens a popup.
+
+  THIS FILE HAS THREE PARTS
+    PART 1 · THE LOOK       (CSS, in the <style> below): the box, the camera, the buttons, the popups
+    PART 2 · THE BONES      (HTML, in the <body>): an empty stage, the cue, the 4 popups
+    PART 3 · THE BEHAVIOUR  (JavaScript, at the bottom): size the room, put up the set, move the camera,
+                            open and close popups, the gallery
+
+  WHERE THINGS COME FROM
+    The set: assets/post-stage.js (the list of pictures and where each stands, in metres) and
+      assets/img/post/stage/ (the pictures). Both are made by tools/bake-stage.js, which photographs
+      post/recipe.html, the live room. To change the room: change the recipe, then re-bake.
+    The Wishing Wall and café close-ups: assets/img/post/room/ (tools/bake-post.js)
+    The gallery's photos and label, and the wishes' words: assets/data.js, PART 3
+  ------------------------------------------------------------------
+-->
 <style>
-  /* basic reset: no page margin, phone notches respected */
-  html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
-  body { margin: 0; background: #f4efe6; }
-  [hidden] { display: none !important; }
-</style>
-<!-- The Newsstand's own stylesheet: the kiosk on the left wall is a miniature of the real one -->
-<link rel="stylesheet" href="../assets/newsstand.css">
-<link rel="stylesheet" href="../assets/post.css">
-<!-- Came through the storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
-<style>
-html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
-@keyframes nr-from-light { to { opacity: 0; visibility: hidden; } }
-@media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
+/* ================================================================
+   PART 1 · THE LOOK
+   ================================================================ */
+
+/* --- The page itself: black behind everything. The page scrolls up and down only, never sideways: how far it
+   scrolls is how far the camera comes down through the room. While a popup is open it stays put (.locked). --- */
+html { box-sizing: border-box; overflow-x: hidden; } *, *::before, *::after { box-sizing: inherit; }
+html, body { margin: 0; background: #0d0d0e; }
+html.locked, html.locked body { overflow: hidden; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read aloud by screen readers, not shown */
+
+/* --- THE STAGE ---
+   .stage  as tall as the room (--PH): that's what gives the page something to scroll
+   .scene  the camera, pinned to the screen. "perspective" is how far your eye is from the screen (--P);
+           perspective-origin 50% 50% = looking straight ahead, at the middle of the screen
+   .room   the box, kept in real 3D (preserve-3d). As you scroll, PART 3 slides it up past the camera by exactly the
+           distance scrolled: what a camera coming down a staircase sees. Far things (Nebula) barely move; the walls by
+           the door sweep past. That difference in speed is the parallax that makes it feel like coming down.
+   The sizes are set by PART 3, step 1, in pixels: --u one metre, --W the screen's width, --Wr the room's width,
+   --D its depth, --PH its height, --DN the near floor slab, --P the camera's distance, --walk the walk-in. */
+.stage { position: relative; height: var(--PH, 200vh); }
+.stage:not(.ready) .scene { opacity: 0; }                    /* hidden until its pictures have arrived... */
+.stage.ready .scene { opacity: 1; transition: opacity .5s; } /* ...then it fades in */
+.scene { position: fixed; inset: 0; overflow: hidden; perspective: var(--P); perspective-origin: 50% 50%; }
+.room { position: absolute; top: 0; left: calc((var(--W) - var(--Wr)) / 2); width: var(--Wr); height: var(--PH);
+  transform-style: preserve-3d; will-change: translate; pointer-events: none; }
+/* walking in: the room starts a step further away and comes toward you */
+.walk-in .room { animation: walk-in 1.8s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes walk-in { from { transform: translateZ(var(--walk)); } }
+
+/* THE SIDES OF THE BOX: each a flat panel, tilted into place, exactly as in the original room.
+   The back wall is pushed straight back; the left wall is hinged on its left edge and swung 90° to run from the door
+   to the café; the right wall is hinged on its right edge and swung the other way; the floor is laid in two slabs,
+   each hinged on its front edge and tipped back flat. Each side holds its picture(s) (the <img>s inside it). */
+.wall, .panel { position: absolute; overflow: hidden; }
+.wall > img, .panel > img, .piece { position: absolute; display: block; max-width: none; }
+.w-back { left: 0; top: 0; width: var(--Wr); height: var(--PH); transform: translateZ(calc(var(--D) * -1)); background: #141414; }
+.w-left { left: 0; top: 0; width: var(--D); height: var(--PH); transform-origin: 0 50%; transform: rotateY(90deg); background: #e8e4dc; }
+.w-right { left: calc(var(--Wr) - var(--D)); top: 0; width: var(--D); height: var(--PH); transform-origin: 100% 50%; transform: rotateY(-90deg); background: #141414; }
+.w-floor { left: 0; top: calc(var(--PH) - var(--D)); width: var(--Wr); height: calc(var(--D) - var(--DN)); transform-origin: 50% 100%;
+  transform: translate3d(0, var(--DN), calc(var(--DN) * -1)) rotateX(90deg); background-color: #0b0b0c; }
+.w-floor-near { left: 0; top: calc(var(--PH) - var(--DN)); width: var(--Wr); height: var(--DN); transform-origin: 50% 100%; transform: rotateX(90deg); background-color: #0b0b0c; }
+
+/* --- The light in the room, laid over the screen (so it stays put while you scroll), the same as the original:
+   soft sunbeams from the glass roof, then a warm tint and a gentle vignette. Clicks go straight through. --- */
+.sun { position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 46% 40% at 44% 30%, rgba(255,250,232,.2), transparent 70%),
+    linear-gradient(108deg, transparent 34%, rgba(255,247,226,.09) 38%, transparent 44%, transparent 50%, rgba(255,247,226,.06) 55%, transparent 61%, transparent 66%, rgba(255,247,226,.05) 70%, transparent 75%); }
+.air { position: fixed; inset: 0; pointer-events: none; opacity: .9;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,0) 60%, rgba(20,12,6,.22)), linear-gradient(rgba(255,236,200,.12), rgba(255,236,200,.12)); }
+
+/* --- CRYSTAL GLASS: the look of every button and label that floats over the room (the four spots' name tags,
+   the way back out, the phone directory, the popups' close buttons). Clear and see-through, like cut crystal:
+     - the room behind shows through, blurred and a little brighter (backdrop-filter)
+     - a faint white wash, brighter at the top-left facet (the first gradient)
+     - a hairline of light around the edge and a brighter line along the top (the inset box-shadows)
+     - a faint rainbow at the edge, the way crystal splits light (the ::before layer, a thin ring of colour)
+   White lettering with a soft dark shadow, so it reads over light and dark parts of the room alike. --- */
+.crystal { position: relative; isolation: isolate; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.08) 42%, rgba(255,255,255,.04) 58%, rgba(255,255,255,.2));
+  -webkit-backdrop-filter: blur(6px) saturate(1.5) brightness(1.08); backdrop-filter: blur(6px) saturate(1.5) brightness(1.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(255,255,255,.2),
+    0 4px 14px rgba(0,0,0,.28); }
+.crystal::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; padding: 1px;
+  background: linear-gradient(115deg, rgba(255,120,170,.55), rgba(255,220,120,.5) 25%, rgba(120,255,200,.45) 50%, rgba(120,170,255,.55) 75%, rgba(220,140,255,.5));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: .7; }
+
+/* --- THE FOUR BUTTONS: invisible patches stuck onto the walls (inside the 3D walls, so they move with the room).
+   pointer-events: auto = they answer to the mouse, though the room around them doesn't. A faint glow on hover. --- */
+.spot { position: absolute; display: block; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer;
+  pointer-events: auto; transition: background .3s; -webkit-tap-highlight-color: transparent; }
+.spot:hover, .spot:focus-visible { background: rgba(255,248,232,.1); }
+.spot:focus-visible { outline: calc(var(--u) * .03) solid rgba(255,255,255,.8); outline-offset: calc(var(--u) * -.03); }   /* (for keyboard visitors) */
+/* its name: a small crystal tag that follows the mouse (and sits on the button for keyboard visitors) */
+.tag { position: fixed; z-index: 6; pointer-events: none; white-space: nowrap; transform: translate(14px, 14px);
+  font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  padding: 8px 12px; border-radius: 3px; }   /* (crystal glass: see above) */
+
+/* --- The page furniture: the way back out, the "Scroll down" cue (at the bottom of the screen), the phone directory --- */
+.back { position: fixed; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  font: 700 10px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  text-decoration: none; padding: 6px 9px; border-radius: 3px; }   /* (crystal glass: see above) */
+.back:hover { background-color: rgba(255,255,255,.12); }
+.back:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.cue { position: fixed; z-index: 5; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
+  display: grid; justify-items: center; gap: 6px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
+  font: 700 11px/1 Arimo, "Helvetica Neue", Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
+.cue::after { content: ""; width: 12px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); animation: bob 1.6s ease-in-out infinite; }       /* a little arrow under the words, pointing down */
+.cue.gone { opacity: 0; }
+@media (max-aspect-ratio: 9/10) { .cue { bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 82px); } }   /* phones: just above the directory */
+@keyframes bob { 50% { transform: translateY(5px) rotate(45deg); } }
+
+/* The directory: the four places as buttons, for phones only (on a phone some of the room is off to the side).
+   A small crystal panel (about a third smaller than it was): four crystal buttons in a 2 x 2 grid. */
+.directory { display: none; }
+@media (max-aspect-ratio: 9/10) {
+  .directory { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; position: fixed; z-index: 5; padding: 5px; border-radius: 6px;
+    left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .directory button { border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left; white-space: nowrap;
+    font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+  .directory button:active { background-color: rgba(255,255,255,.3); }
+}
+
+/* --- THE POPUPS. Each popup is a <dialog>: the browser's own popup box. It covers the screen, keeps the keyboard
+   inside itself while open, and closes with the Escape key all by itself. --- */
+dialog.pop { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: #0d0d0c; color: #f1ece2; overflow: hidden; overscroll-behavior: contain;
+  font-family: Arimo, "Helvetica Neue", Arial, sans-serif; }
+dialog.pop[open] { animation: fade-in .35s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+.close { position: fixed; z-index: 3; top: max(8px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px));
+  width: 44px; height: 44px; border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+  font: 300 30px/1 "Helvetica Neue", Arial, sans-serif; }   /* (crystal glass: see above) */
+.close:hover, .close:focus-visible { outline: none; background-color: rgba(255,255,255,.18); }
+.close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* 1 · Newsstand: the real Newsstand page, shown inside the popup (an <iframe> is a window onto another page) */
+.pop-newsstand iframe { display: block; width: 100%; height: 100%; border: 0; background: #f4efe6; }
+
+/* 2 · Wishing Wall: the whole wall, as big as the screen allows. Click (or tap) it to zoom in and read; the zoomed
+   wall is 3 times bigger and scrolls every way (swipe, or the scroll wheel); click again to see it all. */
+.wall-scroll { position: absolute; inset: 0; display: flex; overflow: auto;
+  padding: 24px max(24px, env(safe-area-inset-right, 0px)) 48px max(24px, env(safe-area-inset-left, 0px)); }
+.wall-scroll img { display: block; margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%; cursor: zoom-in;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.wall-scroll.zoomed img { max-width: none; max-height: none; cursor: zoom-out; }
+.wall-hint { position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8d8a86; pointer-events: none; }
+
+/* 3 · Cafe: the Nebula close-up, as big as fits. The pink neon on it is a link to Buy Me a Coffee. */
+dialog.pop-cafe[open] { display: grid; place-items: center; align-content: center; gap: 12px; padding: 56px 16px 20px; }
+.cafe { position: relative; margin: 0; width: min(100%, calc((100vh - 110px) * 1400 / 1516)); width: min(100%, calc((100svh - 110px) * 1400 / 1516)); }
+.cafe img { display: block; width: 100%; height: auto; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.neon { position: absolute; display: block; border-radius: 40%; color: transparent; font-size: 1px; transition: background .3s; }
+.neon:hover, .neon:focus-visible { outline: none; background: radial-gradient(closest-side, rgba(255,90,150,.35), transparent); }
+.cafe-hint { margin: 0; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8d8a86; text-align: center; }
+.cafe-hint a { color: #f1ece2; }
+
+/* 4 · Gallery: the whole exhibit on one black brick wall, then each photo big (the viewer) */
+dialog.pop-gallery { overflow-y: auto;
+  background:
+    radial-gradient(ellipse 58% 52% at 50% 40%, rgba(255,232,196,.13), rgba(255,232,196,.04) 55%, transparent 75%),
+    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 45%, rgba(0,0,0,.72)),
+    url(../assets/img/post/black-brick.webp) 50% 50% / 484px auto repeat, #111;
+  background-attachment: fixed; }
+.hang { max-width: 1060px; margin: 0 auto; padding: 64px 24px 48px; }
+.hang header { margin: 0 0 30px; }
+.hang h2 { margin: 0; font: 300 clamp(34px, 6vw, 56px)/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; }
+.hang header p { margin: 8px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #b9b3a9; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 34px); }
+@media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+/* each photo as a small canvas print: a thin black float frame around a square crop */
+.print { display: block; aspect-ratio: 1; margin: 0; padding: 5px; border: 0; cursor: pointer; background: #070707;
+  box-shadow: 0 0 0 4px #1c1c1c, 0 0 0 5px #3a3a3a, 0 14px 30px rgba(0,0,0,.6); transition: transform .25s; }
+.print:hover, .print:focus-visible { outline: none; transform: translateY(-3px); box-shadow: 0 0 0 4px #1c1c1c, 0 0 0 5px #8d8a86, 0 18px 36px rgba(0,0,0,.7); }
+.print img { display: block; width: 100%; height: 100%; object-fit: cover; background: #222; }
+
+/* the viewer: one photo, whole and untrimmed, with its museum label flush to the frame's outer edge */
+.viewer { position: fixed; inset: 0; display: grid; place-items: center;
+  padding: max(56px, env(safe-area-inset-top, 0px)) 72px max(40px, env(safe-area-inset-bottom, 0px)); }
+.v-count { position: absolute; top: max(20px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); margin: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #8d8a86; }
+.v-btn { position: absolute; z-index: 1; border: 0; padding: 0; background: transparent; color: #f1ece2; cursor: pointer; opacity: .75; }
+.v-btn:hover, .v-btn:focus-visible { opacity: 1; outline: none; }
+.v-btn:focus-visible { box-shadow: 0 0 0 2px #f1ece2; }
+.v-all { top: max(14px, env(safe-area-inset-top, 0px)); left: 16px; padding: 6px 8px; font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.v-prev, .v-next { top: 50%; transform: translateY(-50%); width: 48px; height: 64px; font: 300 56px/1 "Helvetica Neue", Arial, sans-serif; }
+.v-prev { left: 12px; } .v-next { right: 12px; }
+.piece { margin: 0; display: flex; align-items: flex-end; gap: 30px; max-width: 100%; max-height: 100%; }
+.frame { position: relative; flex: 0 1 auto; min-width: 0; background: #070707; padding: 7px;
+  box-shadow: 0 0 0 6px #1c1c1c, 0 0 0 7px #3a3a3a, 0 22px 55px rgba(0,0,0,.7); }
+.frame img { display: block; width: auto; height: auto; object-fit: contain;
+  max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); max-width: calc(100vw - 144px - 330px); }
+/* the label: a printed card behind clear glass, held off the wall by four chrome standoffs */
+.label { position: relative; flex: 0 0 auto; margin: 0 0 -7px; }
+.glass { position: relative; padding: 11px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05) 45%, rgba(220,235,255,.08));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 1px 0 rgba(255,255,255,.6), 0 8px 22px rgba(0,0,0,.55); }
+.glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 18%, rgba(255,255,255,.28) 24%, rgba(255,255,255,.06) 31%, transparent 37%, transparent 64%, rgba(255,255,255,.12) 68%, transparent 73%); }
+.card { background: #f7f5f0; color: #111; padding: 13px 18px 14px 16px; width: max-content; min-width: 200px; max-width: 290px; }
+.card p { margin: 0; }
+.v-artist { font-weight: 700; font-size: 12px; letter-spacing: .06em; line-height: 1.35; }
+.v-title  { font-size: 13px; line-height: 1.35; margin-top: 6px !important; }
+.v-medium { font-size: 11.5px; line-height: 1.35; color: #555; margin-top: 2px !important; }
+.screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
+/* on a phone: the label goes under the photo (flush with its right edge) and the arrows drop to the bottom corners */
+@media (max-width: 760px) {
+  .viewer { padding: max(52px, env(safe-area-inset-top, 0px)) 16px max(76px, env(safe-area-inset-bottom, 0px)); }
+  .piece { flex-direction: column; align-items: flex-end; gap: 4px; }
+  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 330px); max-height: calc(100dvh - 330px); }
+  .label { margin: 6px -7px 0 0; }
+  .v-prev, .v-next { top: auto; transform: none; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .v-prev { left: 16px; } .v-next { right: 16px; }
+}
+
+/* --- Coming in through the storefront door, and leaving: a fade from (and to) white light --- */
+html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: from-light 1.2s ease-out .1s both; }
+@keyframes from-light { to { opacity: 0; visibility: hidden; } }
+body::before { content: ""; position: fixed; inset: 0; z-index: 2147483646; background: #fff; opacity: 0; pointer-events: none; transition: opacity .6s ease-in; }
+body.leaving::before { opacity: 1; }
+
+/* Visitors who ask for less motion get none */
+@media (prefers-reduced-motion: reduce) {
+  .cue::after, dialog.pop[open], html.from-light body::after { animation: none; }
+  html.from-light body::after { display: none; }
+  .spot, .print, body::before, .stage.ready .scene { transition: none; }
+  .walk-in .room { animation: none; }
+}
 </style>
 <script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
 </head>
 <body>
-<!-- NOT RISING · THE POST, the room inside 777 Daydream St.
-     The room is a real 3D box made of flat panels (walls, floor, ceiling),
-     tilted into place with CSS. post.js fills each panel with its drawings
-     and reads the words, wishes and photos from data.js (PART 3). -->
-<div class="nrp" id="nrp" lang="en">
-  <a class="nrp-back" href="../index.html">← 777 Daydream St.</a>
+<!-- ================================================================
+     PART 2 · THE BONES
+     ================================================================ -->
 
-  <div class="nrp-scene" id="nrp-scene">
-    <div class="nrp-room" id="nrp-room">
-      <!-- The sides of the box. post.js draws into each one. -->
-      <div class="nrp-wall nrp-back-wall" id="nrp-back"></div>    <!-- the windows, Nebula Cafe, the EXIT hallway -->
-      <div class="nrp-wall nrp-left"  id="nrp-left"></div>         <!-- white brick: the Newsstand, the graffiti -->
-      <div class="nrp-wall nrp-right" id="nrp-right"></div>        <!-- black brick: the Gallery -->
-      <div class="nrp-wall nrp-floor" id="nrp-floor"></div>        <!-- stone floor (the far slab), daylight -->
-      <div class="nrp-wall nrp-floor-near" id="nrp-floor-near"></div>  <!-- stone floor (the near slab, inside the door) -->
-      <div class="nrp-wall nrp-ceiling" id="nrp-ceiling"></div>
-      <!-- The skylight, the planters, the café, the plants and the rattan lounge stand inside the room.
-           post.js adds them here. -->
-    </div>
+<a class="back crystal" href="../index.html">← 777 Daydream St.</a>
+
+<!-- THE STAGE: empty here. PART 3 puts up the set from assets/post-stage.js: the walls, floor and roof, everything
+     standing in the room, and the four buttons on the walls. -->
+<main class="stage" id="stage" aria-label="THE POST: a tall room under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand and the Wishing Wall. Ahead, through a great arch, Nebula Cafe with its glittering black counter and a pink neon sign. In front of it, on the right, a lounge: a low green L-shaped sofa heaped with cushions and throws, a wooden coffee table, a woven jute pouf and rug, a rattan pendant and Edison bulbs overhead. On the right wall, black brick: the Gallery, rows of black-and-white photographs.">
+  <div class="scene"><div class="room" id="room"></div></div>
+</main>
+
+<!-- The light in the room (laid over the screen), the buttons' name tag, and the nudge to look down -->
+<div class="sun" aria-hidden="true"></div>
+<div class="air" aria-hidden="true"></div>
+<div class="tag crystal" id="tag" hidden></div>
+<p class="cue" id="cue" aria-hidden="true">Scroll down</p>
+
+<!-- The directory by the door (shows on phones only): the same four places as buttons -->
+<nav class="directory crystal" aria-label="Directory">
+  <button class="crystal" type="button" data-pop="newsstand">← Newsstand</button>
+  <button class="crystal" type="button" data-pop="wall">↖ Wishing Wall</button>
+  <button class="crystal" type="button" data-pop="cafe">↑ Cafe</button>
+  <button class="crystal" type="button" data-pop="gallery">Gallery →</button>
+</nav>
+
+<!-- THE FOUR POPUPS. Each starts closed. "data-src" (instead of "src") holds back a picture or page
+     until the popup is first opened (PART 3, step 2), so nobody downloads what they don't open. -->
+
+<!-- 1 · THE NEWSSTAND: the real Newsstand page inside the popup -->
+<dialog class="pop pop-newsstand" id="pop-newsstand" aria-label="The Newsstand">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <iframe title="The Newsstand" data-src="../newsstand/index.html" allow="fullscreen"></iframe>
+</dialog>
+
+<!-- 2 · THE WISHING WALL: the painted wall, flat and straight on -->
+<dialog class="pop pop-wall" id="pop-wall" aria-label="The Wishing Wall">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <div class="wall-scroll" data-empty>
+    <img id="wall-img" data-src="../assets/img/post/room/wall.webp" width="2722" height="2053"
+         alt="The Wishing Wall: white brick with a floor-to-ceiling stencilled cowboy in the middle and every cover feature's wish painted in its own block around him, under the words WISHING WALL.">
   </div>
+  <p class="wall-hint" id="wall-hint" aria-hidden="true">Click the wall to zoom in</p>
+  <!-- the wishes as words too, for screen readers (filled in from data.js) -->
+  <ul class="sr-only" id="wishes"></ul>
+</dialog>
 
-  <!-- Sunlight streaming in through the glass, then the air of the room (a soft vignette and a little grain) -->
-  <div class="nrp-sun" aria-hidden="true"></div>
-  <div class="nrp-air" aria-hidden="true"></div>
+<!-- 3 · NEBULA CAFE: the close-up; the pink neon is the link.
+     The link's left / top / width / height are percent of the close-up picture. -->
+<dialog class="pop pop-cafe" id="pop-cafe" aria-label="Nebula Cafe">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <figure class="cafe">
+    <img data-src="../assets/img/post/room/cafe.webp" width="1400" height="1516"
+         alt="Nebula Cafe: NEBULA cafe in warm white neon on white brick under an ivy-hung arch, a pink neon sign below it that reads buy me a coffee, shelves of jars and bottles, Edison bulbs, and a glittering black counter.">
+    <a class="neon" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener"
+       style="left:33.7%; top:58.8%; width:32.5%; height:7.1%">Buy me a coffee (opens Buy Me a Coffee in a new tab)</a>
+  </figure>
+  <p class="cafe-hint">The pink neon opens <a href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener">Buy Me a Coffee ↗</a></p>
+</dialog>
 
-  <!-- You land up under the roof; this nudges you to scroll down to the shop floor -->
-  <div class="nrp-down" id="nrp-down" aria-hidden="true">Scroll down</div>
-  <div class="nrp-toast" id="nrp-toast" role="status" hidden></div>
-</div>
+<!-- 4 · THE GALLERY: first the whole exhibit on one wall (the hang), then one photo at a time (the viewer) -->
+<dialog class="pop pop-gallery" id="pop-gallery" aria-label="Gallery: LIFE Exhibit">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
 
-<!-- Where the pictures live, then the data, then the engine, then the full-screen button -->
-<script>window.NRNS_BASE = "../assets/img/";</script>
+  <section class="hang" id="hang" data-empty>
+    <header>
+      <h2 id="g-title">LIFE</h2>
+      <p id="g-sub"></p>
+    </header>
+    <div class="grid" id="grid"></div>   <!-- the 16 framed prints are added here from data.js -->
+  </section>
+
+  <section class="viewer" id="viewer" hidden data-empty>   <!-- (in the viewer, a click on the dark goes back to the hang) -->
+    <button class="v-btn v-all" id="v-all" type="button">← All photos</button>
+    <p class="v-count" id="v-count"></p>
+    <button class="v-btn v-prev" id="v-prev" type="button" aria-label="Previous photo">‹</button>
+    <button class="v-btn v-next" id="v-next" type="button" aria-label="Next photo">›</button>
+    <figure class="piece" data-empty>
+      <div class="frame"><img id="v-img" alt=""></div>
+      <figcaption class="label">
+        <div class="glass">
+          <div class="card">
+            <p class="v-artist" id="v-artist"></p>
+            <p class="v-title" id="v-title"></p>
+            <p class="v-medium" id="v-medium"></p>
+          </div>
+          <i class="screw" style="left:6px;top:6px"></i><i class="screw" style="right:6px;top:6px"></i>
+          <i class="screw" style="left:6px;bottom:6px"></i><i class="screw" style="right:6px;bottom:6px"></i>
+        </div>
+      </figcaption>
+    </figure>
+  </section>
+</dialog>
+
+<!-- The words and photo lists (data.js), the stage set (post-stage.js), then PART 3, then the full-screen button -->
 <script src="../assets/data.js"></script>
-<!-- (post-paint.js is not loaded: its paintings are baked into assets/img/post/baked; it stays as the recipe) -->
-<script src="../assets/post-roof.js"></script>    <!-- paints the glass roof and the leaves lying on it -->
-<script src="../assets/post.js"></script>
+<script src="../assets/post-stage.js"></script>
+<script>
+/* ================================================================
+   PART 3 · THE BEHAVIOUR
+   ================================================================ */
+(function () {
+  const $ = id => document.getElementById(id);
+  const DATA = window.NRPOST || {};
+  const IMG = "../assets/img/";
+  const room = $("room"), stage = $("stage"), cue = $("cue"), tag = $("tag");
+  const STAGE = window.NRSTAGE, SET_BASE = IMG + "post/stage/";
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let S = null, setName = "", SIZE = {};   // SIZE: this screen's room, in pixels
+
+  /* STEP 1 · SIZE THE ROOM FOR THIS SCREEN (the same rules as the original room)
+     A phone (any screen taller than it is wide) gets the NARROW set: a corridor 4.2 m wide and 17 m deep.
+     Everything else gets the WIDE set: 6.4 m wide, 13.5 m deep. The room is 7.2 m tall (two storeys).
+       u  = how many pixels make one metre. The room is 2 screens tall (2.2 on a phone), so u = 2 x screen height / 7.2.
+            (On a very wide screen it's sized by the width instead, so the room always spans the screen.)
+       P  = how far the camera is from the screen: 0.9 x its width (on a phone, a little further back)
+     Nothing is ever wider than the screen: the room's sides run off its edges, the way they did in the original. */
+  function measure() {
+    const W = innerWidth, H = innerHeight;
+    setName = W / H < .9 ? "narrow" : "wide";
+    S = STAGE[setName];
+    const R = S.room, narrow = setName === "narrow";
+    const u = narrow ? 2.2 * H / R.HM : Math.max(2 * H / R.HM, W / R.Wm);
+    const P = narrow ? Math.max(W * 1.9, H * .95) : W * .9;
+    SIZE = { W, H, u, P, D: R.Dm * u, PH: R.HM * u };
+    const css = stage.style;
+    css.setProperty("--u", u + "px");          css.setProperty("--W", W + "px");
+    css.setProperty("--Wr", R.Wm * u + "px");  css.setProperty("--D", SIZE.D + "px");
+    css.setProperty("--PH", SIZE.PH + "px");      css.setProperty("--DN", R.DNm * u + "px");
+    css.setProperty("--P", P + "px");          css.setProperty("--walk", -1.6 * u + "px");
+  }
+
+  /* STEP 2 · PUT UP THE SET
+     Reads the list in assets/post-stage.js and builds the room from it:
+       walls   each side of the box gets its picture(s), laid on it in metres, and its buttons
+       pieces  the two glass roof slopes (panels, tilted like the walls) and every picture standing in the room,
+               each pushed back to its own depth (translateZ) so the camera sees it in perspective
+       live    the ceiling fan and the benches (little 3D objects with their own look)
+     m(1.5) is "1.5 metres" written for CSS: calc(var(--u) * 1.5). */
+  const m = v => `calc(var(--u) * ${v})`;
+  function picture(b, cls) {
+    const i = new Image(); i.alt = ""; i.decoding = "async"; i.draggable = false; if (cls) i.className = cls;
+    i.src = SET_BASE + b.img;
+    Object.assign(i.style, { left: m(b.x), top: m(b.y), width: m(b.w), height: m(b.h) });
+    return i;
+  }
+  function button(h) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "spot"; b.dataset.pop = h.pop; b.dataset.label = h.label;
+    b.setAttribute("aria-label", "Open the " + h.label);
+    const [x, y, w, hh] = h.box;
+    Object.assign(b.style, { left: m(x), top: m(y), width: m(w), height: m(hh) });
+    return b;
+  }
+  let liveCss = null;
+  function putUpTheSet() {
+    room.textContent = "";
+    for (const [name, w] of Object.entries(S.walls)) {
+      const el = document.createElement("div");
+      el.className = "wall w-" + name;
+      if (w.style) el.style.cssText = w.style;            // (the floor: its sparkle, a small picture repeating every 2 m)
+      w.bands.forEach(b => el.appendChild(picture(b)));
+      w.hot.forEach(h => el.appendChild(button(h)));
+      room.appendChild(el);
+    }
+    for (const p of S.pieces) {
+      if (p.kind === "panel") {                          // a glass roof slope
+        const el = document.createElement("div");
+        el.className = "panel"; el.style.cssText = p.style;
+        p.bands.forEach(b => el.appendChild(picture(b)));
+        room.appendChild(el);
+      } else {                                           // something standing in the room, z metres back from the door
+        const i = picture(p, "piece");
+        i.style.transform = `translateZ(${m(-p.z)})`;
+        room.appendChild(i);
+      }
+    }
+    room.insertAdjacentHTML("beforeend", S.live);
+    if (!liveCss) { liveCss = document.createElement("style"); document.head.appendChild(liveCss); }
+    liveCss.textContent = S.css;
+  }
+
+  /* STEP 3 · THE CAMERA COMES DOWN THE STAIRS (the original room's own trick)
+     The camera (.scene) stays fixed to the screen. As you scroll, the whole room slides UP past it by exactly the
+     distance scrolled, which is what a camera being lowered sees. Only one thing changes ("translate"), and the
+     browser does that on the graphics chip without repainting anything, so it stays smooth. */
+  function eye() {
+    room.style.translate = `0 ${-scrollY}px 0`;
+    if (Math.abs(scrollY - landedAt) > 40) cue.classList.add("gone");   // the cue goes once you start looking around
+  }
+  let eyeQueued = false;
+  addEventListener("scroll", () => { if (eyeQueued) return; eyeQueued = true; requestAnimationFrame(() => { eyeQueued = false; eye(); }); }, { passive: true });
+
+  /* STEP 4 · WHERE YOU LAND
+     A wide screen lands at the very top, up under the glass roof, like the original. A phone lands centred on Nebula
+     Cafe: it finds the café's button and works out how far to scroll to bring its middle to the middle of the screen.
+     (The café is on the far wall, D pixels back, so it moves P / (P + D) as far as you scroll: that's the sum below.) */
+  let landedAt = 0;
+  function land() {
+    let y = 0;
+    const cafe = room.querySelector('.spot[data-pop="cafe"]');
+    if (setName === "narrow" && cafe) {
+      const r = cafe.getBoundingClientRect(), k = SIZE.P / (SIZE.P + SIZE.D);
+      y = Math.max(0, Math.min(SIZE.PH - SIZE.H, scrollY + (r.top + r.height / 2 - SIZE.H / 2) / k));
+    }
+    scrollTo(0, y); landedAt = y; eye();
+  }
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
+  /* START: size it, put it up, wait for the pictures (at most 3 seconds), fade in, walk in, land. */
+  function start() {
+    measure(); putUpTheSet(); eye();
+    const imgs = [...room.querySelectorAll("img")];
+    const loaded = Promise.all(imgs.map(i => i.decode().catch(() => {})));
+    Promise.race([loaded, new Promise(r => setTimeout(r, 3000))]).then(() => {
+      land();
+      stage.classList.add("ready");
+      if (!reduceMotion) stage.classList.add("walk-in");
+    });
+  }
+  start();
+  // a new screen shape (a phone turned on its side, a window resized) puts the set up again; a phone's address bar
+  // sliding away (a small change in height only) doesn't
+  let lastW = innerWidth, lastH = innerHeight, again;
+  addEventListener("resize", () => {
+    if (innerWidth === lastW && Math.abs(innerHeight - lastH) < lastH * .15) return;
+    lastW = innerWidth; lastH = innerHeight; clearTimeout(again);
+    again = setTimeout(() => { const before = setName; measure(); if (setName !== before) putUpTheSet(); eye(); }, 150);
+  });
+
+  /* STEP 5 · THE BUTTONS' NAME TAG: follows the mouse over a button; for keyboard visitors it sits on the button */
+  const showTag = (text, x, y) => { tag.textContent = text; tag.style.left = x + "px"; tag.style.top = y + "px"; tag.hidden = false; };
+  room.addEventListener("pointermove", e => {
+    const b = e.target.closest(".spot");
+    if (b && e.pointerType === "mouse") showTag(b.dataset.label, e.clientX, e.clientY); else tag.hidden = true;
+  });
+  room.addEventListener("pointerleave", () => (tag.hidden = true));
+  room.addEventListener("focusin", e => { const b = e.target.closest(".spot"); if (!b) return; const r = b.getBoundingClientRect(); showTag(b.dataset.label, r.left + r.width / 2, r.top + r.height / 2); });
+  room.addEventListener("focusout", () => (tag.hidden = true));
+
+  /* STEP 6 · OPEN AND CLOSE THE POPUPS
+     Every button with data-pop="name" opens the <dialog> with id "pop-name". The first time a popup opens,
+     its held-back pictures (data-src) are switched on, which is when they download. While it's open the page
+     underneath stays put (.locked). */
+  function openPop(name) {
+    const pop = $("pop-" + name);
+    pop.querySelectorAll("[data-src]").forEach(el => { el.src = el.dataset.src; el.removeAttribute("data-src"); });
+    if (name === "gallery") showHang();
+    tag.hidden = true;
+    document.documentElement.classList.add("locked");
+    pop.showModal();
+  }
+  // (one listener for the whole page: it catches a click on any button with data-pop, in the room or the directory)
+  document.addEventListener("click", e => { const b = e.target.closest("[data-pop]"); if (b) openPop(b.dataset.pop); });
+  document.querySelectorAll("dialog.pop").forEach(pop => {
+    pop.addEventListener("close", () => document.documentElement.classList.remove("locked"));
+    pop.querySelector(".close").addEventListener("click", () => pop.close());
+    // a click on the dark around the picture closes the popup too (data-empty marks those dark areas);
+    // in the gallery's viewer it steps back to the whole exhibit first
+    pop.addEventListener("click", e => {
+      if (e.target !== pop && !e.target.hasAttribute("data-empty")) return;
+      if (pop.id === "pop-gallery" && !viewer.hidden) showHang(); else pop.close();
+    });
+  });
+
+  /* STEP 6B · ZOOMING INTO THE WISHING WALL
+     A click (or tap) on the wall makes it 3 times the size it fits at, and scrolls so the spot you clicked stays
+     under your finger. Another click shows the whole wall again. */
+  const wallBox = document.querySelector(".wall-scroll"), wallImg = $("wall-img"), wallHint = $("wall-hint");
+  const tapWord = matchMedia("(pointer: coarse)").matches ? "Tap" : "Click";
+  wallHint.textContent = tapWord + " the wall to zoom in";
+  wallImg.addEventListener("click", e => {
+    const r = wallImg.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    const zoom = !wallBox.classList.contains("zoomed");
+    if (zoom) { wallImg.style.width = r.width * 3 + "px"; wallImg.style.height = r.height * 3 + "px"; }
+    else { wallImg.style.width = wallImg.style.height = ""; }
+    wallBox.classList.toggle("zoomed", zoom);
+    wallHint.textContent = zoom ? tapWord + " again to see the whole wall" : tapWord + " the wall to zoom in";
+    if (zoom) {
+      const r2 = wallImg.getBoundingClientRect(), b = wallBox.getBoundingClientRect();
+      wallBox.scrollLeft += (r2.left + fx * r2.width) - e.clientX;
+      wallBox.scrollTop += (r2.top + fy * r2.height) - e.clientY;
+    }
+  });
+  $("pop-wall").addEventListener("close", () => { wallBox.classList.remove("zoomed"); wallImg.style.width = wallImg.style.height = ""; });
+
+  /* STEP 7 · THE WISHES AS WORDS, for screen readers (the wall itself is a picture) */
+  (DATA.WISHES || []).forEach(w => {
+    const li = document.createElement("li");
+    li.textContent = w.wish.replace(/\*\*/g, "") + " (" + w.name + ", Human)";
+    $("wishes").appendChild(li);
+  });
+
+  /* STEP 8 · THE GALLERY
+     The hang: every photo in data.js as a small framed print, in order. Click one and the viewer
+     shows it whole, with its label. ‹ › (or the arrow keys, or a swipe) move along; "All photos" or Escape
+     goes back to the hang. */
+  const G = DATA.GALLERY || [], LABEL = DATA.GALLERY_LABEL || {};
+  const hang = $("hang"), viewer = $("viewer");
+  let at = 0;
+  $("g-title").textContent = (LABEL.title || "LIFE").split(" ")[0];          // "LIFE"
+  $("g-sub").textContent = [LABEL.title, LABEL.artist].filter(Boolean).join(" · ");
+  G.forEach((p, i) => {
+    const print = document.createElement("button");
+    print.className = "print"; print.type = "button";
+    print.setAttribute("aria-label", "Photo " + (i + 1) + ": " + (p.alt || ""));
+    const img = document.createElement("img");
+    img.alt = "";
+    img.dataset.src = IMG + (p.thumb || p.img.replace("/life/", "/life/wall/"));   // the small copy; the big one loads in the viewer
+    if (p.crop) img.style.objectPosition = p.crop;                               // which part of the photo the square keeps
+    print.appendChild(img);
+    print.addEventListener("click", () => show(i));
+    $("grid").appendChild(print);
+  });
+  function showHang() {
+    viewer.hidden = true; hang.hidden = false;
+    const print = $("grid").children[at]; if (print && $("pop-gallery").open) print.focus({ preventScroll: true });
+  }
+  function show(i) {
+    at = (i + G.length) % G.length;                                  // wrap around: after the last comes the first
+    const p = G[at], L = Object.assign({}, LABEL, p);                // the shared label, with this photo's own words on top
+    const img = $("v-img");
+    img.src = IMG + p.img; img.alt = p.alt || ""; img.style.aspectRatio = String(p.ar || 1);
+    $("v-artist").textContent = L.artist || "";
+    $("v-title").textContent = L.title || "";
+    $("v-medium").textContent = L.medium || "";
+    $("v-count").textContent = String(at + 1).padStart(2, "0") + " / " + String(G.length).padStart(2, "0");
+    if (viewer.hidden) { hang.hidden = true; viewer.hidden = false; $("v-next").focus({ preventScroll: true }); }
+    [at + 1, at - 1].forEach(j => { new Image().src = IMG + G[(j + G.length) % G.length].img; });   // fetch the neighbours early
+  }
+  $("v-prev").addEventListener("click", () => show(at - 1));
+  $("v-next").addEventListener("click", () => show(at + 1));
+  $("v-all").addEventListener("click", showHang);
+  const gallery = $("pop-gallery");
+  gallery.addEventListener("keydown", e => {
+    if (viewer.hidden) return;
+    if (e.key === "ArrowRight") show(at + 1);
+    if (e.key === "ArrowLeft") show(at - 1);
+  });
+  gallery.addEventListener("cancel", e => { if (!viewer.hidden) { e.preventDefault(); showHang(); } });   // Escape: back to the hang first
+  let startX = null;                                                 // a swipe: where the finger went down vs. where it came up
+  viewer.addEventListener("touchstart", e => { startX = e.touches[0].clientX; }, { passive: true });
+  viewer.addEventListener("touchend", e => {
+    if (startX == null) return;
+    const dx = e.changedTouches[0].clientX - startX; startX = null;
+    if (Math.abs(dx) > 45) show(at + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* STEP 9 · LEAVING: back out to Daydream St. through white light (the storefront fades in from it) */
+  document.querySelector(".back").addEventListener("click", e => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    e.preventDefault();
+    const href = e.currentTarget.href;
+    document.body.classList.add("leaving");
+    try { sessionStorage.setItem("nr-light", "1"); } catch (err) {}
+    setTimeout(() => (location.href = href), 600);
+  });
+  addEventListener("pageshow", () => document.body.classList.remove("leaving"));   // coming back with the Back button
+})();
+</script>
 <script src="../assets/fullscreen.js"></script>
 </body>
 </html>
