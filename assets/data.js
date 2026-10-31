@@ -293,7 +293,7 @@ window.NRSF = {
 
   /* Where each door and window leads, as folders of this site. */
   LINKS: {
-    tradingPost: "post/index.html", // right door, unit 10: opens into THE POST (the room inside); its directory leads on to the Newsstand
+    tradingPost: "post/cafe", // right door, unit 10: opens into THE POST (the room inside); its directory leads on to the Newsstand
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library"   // the A-frame floor sign (opens in a new tab)
