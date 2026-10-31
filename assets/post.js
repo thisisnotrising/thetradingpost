@@ -968,6 +968,9 @@
     ivy: .7,         // the strip at the top where the ivy hangs (no words there)
     floor: .15,      // the strip along the floor (no words there)
     base: .1,        // the cowboy's feet are this far above the floor; his hat reaches the ceiling
+    under: 1.05,     // when a wish goes under the mural (place: "under" in data.js), the cowboy is raised this much
+                     // more, and that wish is painted centred in the strip it leaves, across the middle of his body
+    underSpan: [.02, .82],   // the part of the stencil picture (left to right, 0 to 1) the cowboy's paint covers
     minA: 1.2, minB: .8,    // the smallest space a block can go in: 1.2 m one way, 0.8 m the other
     title: 2.8,      // WISHING / WALL are at most this wide
     aspect: 1.5,     // the blocks aim to be this many times wider than tall (so the words can run across)
@@ -1080,10 +1083,11 @@
     const ht = q => q.case === "up" ? fontOf(q).cap : fontOf(q).xh;
     const minFs = q => L / ht(q), byFs = q => L / fontOf(q).xh;
     const words = q => esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    const signed = q => "— " + esc(q.name) + (q.human === false ? "" : ", Human");   // (human: false in data.js = the name alone)
     const probe = make("div", "nrwv-probe", wall);
     list.forEach(q => {
       const f = fontOf(q);
-      probe.innerHTML = `<span style="font:${minFs(q) * PX}px/${f.lh} '${q.font}';word-spacing:${f.ws}em">${words(q)}</span> <span style="font:${byFs(q) * PX}px/${f.lh} '${q.font}'">— ${esc(q.name)}, Human</span>`;
+      probe.innerHTML = `<span style="font:${minFs(q) * PX}px/${f.lh} '${q.font}';word-spacing:${f.ws}em">${words(q)}</span> <span style="font:${byFs(q) * PX}px/${f.lh} '${q.font}'">${signed(q)}</span>`;
       const [a, b] = probe.children;
       q._unit = (a.offsetWidth * minFs(q) * f.lh + b.offsetWidth * byFs(q) * f.lh) / PX;   // square metres, at L = 1
     });
@@ -1101,7 +1105,8 @@
       const bw = bk.w - R.gap, bh = bk.h - R.gap;
       Object.assign(el.style, { left: (bk.x + g2) * PX + "px", top: (bk.y + g2) * PX + "px", width: bw * PX + "px", height: bh * PX + "px" });
       const inner = make("div", "nrwv-in", el);
-      inner.innerHTML = `<div class="nrwv-words">${words(q)}</div><div class="nrwv-name">— ${esc(q.name)}, Human</div>`;
+      inner.innerHTML = `<div class="nrwv-words">${words(q)}</div><div class="nrwv-name">${signed(q)}</div>`;
+      if (q.place === "under") el.classList.add("under");             // (centred, like a caption)
       const wd = inner.firstChild, nm = inner.lastChild, nfs = byFs(q), fmin = minFs(q);
       Object.assign(nm.style, { font: `${nfs * PX}px/${f.lh} "${q.font}"`, wordSpacing: f.ws + "em" });
       nm.style.setProperty("--bold", thicken(q, nfs * PX, R.stem * L * PX) + "px");
@@ -1123,7 +1128,12 @@
 
     // 2-5 at the current letter size L. Returns the blocks' results, or null if the wishes can't all be given a space.
     const H = R.height; let title;
-    const cow = { y: R.base, h: H - R.base }; cow.w = cow.h * AR; cow.x = (W - cow.w) / 2;   // the cowboy: floor to ceiling, in the middle
+    // the wishes painted under the mural, and the rest (laid out around him)
+    const under = list.filter(q => q.place === "under"), around = list.filter(q => q.place !== "under");
+    const lift = under.length ? R.under : 0;
+    const cow = { y: R.base + lift, h: H - R.base - lift }; cow.w = cow.h * AR; cow.x = (W - cow.w) / 2;   // the cowboy: up to the ceiling, in the middle
+    // the strip under him: across the middle of his body, from the floor strip up to his feet (y counts down from the top)
+    const ub = { x: cow.x + R.underSpan[0] * cow.w, w: (R.underSpan[1] - R.underSpan[0]) * cow.w, y: H - cow.y, h: cow.y - R.floor };
     function attempt(allowUp) {
       [...wall.querySelectorAll(".nrwv-block")].forEach(n => n.remove());
       const G = freeGrid(H, cow, ink);
@@ -1131,6 +1141,7 @@
       // (at most R.title): each word sized to fill that width, so the shorter WALL comes out bigger.
       title = null;
       const rB = G.R - Math.round(R.floor / CELL);                   // the first row of the floor strip
+      if (under.length) takeCells(G, Math.floor(ub.y / CELL), Math.floor(ub.x / CELL), Math.ceil(ub.h / CELL), Math.ceil(ub.w / CELL), 1);   // (keep the strip under him for his caption)
       const isFree = (r0, r1, c0, c1) => { for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) if (!G.f[r * G.C + c]) return false; return true; };
       for (let tW = R.title; tW >= 1.2 && !title; tW -= .1) {
         const fs1 = tW / tw[0], fs2 = tW / tw[1], tH = (fs1 + fs2) * .86 + .06, cw = Math.ceil(tW / CELL), ch = Math.ceil(tH / CELL);
@@ -1145,7 +1156,7 @@
       const rects = carve(G).map(r => ({ x: r.c0 * CELL, y: r.r0 * CELL, w: r.w * CELL, h: r.h * CELL, items: [], left: 0 }));
       rects.forEach(r => (r.left = r.w * r.h));
       // share the wishes out: the biggest first, each to the rectangle with the most room left
-      for (const q of list.slice().sort((a, b) => b._w - a._w)) {
+      for (const q of around.slice().sort((a, b) => b._w - a._w)) {
         const r = rects.reduce((best, r) => (!best || r.left > best.left ? r : best), null);
         if (!r || r.left < q._w) return null;
         r.items.push(q); r.left -= q._w;
@@ -1154,7 +1165,9 @@
       // (the treemap makes squares; drawing it on a wall stretched R.aspect times taller and squashing it back
       //  turns them into blocks R.aspect times wider than tall, the shape words running across fill best)
       const a = R.aspect, wide = r => squarify(r.items, { x: r.x, y: r.y * a, w: r.w, h: r.h * a }).map(b => ({ ...b, y: b.y / a, h: b.h / a }));
-      return rects.flatMap(wide).map(bk => fill(bk, allowUp));
+      // the wishes under the mural share its strip, side by side
+      const underBlocks = under.map((q, i) => ({ q, x: ub.x + ub.w * i / under.length, y: ub.y, w: ub.w / under.length, h: ub.h }));
+      return [...rects.flatMap(wide), ...underBlocks].map(bk => fill(bk, allowUp && bk.q.place !== "under"));
     }
     // Start with letters R.letter tall and every block a bit bigger than its words need. Then, all words running
     // across: grow the blocks that came out too small and lay it out again (up to 6 tries). Still not there? Let the
