@@ -29,6 +29,9 @@
       post/recipe.html, the live room. To change the room: change the recipe, then re-bake.
     The Wishing Wall and café close-ups: assets/img/post/room/ (tools/bake-post.js)
     The gallery's photos and label, and the wishes' words: assets/data.js, PART 3
+    The big poster on the black wall: WALL_POSTER in assets/data.js (where it hangs) and assets/img/post/
+      poster-best-storyteller*.webp (the pictures, made by tools/render-poster.js). It's hung live (PART 3, step 2B),
+      not baked, so a re-bake doesn't touch it.
   ------------------------------------------------------------------
 -->
 <style>
@@ -75,6 +78,24 @@ html.locked, html.locked body { overflow: hidden; }
 .w-floor { left: 0; top: calc(var(--PH) - var(--D)); width: var(--Wr); height: calc(var(--D) - var(--DN)); transform-origin: 50% 100%;
   transform: translate3d(0, var(--DN), calc(var(--DN) * -1)) rotateX(90deg); background-color: #0b0b0c; }
 .w-floor-near { left: 0; top: calc(var(--PH) - var(--DN)); width: var(--Wr); height: var(--DN); transform-origin: 50% 100%; transform: rotateX(90deg); background-color: #0b0b0c; }
+
+/* --- THE POSTER ON THE BLACK WALL (Oct 31): the storefront's #1 BEST STORYTELLER poster, blown up and hung on the
+   blank black brick behind the lounge. PART 3 (step 2) sizes it and puts it on the right-hand wall, from WALL_POSTER
+   in data.js. It sits flat on the wall, so it moves in 3D with the wall, and the sofa, the pink plant and the
+   Edison bulbs stand in front of it.
+     .poster        a thin black frame (like the Gallery's canvases, with the same hairline edge) and a soft
+                    shadow on the brick, so it reads as hung and not painted on
+     .poster img    the poster itself, filling the frame
+     .poster-ivy    the wall's ivy, carried on over the poster's top edge, so the strands drape over it instead of
+                    being cut off by it (it fades out just above the lettering, so the words stay clear)
+     .poster-light  the room's own light laid over it, so it sits in the room instead of glowing like a screen:
+                    the same shading the wall has (darker toward the floor and the ceiling, a warm wash from the glass
+                    at the back) and the warm light of the Edison bulbs. PART 3 lines these up with the wall, so they
+                    carry on across the poster exactly where they fall on the brick. --- */
+.poster { position: absolute; padding: calc(var(--u) * .05); background: #0a0a0a;
+  box-shadow: 0 0 0 calc(var(--u) * .012) #3a3a3a, 0 calc(var(--u) * .04) calc(var(--u) * .14) rgba(0,0,0,.85); }
+.poster img { position: static; display: block; width: 100%; height: 100%; }
+.poster-ivy, .poster-light { position: absolute; inset: 0; pointer-events: none; background-repeat: no-repeat; }
 
 /* --- The light in the room, laid over the screen (so it stays put while you scroll), the same as the original:
    soft sunbeams from the glass roof, then a warm tint and a gentle vignette. Clicks go straight through. --- */
@@ -261,7 +282,7 @@ body.leaving::before { opacity: 1; }
 
 <!-- THE STAGE: empty here. PART 3 puts up the set from assets/post-stage.js: the walls, floor and roof, everything
      standing in the room, and the four buttons on the walls. -->
-<main class="stage" id="stage" aria-label="THE POST: a tall room under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand and the Wishing Wall. Ahead, through a great arch, Nebula Cafe with its glittering black counter and a pink neon sign. In front of it, on the right, a lounge: a low green L-shaped sofa heaped with cushions and throws, a wooden coffee table, a woven jute pouf and rug, a rattan pendant and Edison bulbs overhead. On the right wall, black brick: the Gallery, rows of black-and-white photographs.">
+<main class="stage" id="stage" aria-label="THE POST: a tall room under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand and the Wishing Wall. Ahead, through a great arch, Nebula Cafe with its glittering black counter and a pink neon sign. In front of it, on the right, a lounge: a low green L-shaped sofa heaped with cushions and throws, a wooden coffee table, a woven jute pouf and rug, a rattan pendant and Edison bulbs overhead. On the right wall, black brick: the Gallery, rows of black-and-white photographs, and behind the lounge a towering poster: #1 NOT RISING Magazine, Best Storyteller, Poetic Drift by Joel Lymneos.">
   <div class="scene"><div class="room" id="room"></div></div>
 </main>
 
@@ -434,6 +455,59 @@ body.leaving::before { opacity: 1; }
     room.insertAdjacentHTML("beforeend", S.live);
     if (!liveCss) { liveCss = document.createElement("style"); document.head.appendChild(liveCss); }
     liveCss.textContent = S.css;
+    hangPoster();
+  }
+
+  /* STEP 2B · HANG THE POSTER ON THE BLACK WALL (WALL_POSTER in data.js)
+     The box in data.js says which stretch of the right-hand wall it fills. The poster is made as big as fits in that
+     box without stretching: first try the box's full height; if that would be too wide, use its full width instead.
+     Then it's centred in the box.
+     Along the right-hand wall, x is measured from the back corner (x 0 = by the café) toward the door, and y from
+     the TOP of the wall down (y 0 = the top), so a height off the floor becomes HM minus that height. */
+  // Where the Edison bulbs' warm light is brightest on this wall: metres from the back corner, and up from the floor.
+  // (post.js lays a warm patch there, baked into the wall's picture; the poster gets the same light.)
+  const BULB_GLOW = { wide: [5.42, 2.86], narrow: [6.56, 2.86] };
+  function hangPoster() {
+    const P = DATA.WALL_POSTER, box = P && P[setName], wall = room.querySelector(".w-right");
+    if (!box || !wall) return;
+    const HM = S.room.HM, Dm = S.room.Dm, boxW = box.to - box.from, boxH = box.top - box.bottom;
+    const h = Math.min(boxH, boxW / P.shape), w = h * P.shape;        // as big as fits, keeping its shape
+    const x = box.from + (boxW - w) / 2;                               // centred along the stretch...
+    const y = HM - (box.bottom + (boxH - h) / 2) - h;                  // ...and up and down (its top edge, down from the top)
+    const el = document.createElement("div");
+    el.className = "poster";
+    Object.assign(el.style, { left: m(x), top: m(y), width: m(w), height: m(h) });
+    const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = P.alt || "";
+    img.src = IMG + (setName === "narrow" && P.phone ? P.phone : P.img);
+    // Over the poster, from the bottom up (the same order as on the wall in post.js): the ivy, then the room's light.
+    // Each is sized to what it covers on the wall and slid back by the poster's own position, so it lines up
+    // exactly with the wall around the poster.
+    //   THE IVY: the bottom of the same picture that runs along the top of the wall (post/ivy-wall.webp: 6.4 m wide,
+    //   2.5 m tall, repeating, started 2.3 m in on this wall). ivy-wall-fringe.webp is just its lower part, the long
+    //   strands from 1.2 m to 2.5 m down from the top of the wall (a small download). It shows over the poster's top
+    //   margin, then fades out (the mask) just above the words. (So keep the poster's top at 6.0 m or lower.)
+    const ivy = document.createElement("div");
+    ivy.className = "poster-ivy";
+    const words = .05 + (h - .1) * 55 / 1102;                         // where the lettering starts, down from the poster's top (m)
+    const fade = `linear-gradient(#000 ${m(words * .45)}, transparent ${m(words * .9)})`;
+    Object.assign(ivy.style, { backgroundImage: `url(${IMG}post/ivy-wall-fringe.webp)`, backgroundRepeat: "repeat-x",
+      backgroundSize: `${m(6.4)} ${m(1.3)}`, backgroundPosition: `${m(-2.3 - x)} ${m(1.2 - y)}`, maskImage: fade, webkitMaskImage: fade });
+    //   THE LIGHT (the same as .nrp-wallshade-r in post.css, plus the bulbs' warm light, kept soft at its edges).
+    //   (In a list of backgrounds, the FIRST one is drawn on top.)
+    const light = document.createElement("div");
+    light.className = "poster-light";
+    const [gx, gy] = BULB_GLOW[setName] || [0, 0], gw = 2.9, gh = 4;  // the warm light: centre, and how far it spreads (m)
+    Object.assign(light.style, {
+      backgroundImage: [
+        "radial-gradient(closest-side, rgba(255,186,110,.16), rgba(255,170,90,.05) 69%, rgba(255,170,90,0))",           // the bulbs' warm light
+        "linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,0) 14%, rgba(0,0,0,0) 85%, rgba(0,0,0,.35))",                // darker at the floor and the top
+        "linear-gradient(90deg, rgba(255,246,226,.16), rgba(255,246,226,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,.35))"    // the warm wash from the glass
+      ].join(","),
+      backgroundSize: [`${m(gw)} ${m(gh)}`, `${m(Dm)} ${m(HM)}`, `${m(Dm)} ${m(HM)}`].join(","),
+      backgroundPosition: [`${m(gx - gw / 2 - x)} ${m(HM - gy - gh / 2 - y)}`, `${m(-x)} ${m(-y)}`, `${m(-x)} ${m(-y)}`].join(",")
+    });
+    el.append(img, ivy, light);
+    wall.appendChild(el);
   }
 
   /* STEP 3 · THE CAMERA COMES DOWN THE STAIRS (the original room's own trick)
