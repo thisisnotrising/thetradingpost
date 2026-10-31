@@ -2,7 +2,8 @@
    Two sets: "wide" (computers, tablets on their side) and "narrow" (phones).
    Every size and position is in METRES; post/index.html multiplies by --u (pixels per metre) to fit the screen.
    room    the box: Wm wide, Dm deep, HM tall; the floor is laid in two slabs, the near one DNm deep
-   walls   back, left, right, floor, floor-near: each one or more pictures (bands) laid on that surface, and its clickable spots (hot)
+   walls   back, left, right, floor, floor-near: each one or more pictures (bands) laid on that surface, and its clickable spots (hot);
+           the floor slabs also have their sparkle (tile): one small picture, size metres square, repeating from x, y
    pieces  the glass roof slopes (panels) and everything standing in the room (pieces): a picture, where it stands (x, y),
            how big (w, h) and how far back from the door (z)
    live    the ceiling fan and the benches, kept as little 3D objects, with their look (css) */
@@ -48,14 +49,14 @@ window.NRSTAGE = {
     "bands": [
      { "img": "wide/floor.webp", "x": 0, "y": 0, "w": 6.4, "h": 9 }
     ],
-    "style": "background-image: url(\"../assets/img/post/obsidian-floor.webp\"); background-size: calc(var(--u) * 2) calc(var(--u) * 2);",
+    "tile": { "img": "post/obsidian-floor.webp", "size": 2, "x": 0, "y": 0 },
     "hot": []
    },
    "floor-near": {
     "bands": [
      { "img": "wide/floor-near.webp", "x": 0, "y": 0, "w": 6.4, "h": 4.5 }
     ],
-    "style": "background-image: url(\"../assets/img/post/obsidian-floor.webp\"); background-size: calc(var(--u) * 2) calc(var(--u) * 2); background-position: calc(var(--u) * 0) calc(var(--u) * -9);",
+    "tile": { "img": "post/obsidian-floor.webp", "size": 2, "x": 0, "y": -9 },
     "hot": []
    }
   },
@@ -141,14 +142,14 @@ window.NRSTAGE = {
     "bands": [
      { "img": "narrow/floor.webp", "x": 0, "y": 0, "w": 4.2, "h": 12.5 }
     ],
-    "style": "background-image: url(\"../assets/img/post/obsidian-floor.webp\"); background-size: calc(var(--u) * 2) calc(var(--u) * 2);",
+    "tile": { "img": "post/obsidian-floor.webp", "size": 2, "x": 0, "y": 0 },
     "hot": []
    },
    "floor-near": {
     "bands": [
      { "img": "narrow/floor-near.webp", "x": 0, "y": 0, "w": 4.2, "h": 4.5 }
     ],
-    "style": "background-image: url(\"../assets/img/post/obsidian-floor.webp\"); background-size: calc(var(--u) * 2) calc(var(--u) * 2); background-position: calc(var(--u) * 0) calc(var(--u) * -12.5);",
+    "tile": { "img": "post/obsidian-floor.webp", "size": 2, "x": 0, "y": -12.5 },
     "hot": []
    }
   },
