@@ -540,7 +540,7 @@ body.leaving::before { opacity: 1; }
   /* STEP 7 · THE WISHES AS WORDS, for screen readers (the wall itself is a picture) */
   (DATA.WISHES || []).forEach(w => {
     const li = document.createElement("li");
-    li.textContent = w.wish.replace(/\*\*/g, "") + " (" + w.name + ", Human)";
+    li.textContent = w.wish.replace(/\*\*/g, "") + " (" + w.name + (w.human === false ? "" : ", Human") + ")";
     $("wishes").appendChild(li);
   });
 
