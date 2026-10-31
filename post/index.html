@@ -37,6 +37,10 @@
       poster-best-storyteller*.webp (the pictures, made by tools/render-poster.js). It's hung live (PART 3, step 2B),
       not baked, so a re-bake doesn't touch it. Click it and it opens up close with a BUY IT button (popup 5), the
       same as the poster in the storefront window; the book, author and shop link come from POSTERS in data.js.
+    THE FINAL STAGE (phones and tablets, Oct 31): assets/post-final.js. The same room and camera, but its pictures are
+      drawn by the phone's graphics chip on one flat canvas behind the room, instead of being held up in 3D (which
+      made phones crash). The room in front keeps its buttons, the fan and the benches. Add ?final=0 or ?final=1 to
+      the address to see either version on any screen.
   ------------------------------------------------------------------
 -->
 <style>
@@ -77,6 +81,22 @@ html.locked, html.locked body { overflow: hidden; }
    each hinged on its front edge and tipped back flat. Each side holds its picture(s) (the <img>s inside it). */
 .wall, .panel { position: absolute; overflow: hidden; }
 .wall > img, .panel > img, .piece { position: absolute; display: block; max-width: none; }
+/* THE FINAL STAGE (phones and tablets: assets/post-final.js). The canvas fills the camera's view, behind the room, and
+   the pictures are drawn on it. The room in front keeps only what has to stay live: the buttons (invisible, each on its
+   own layer so nothing is painted), the poster's button, the fan and the benches. */
+.final-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.final .wall > .spot, .final .wall > .poster { transform: translateZ(0); }
+.final .poster { background: none; box-shadow: none; }
+/* (Oct 31: the iPhone crash) On iPhones and iPads, every picture on a wall, the roof slopes and the floor is lifted
+   onto its own layer (translateZ(0) = "give it its own sheet of glass"), and so are the buttons and the poster, so the
+   walls themselves have nothing left to paint but their plain colour. Why: an iPhone's browser keeps a fully painted
+   copy of every tilted surface that has anything painted on it, at 3 pixels per point. For this room that came to
+   over half a gigabyte, and the page crashed. A picture on its own layer is simply shown as it is, at no extra cost.
+   (Only there: Chrome and Android work the other way round and would use MORE memory. -webkit-touch-callout is
+   something only iPhone and iPad browsers understand, so @supports picks them out.) */
+@supports (-webkit-touch-callout: none) {
+  .wall > img, .panel > img, .wall > .spot, .wall > .poster { transform: translateZ(0); }
+}
 .w-back { left: 0; top: 0; width: var(--Wr); height: var(--PH); transform: translateZ(calc(var(--D) * -1)); background: #141414; }
 .w-left { left: 0; top: 0; width: var(--D); height: var(--PH); transform-origin: 0 50%; transform: rotateY(90deg); background: #e8e4dc; }
 .w-right { left: calc(var(--Wr) - var(--D)); top: 0; width: var(--D); height: var(--PH); transform-origin: 100% 50%; transform: rotateY(-90deg); background: #141414; }
@@ -140,6 +160,7 @@ button.poster:focus-visible { outline: calc(var(--u) * .03) solid rgba(255,255,2
 .spot { position: absolute; display: block; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer;
   pointer-events: auto; transition: background .3s; -webkit-tap-highlight-color: transparent; }
 .spot:hover, .spot:focus-visible { background: rgba(255,248,232,.1); }
+@media (hover: none) { .spot:hover { background: transparent; } }   /* (touch screens: no lit box left behind after a tap) */
 .spot:focus-visible { outline: calc(var(--u) * .03) solid rgba(255,255,255,.8); outline-offset: calc(var(--u) * -.03); }   /* (for keyboard visitors) */
 /* its name: a small crystal tag that follows the mouse (and sits on the button for keyboard visitors) */
 .tag { position: fixed; z-index: 6; pointer-events: none; white-space: nowrap; transform: translate(14px, 14px);
@@ -317,7 +338,7 @@ body.leaving::before { opacity: 1; }
 <!-- THE STAGE: empty here. PART 3 puts up the set from assets/post-stage.js: the walls, floor and roof, everything
      standing in the room, and the four buttons on the walls. -->
 <main class="stage" id="stage" aria-label="THE POST: a tall room under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand and the Wishing Wall. Ahead, through a great arch, Nebula Cafe with its glittering black counter and a pink neon sign. In front of it, on the right, a lounge: a low green L-shaped sofa heaped with cushions and throws, a wooden coffee table, a woven jute pouf and rug, a rattan pendant and Edison bulbs overhead. On the right wall, black brick: the Gallery, rows of black-and-white photographs, and behind the lounge a towering poster: #1 NOT RISING Magazine, Best Storyteller, Poetic Drift by Joel Lymneos.">
-  <div class="scene"><div class="room" id="room"></div></div>
+  <div class="scene"><canvas class="final-canvas" id="final" hidden></canvas><div class="room" id="room"></div></div>
 </main>
 
 <!-- The light in the room (laid over the screen), the buttons' name tag, and the nudge to look down -->
@@ -414,9 +435,10 @@ body.leaving::before { opacity: 1; }
   </section>
 </dialog>
 
-<!-- The words and photo lists (data.js), the stage set (post-stage.js), then PART 3, then the full-screen button -->
+<!-- The words and photo lists (data.js), the stage set (post-stage.js), the final stage (post-final.js), then PART 3 -->
 <script src="../assets/data.js"></script>
 <script src="../assets/post-stage.js"></script>
+<script src="../assets/post-final.js"></script>
 <script>
 /* ================================================================
    PART 3 · THE BEHAVIOUR
@@ -429,6 +451,16 @@ body.leaving::before { opacity: 1; }
   const STAGE = window.NRSTAGE, SET_BASE = IMG + "post/stage/";
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let S = null, setName = "", SIZE = {};   // SIZE: this screen's room, in pixels
+
+  /* THE FINAL STAGE OR THE STAGE SET?
+     Touch screens (phones, tablets) get the final stage (assets/post-final.js): the pictures drawn on one flat canvas.
+     Computers keep the stage set, the pictures held up in 3D. ?final=1 or ?final=0 in the address picks one by hand.
+     If the phone has no graphics chip to draw with (very rare), it gets the stage set too. */
+  const ask = location.search;
+  const wantFinal = /[?&]final=1/.test(ask) || (!/[?&]final=0/.test(ask) && matchMedia("(pointer: coarse)").matches);
+  const FINAL = wantFinal && window.NRFINAL && NRFINAL.supported() ? NRFINAL.create($("final"), document.querySelector(".scene")) : null;
+  if (FINAL) { $("final").hidden = false; stage.classList.add("final"); }
+  let finalReady = Promise.resolve(), posterLook = null;
 
   /* STEP 1 · SIZE THE ROOM FOR THIS SCREEN (the same rules as the original room)
      A phone (any screen taller than it is wide) gets the NARROW set: a corridor 4.2 m wide and 17 m deep.
@@ -450,6 +482,7 @@ body.leaving::before { opacity: 1; }
     css.setProperty("--Wr", R.Wm * u + "px");  css.setProperty("--D", SIZE.D + "px");
     css.setProperty("--PH", SIZE.PH + "px");      css.setProperty("--DN", R.DNm * u + "px");
     css.setProperty("--P", P + "px");          css.setProperty("--walk", -1.6 * u + "px");
+    if (FINAL) FINAL.setCamera(P);
   }
 
   /* STEP 2 · PUT UP THE SET
@@ -462,7 +495,8 @@ body.leaving::before { opacity: 1; }
   const m = v => `calc(var(--u) * ${v})`;
   function picture(b, cls) {
     const i = new Image(); i.alt = ""; i.decoding = "async"; i.draggable = false; if (cls) i.className = cls;
-    i.src = SET_BASE + b.img;
+    if (FINAL) i.dataset.gl = SET_BASE + b.img;          // (the final stage: just the box; post-final.js draws the picture)
+    else i.src = SET_BASE + b.img;
     Object.assign(i.style, { left: m(b.x), top: m(b.y), width: m(b.w), height: m(b.h) });
     return i;
   }
@@ -474,13 +508,30 @@ body.leaving::before { opacity: 1; }
     Object.assign(b.style, { left: m(x), top: m(y), width: m(w), height: m(hh) });
     return b;
   }
+  /* THE FLOOR'S SPARKLE (Oct 31): one small picture (post/obsidian-floor.webp, 2 m square) laid like floor tiles across
+     the slab, each tile its own <img> on its own layer; all of them share one copy of the picture. (It used to be the
+     slab's repeating background, but then a phone has to paint the whole tilted slab into memory at full sharpness.)
+       t      the tile: its picture (img), how many metres square (size), and where the pattern starts (x, y)
+       x0, y0 the first tile's corner: the start, stepped back by whole tiles until it's at or just before the slab's edge
+     Each tile is 1 cm bigger than the step between them, so neighbours overlap a hair and no seam can show. */
+  function laySparkle(el, t, name) {
+    const R = S.room, w = R.Wm, h = name === "floor-near" ? R.DNm : R.Dm - R.DNm;   // the slab, in metres
+    const s = t.size, x0 = t.x - Math.ceil(t.x / s) * s, y0 = t.y - Math.ceil(t.y / s) * s;
+    for (let y = y0; y < h; y += s) for (let x = x0; x < w; x += s) {
+      const i = new Image(); i.alt = ""; i.decoding = "async"; i.draggable = false; i.className = "tile";
+      if (FINAL) i.dataset.gl = IMG + t.img; else i.src = IMG + t.img;
+      Object.assign(i.style, { left: m(x), top: m(y), width: m(s + .01), height: m(s + .01) });
+      el.appendChild(i);
+    }
+  }
   let liveCss = null;
   function putUpTheSet() {
     room.textContent = "";
     for (const [name, w] of Object.entries(S.walls)) {
       const el = document.createElement("div");
       el.className = "wall w-" + name;
-      if (w.style) el.style.cssText = w.style;            // (the floor: its sparkle, a small picture repeating every 2 m)
+      if (w.style) el.style.cssText = w.style;
+      if (w.tile) laySparkle(el, w.tile, name);           // (the floor: its sparkle, a small picture laid every 2 m)
       w.bands.forEach(b => el.appendChild(picture(b)));
       w.hot.forEach(h => el.appendChild(button(h)));
       room.appendChild(el);
@@ -494,6 +545,7 @@ body.leaving::before { opacity: 1; }
       } else {                                           // something standing in the room, z metres back from the door
         const i = picture(p, "piece");
         i.style.transform = `translateZ(${m(-p.z)})`;
+        i.dataset.z = p.z;                               // (the final stage draws the farthest first)
         room.appendChild(i);
       }
     }
@@ -501,6 +553,7 @@ body.leaving::before { opacity: 1; }
     if (!liveCss) { liveCss = document.createElement("style"); document.head.appendChild(liveCss); }
     liveCss.textContent = S.css;
     hangPoster();
+    if (FINAL) finalReady = FINAL.build(room, posterLook);   // the final stage measures every box, loads its pictures
   }
 
   /* STEP 2B · HANG THE POSTER ON THE BLACK WALL (WALL_POSTER in data.js)
@@ -528,10 +581,9 @@ body.leaving::before { opacity: 1; }
     el.type = "button"; el.className = "poster"; el.dataset.pop = "poster"; el.dataset.label = BEST ? BEST.book : "Best Storyteller";
     el.setAttribute("aria-label", (P.alt || "The Best Storyteller poster") + " Open it up close");
     Object.assign(el.style, { left: m(x), top: m(y), width: m(w), height: m(h) });
-    const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = "";
-    img.src = IMG + (setName === "narrow" && P.phone ? P.phone : P.img);
-    // popup 5 shows this same picture, big, with the BUY IT button under it
-    const lb = $("lb-poster"); lb.src = img.src; lb.alt = P.alt || "";
+    const src = IMG + (setName === "narrow" && P.phone ? P.phone : P.img);
+    // popup 5 shows this same picture, big, with the BUY IT button under it (held back until the popup opens)
+    const lb = $("lb-poster"); if (!lb.src) lb.dataset.src = src; lb.alt = P.alt || "";
     // Over the poster, from the bottom up (the same order as on the wall in post.js): the ivy, then the room's light.
     // Each is sized to what it covers on the wall and slid back by the poster's own position, so it lines up
     // exactly with the wall around the poster.
@@ -542,6 +594,14 @@ body.leaving::before { opacity: 1; }
     const ivy = document.createElement("span");
     ivy.className = "poster-ivy";
     const words = .05 + (h - .1) * 55 / 1102;                         // where the lettering starts, down from the poster's top (m)
+    const [gx, gy] = BULB_GLOW[setName] || [0, 0], gw = 2.9, gh = 4;  // the bulbs' warm light: centre, and how far it spreads (m)
+    // all of it as numbers, in metres: the final stage paints the poster from these (assets/post-final.js, part 3)
+    posterLook = { x, y, w, h, img: src, pad: .05, ring: .012, ringColour: "#3a3a3a",
+      shadow: { dy: .04, blur: .14, colour: "rgba(0,0,0,.85)" },
+      ivy: { img: IMG + "post/ivy-wall-fringe.webp", size: [6.4, 1.3], pos: [-2.3 - x, 1.2 - y], fade: [words * .45, words * .9] },
+      light: { Dm, HM, glow: [gx, gy, gw, gh] } };
+    if (FINAL) { wall.appendChild(el); return; }                    // (the final stage: just the button; the poster is drawn)
+    const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = ""; img.src = src;
     const fade = `linear-gradient(#000 ${m(words * .45)}, transparent ${m(words * .9)})`;
     Object.assign(ivy.style, { backgroundImage: `url(${IMG}post/ivy-wall-fringe.webp)`, backgroundRepeat: "repeat-x",
       backgroundSize: `${m(6.4)} ${m(1.3)}`, backgroundPosition: `${m(-2.3 - x)} ${m(1.2 - y)}`, maskImage: fade, webkitMaskImage: fade });
@@ -549,7 +609,6 @@ body.leaving::before { opacity: 1; }
     //   (In a list of backgrounds, the FIRST one is drawn on top.)
     const light = document.createElement("span");
     light.className = "poster-light";
-    const [gx, gy] = BULB_GLOW[setName] || [0, 0], gw = 2.9, gh = 4;  // the warm light: centre, and how far it spreads (m)
     Object.assign(light.style, {
       backgroundImage: [
         "radial-gradient(closest-side, rgba(255,186,110,.16), rgba(255,170,90,.05) 69%, rgba(255,170,90,0))",           // the bulbs' warm light
@@ -569,6 +628,7 @@ body.leaving::before { opacity: 1; }
      browser does that on the graphics chip without repainting anything, so it stays smooth. */
   function eye() {
     room.style.translate = `0 ${-scrollY}px 0`;
+    if (FINAL) FINAL.draw();                                   // (the final stage: draw the pictures in their new places)
     if (Math.abs(scrollY - landedAt) > 40) cue.classList.add("gone");   // the cue goes once you start looking around
   }
   let eyeQueued = false;
@@ -594,18 +654,20 @@ body.leaving::before { opacity: 1; }
   function start() {
     measure(); putUpTheSet(); eye();
     const imgs = [...room.querySelectorAll("img")];
-    const loaded = Promise.all(imgs.map(i => i.decode().catch(() => {})));
+    const loaded = FINAL ? finalReady : Promise.all(imgs.map(i => i.decode().catch(() => {})));
     Promise.race([loaded, new Promise(r => setTimeout(r, 3000))]).then(() => {
       land();
       stage.classList.add("ready");
-      if (!reduceMotion) stage.classList.add("walk-in");
+      if (!reduceMotion) { stage.classList.add("walk-in"); if (FINAL) FINAL.follow(2000); }   // (the canvas follows the walk-in)
     });
   }
   start();
+  if (FINAL) FINAL.onRestore(() => { putUpTheSet(); eye(); });   // (if the phone ever takes the graphics chip away and gives it back)
   // a new screen shape (a phone turned on its side, a window resized) puts the set up again; a phone's address bar
   // sliding away (a small change in height only) doesn't
   let lastW = innerWidth, lastH = innerHeight, again;
   addEventListener("resize", () => {
+    if (FINAL) FINAL.redraw();
     if (innerWidth === lastW && Math.abs(innerHeight - lastH) < lastH * .15) return;
     lastW = innerWidth; lastH = innerHeight; clearTimeout(again);
     again = setTimeout(() => { const before = setName; measure(); if (setName !== before) putUpTheSet(); eye(); }, 150);
@@ -757,6 +819,5 @@ body.leaving::before { opacity: 1; }
   addEventListener("pageshow", () => document.body.classList.remove("leaving"));   // coming back with the Back button
 })();
 </script>
-<script src="../assets/fullscreen.js"></script>
 </body>
 </html>
