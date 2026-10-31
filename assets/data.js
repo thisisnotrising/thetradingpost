@@ -293,7 +293,7 @@ window.NRSF = {
 
   /* Where each door and window leads, as folders of this site. */
   LINKS: {
-    tradingPost: "post/index.html", // right door, unit 9: opens into THE POST (the room inside); its directory leads on to the Newsstand
+    tradingPost: "post/index.html", // right door, unit 10: opens into THE POST (the room inside); its directory leads on to the Newsstand
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library"   // the A-frame floor sign (opens in a new tab)
@@ -308,7 +308,7 @@ window.NRSF = {
     hanging: "NOT RISING",          // the cut-metal swinging sign (split over two lines: NOT / RISING)
     floorSign: ["Inspired by", "RAMH", "Library"],   // the A-frame poster's three lines: small, big, medium (the RAMH logo sits under them)
     leftDoor: "9¾",
-    rightDoor: "9"
+    rightDoor: "10"
   },
 
   /* Seasons. "auto" picks by today's date:
@@ -344,7 +344,7 @@ window.NRSF = {
 /* ================= PART 3 · THE POST (the room inside) ================= */
 /* ============================================================
    NOT RISING · THE POST — THE DATA FILE
-   The room you walk into through the right-hand door (unit 9).
+   The room you walk into through the right-hand door (unit 10).
    The engine (post.js) reads this; the drawing of the room lives there.
    THE POST itself (post/index.html) is a stage set photographed from that room (post/recipe.html), so a change
    here that shows in the room appears there after re-photographing with tools/bake-stage.js. The gallery's photos
