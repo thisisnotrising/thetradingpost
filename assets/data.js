@@ -375,28 +375,30 @@ window.NRPOST = {
      size: how big, compared with the others (a capital is roughly this many metres tall before the wall is filled).
      w: how wide the lines may run before wrapping, in metres.   rot: tilt in degrees (keep it small).
      case: "up" = ALL CAPITALS, "low" = all lower case, leave it out = as written.
-     **word** = paint that word bigger.   outline: 1 = hollow letters.   ink: the paint colour (black to grey).
+     **word** = paint that word bigger.   ink: the paint colour (keep it black, "#111", so every wish reads clearly).
+     Every wish and name is painted bold and black. In the popup (the wall up close) each wish gets its own block,
+     laid out around the floor-to-ceiling cowboy (post.js, wallLayout()); a new wish finds its place by itself.
      New issue? Copy a line, change the name and the words, and pick a side. */
   QUESTION: "If you could manifest a brighter tomorrow, what would be different by 2030?",
   WISHES: [
-    { side: "L", name: "Jennifer Hong",          wish: "I don’t wish people happiness, I wish them **wholeness.**", font: "Sedgwick Ave Display", size: .26, w: 2.6, rot: -3, ink: "#141414" },
-    { side: "L", name: "Paolo Nardi Fernandez",  wish: "Tech for good.", font: "Black Ops One", size: .42, w: 3.2, rot: 0, case: "up", outline: 1, ink: "#3a3a3a" },
+    { side: "L", name: "Jennifer Hong",          wish: "I don’t wish people happiness, I wish them **wholeness.**", font: "Sedgwick Ave Display", size: .26, w: 2.6, rot: -3, ink: "#111" },
+    { side: "L", name: "Paolo Nardi Fernandez",  wish: "Tech for good.", font: "Black Ops One", size: .42, w: 3.2, rot: 0, case: "up", ink: "#111" },
     { side: "R", name: "Rebecca Wicker",         wish: "Different doesn’t mean wrong.", font: "Permanent Marker", size: .3, w: 2.1, rot: -4, case: "up", ink: "#111" },
-    { side: "L", name: "Neela Singh",            wish: "I want the culture of burning people out in the name of growth to finally be called what it is: **exploitation.**", font: "Permanent Marker", size: .13, w: 2.2, rot: 2, ink: "#262626" },
-    { side: "L", name: "Jennifer Houle",         wish: "I would love to see the 5-day/40 hour/week thing abolished.", font: "Bebas Neue", size: .26, w: 2.0, rot: 0, case: "up", ink: "#1c1c1c" },
-    { side: "L", name: "Sam Illingworth",        wish: "People are freed up to be creators and humans.", font: "Rock Salt", size: .13, w: 1.9, rot: -3, ink: "#2c2c2c" },
-    { side: "L", name: "Rebecca Watson",         wish: "A world where people feel less alone.", font: "Reenie Beanie", size: .34, w: 2.2, rot: 3, ink: "#1a1a1a" },
-    { side: "L", name: "Andrew Barban",          wish: "A world where you can read the news and you don’t feel worse.", font: "Sedgwick Ave Display", size: .17, w: 1.9, rot: 2, ink: "#333" },
-    { side: "R", name: "Joel L.",                wish: "No more tying healthcare to employment.", font: "Permanent Marker", size: .17, w: 1.9, rot: -2, case: "low", ink: "#222" },
-    { side: "L", name: "Farida Khalaf",          wish: "I hope we manifest a deeper **empathy.**", font: "Rock Salt", size: .14, w: 1.6, rot: 3, ink: "#2a2a2a" },
-    { side: "R", name: "Pragya",                 wish: "More generosity in the world.", font: "Black Ops One", size: .17, w: 1.7, rot: 0, case: "up", ink: "#4a4a4a" },
-    { side: "R", name: "Constantinos Tachtsidis",wish: "I would like journalism to care more about meaning and less about content quantity.", font: "Bebas Neue", size: .2, w: 1.9, rot: -2, case: "up", ink: "#202020" },
-    { side: "R", name: "Marlana",                wish: "Questioning what we’re told life is supposed to look like.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#1d1d1d" },
-    { side: "R", name: "Ben Linford",            wish: "Understand what we’ll be giving up if we choose to regress.", font: "Sedgwick Ave Display", size: .15, w: 1.7, rot: 2, ink: "#303030" },
-    { side: "L", name: "Casey Keen",             wish: "Fewer insurance-driven constraints shaping what care is allowed to look like.", font: "Permanent Marker", size: .12, w: 1.8, rot: -3, ink: "#2b2b2b" },
-    { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", outline: 1, ink: "#333" },
-    { side: "L", name: "Maria-Cristina Muntean", wish: "A world that values the time it takes to care about something.", font: "Reenie Beanie", size: .26, w: 1.9, rot: -2, ink: "#1b1b1b" },
-    { side: "R", name: "Anna Levitt",            wish: "Less hustle culture, more knowing who you are as a person.", font: "Rock Salt", size: .12, w: 1.9, rot: 4, case: "low", ink: "#262626" }
+    { side: "L", name: "Neela Singh",            wish: "I want the culture of burning people out in the name of growth to finally be called what it is: **exploitation.**", font: "Permanent Marker", size: .13, w: 2.2, rot: 2, ink: "#111" },
+    { side: "L", name: "Jennifer Houle",         wish: "I would love to see the 5-day/40 hour/week thing abolished.", font: "Bebas Neue", size: .26, w: 2.0, rot: 0, case: "up", ink: "#111" },
+    { side: "L", name: "Sam Illingworth",        wish: "People are freed up to be creators and humans.", font: "Rock Salt", size: .13, w: 1.9, rot: -3, ink: "#111" },
+    { side: "L", name: "Rebecca Watson",         wish: "A world where people feel less alone.", font: "Reenie Beanie", size: .34, w: 2.2, rot: 3, ink: "#111" },
+    { side: "L", name: "Andrew Barban",          wish: "A world where you can read the news and you don’t feel worse.", font: "Sedgwick Ave Display", size: .17, w: 1.9, rot: 2, ink: "#111" },
+    { side: "R", name: "Joel L.",                wish: "No more tying healthcare to employment.", font: "Permanent Marker", size: .17, w: 1.9, rot: -2, case: "low", ink: "#111" },
+    { side: "L", name: "Farida Khalaf",          wish: "I hope we manifest a deeper **empathy.**", font: "Rock Salt", size: .14, w: 1.6, rot: 3, ink: "#111" },
+    { side: "R", name: "Pragya",                 wish: "More generosity in the world.", font: "Black Ops One", size: .17, w: 1.7, rot: 0, case: "up", ink: "#111" },
+    { side: "R", name: "Constantinos Tachtsidis",wish: "I would like journalism to care more about meaning and less about content quantity.", font: "Bebas Neue", size: .2, w: 1.9, rot: -2, case: "up", ink: "#111" },
+    { side: "R", name: "Marlana",                wish: "Questioning what we’re told life is supposed to look like.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#111" },
+    { side: "R", name: "Ben Linford",            wish: "Understand what we’ll be giving up if we choose to regress.", font: "Sedgwick Ave Display", size: .15, w: 1.7, rot: 2, ink: "#111" },
+    { side: "L", name: "Casey Keen",             wish: "Fewer insurance-driven constraints shaping what care is allowed to look like.", font: "Permanent Marker", size: .12, w: 1.8, rot: -3, ink: "#111" },
+    { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", ink: "#111" },
+    { side: "L", name: "Maria-Cristina Muntean", wish: "A world that values the time it takes to care about something.", font: "Reenie Beanie", size: .26, w: 1.9, rot: -2, ink: "#111" },
+    { side: "R", name: "Anna Levitt",            wish: "Less hustle culture, more knowing who you are as a person.", font: "Rock Salt", size: .12, w: 1.9, rot: 4, case: "low", ink: "#111" }
   ],
 
   /* THE GALLERY: black-and-white photos, each a framed canvas print, all the same size, in an even grid

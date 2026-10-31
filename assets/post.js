@@ -433,24 +433,60 @@
        3. the rows are spread evenly down the side and the wishes evenly along each row, each nudged up or down a
           little (the same nudge every visit) so it reads as painted by many hands, not typeset.
      Sizes are measured on the flat wall, before it is turned into 3D, so they come out exact.
-     A wish is: its words (**word** painted bigger), then "— Name, Human" underneath. */
+     A wish is: its words (**word** painted bigger), then "— Name, Human" underneath.
+     (Click it and the popup paints this same stretch of wall up close, floor to ceiling, with the cowboy running
+      the full height and the wishes laid out in blocks around him: see wallLayout() in STEP 6A.) */
+
+  // THE SIX WALL FONTS, MEASURED (Oct 2026), so every wish can be made as easy to read as WHOLENESS.
+  // Each number is a share of the font size:
+  //   cap  = how tall a CAPITAL letter is        xh = how tall a small letter is (an x)
+  //   stem = how thick the pen stroke is (Reenie Beanie is a thin pencil; Permanent Marker is a fat marker)
+  //   lh   = the space from one line to the next (Rock Salt's letters are tall and loopy, so it needs more;
+  //          Reenie Beanie's are small for their size, so it needs less)
+  //   ws   = extra space between words (Rock Salt's tails reach into the next word, so it gets the most)
+  const WALL_FONTS = {
+    "Permanent Marker":     { cap: .745, xh: .595, stem: .153, lh: 1.12, ws: .08 },
+    "Sedgwick Ave Display": { cap: .815, xh: .635, stem: .120, lh: 1.12, ws: .08 },   // its small letters look like small capitals (WHOLENESS)
+    "Rock Salt":            { cap: 1.045, xh: .78, stem: .107, lh: 1.4,  ws: .3 },
+    "Bebas Neue":           { cap: .70,  xh: .70,  stem: .103, lh: 1.08, ws: .04 },   // capitals only, so both heights are the same
+    "Black Ops One":        { cap: .65,  xh: .52,  stem: .148, lh: 1.08, ws: 0 },
+    "Reenie Beanie":        { cap: .58,  xh: .41,  stem: .048, lh: 1.0,  ws: .1 }
+  };
+  const fontOf = q => WALL_FONTS[q.font] || WALL_FONTS["Permanent Marker"];
+  // BOLDER: the lettering is fattened by painting a black edge round every letter, the same black as the letter
+  // (-webkit-text-stroke in post.css). thicken() works out how wide that edge has to be so the stroke is at least
+  // BOLD of the font size (WHOLENESS's own font, Sedgwick, is .12, so even it gets a little bolder) and at least
+  // minStem thick. Fonts that are already fat still get a hair more (BOLD_MIN), so every wish reads blacker.
+  // fs and minStem are in pixels; so is the answer.
+  const BOLD = .13, BOLD_MIN = .012;
+  const thicken = (q, fs, minStem = 0) => Math.max(BOLD_MIN * fs, Math.max(BOLD * fs, minStem) - fontOf(q).stem * fs);
+  const caseOf = (t, c) => c === "up" ? t.toUpperCase() : c === "low" ? t.toLowerCase() : t;
+  // ONE WISH, painted (still unplaced). fs = the size of its words, byFs = the size of "— Name, Human",
+  // wrap = how wide its lines may run, minStem = the thinnest stroke allowed. All in pixels.
+  function paintWish(parent, q, fs, byFs, wrap, minStem = 0) {
+    const e = make("div", "nrp-wish", parent,
+      esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") + `<span class="by">— ${esc(q.name)}, Human</span>`);
+    Object.assign(e.style, { font: `${fs}px/${fontOf(q).lh} "${q.font}", "Permanent Marker", cursive`, wordSpacing: fontOf(q).ws + "em", maxWidth: wrap + "px" });
+    e.style.setProperty("--ink", q.ink || "#111");
+    e.style.setProperty("--by", byFs + "px");
+    e.style.setProperty("--bold", thicken(q, fs, minStem) + "px");
+    e.style.setProperty("--bold-by", thicken(q, byFs, minStem) + "px");
+    return e;
+  }
+  // A tilted wish takes up a little more room: ew × eh is the wish itself, bw × bh the box it fills once tilted.
+  const sized = (q, ew, eh) => { const t = Math.abs((q.rot || 0) * Math.PI / 180); return { ew, eh, bw: ew * Math.cos(t) + eh * Math.sin(t), bh: ew * Math.sin(t) + eh * Math.cos(t) }; };
   const WISH_GAPX = .14, WISH_GAPY = .1;
   function wishingWall(wall, zones) {
     const list = DATA.WISHES || [];
-    const caseOf = (t, c) => c === "up" ? t.toUpperCase() : c === "low" ? t.toLowerCase() : t;
     const paint = (q, scale) => {                                    // one wish, painted at this scale (still unplaced)
-      const sz = q.size * scale * u, e = make("div", "nrp-wish" + (q.outline ? " outline" : ""), wall,
-        esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") + `<span class="by">— ${esc(q.name)}, Human</span>`);
-      Object.assign(e.style, { font: `${sz}px/1.12 "${q.font}", "Permanent Marker", cursive`, maxWidth: (q.w * scale / .8 * u) + "px" });
-      e.style.setProperty("--ink", q.ink || "#222"); e.style.setProperty("--by", Math.max(.07 * u, sz * .42) + "px");
-      return e;
+      const sz = q.size * scale * u;
+      return paintWish(wall, q, sz, Math.max(.07 * u, sz * .42), q.w * scale / .8 * u);
     };
     // MEASURING, FAST (Oct 2026). A wish's size grows in step with the lettering (its words and the width it may
     // wrap to both scale together), so each wish is measured ONCE, at the size it has at scale 1, and every other
     // size is worked out by multiplying. All the wishes on a side are put on the wall together and read together,
     // so the browser lays the page out once instead of once per wish. (It used to measure every wish again at each
     // of 14 trial sizes, which was most of the time the room took to appear.)
-    const sized = (q, ew, eh) => { const t = Math.abs((q.rot || 0) * Math.PI / 180); return { ew, eh, bw: ew * Math.cos(t) + eh * Math.sin(t), bh: ew * Math.sin(t) + eh * Math.cos(t) }; };
     let base = new Map(), baseScale = 1;
     const measureAll = (side, scale) => {                            // measure a whole side at this scale, in one go
       const els = side.map(q => paint(q, scale)), dims = els.map(e => [e.offsetWidth / u, e.offsetHeight / u]);
@@ -720,7 +756,6 @@
     // the whole painted stretch is clickable (an invisible panel over it): it opens the wall full screen
     const hot = onWall(make("a", "nrp-wallhot nrp-hot", left), { x: wz[0].x0, y: wy0, w: wz[1].x1 - wz[0].x0, h: wy1 - wy0 });
     hot.dataset.room = "wishingWall"; hot.dataset.tip = "Read the Wishing Wall"; hot.setAttribute("aria-label", "Open the Wishing Wall full screen");
-    WALLVIEW = { x0: newsEnd, x1: Dm, y0: 0, y1: HM - TILE.planter.hm + .7 };                // the stretch the full-screen view shows
     onWall(make("div", "nrp-wallshade", left), { x: 0, y: 0, w: Dm, h: HM });
 
     /* ---- THE RIGHT WALL (black brick): the Gallery ---- */
@@ -926,40 +961,313 @@
   addEventListener("pageshow", () => root.classList.remove("leaving"));
 
   /* ================================================================
-     STEP 6A · THE WISHING WALL, FULL SCREEN
-     Click the wishes (or WISHING / WALL) and the wall opens flat, straight on, filling the screen, so every wish
-     can be read. It is a copy of the painted wall itself (the brick, the cowboy, the lettering and every wish),
-     taken from just past the Newsstand to the door end, scaled to fit the screen's height. On a narrow screen it
-     is wider than the screen, so it scrolls sideways (swipe). ×, Escape or a click outside closes it.
+     STEP 6A · THE WISHING WALL, UP CLOSE (the popup)
+     Click the wishes (or WISHING / WALL) and the popup shows the wall flat, straight on: the same stretch of
+     wall as in the room (the Newsstand to the corner by the café), floor to ceiling.
+       · The cowboy mural runs floor to ceiling.
+       · Every wish is a block of words, built around him wherever his outline leaves room. Like the
+         type-specimen wallpaper Kathi chose, but with the words running across: a block is only turned on its
+         side when its words can't fit any other way. No frames or lines.
+       · WISHING / WALL, in Impact, stand on the floor line beside him.
+     The popup opens showing the whole wall; click (or tap) it to zoom in and read, click again to see it all.
+     (The wall is the size it is in the room, so the words are as big as that space allows: all the wishes and
+      names come out the same smallest size, and the shorter wishes bigger.)
+
+     HOW IT IS LAID OUT (wallLayout(), below), in five steps:
+       1. Measure how much wall each wish needs at a given smallest letter size.
+       2. Map the wall on a grid of 10 cm squares and mark the squares the cowboy's paint covers (read from the
+          stencil picture itself), keeping 20 cm clear of it, plus the ivy at the top and the floor strip.
+       3. Cut the free squares into the biggest rectangles it can find (the "carve" step), and put WISHING / WALL
+          in the free space on the floor line.
+       4. Share the wishes out between the rectangles, then split each rectangle into near-square blocks, one per
+          wish, sized by how much it needs (a "squarified treemap", the usual way to cut a box into squares).
+       5. Make each block's words as big as fit. If a wish comes out too small, give it a bigger block and lay
+          it all out again; if there still isn't room, make every letter a little smaller and try again.
+     It is worked out once, at 100 pixels to the metre, while you look around the room, then sized to fit your
+     screen (so it never has to be worked out again).
      ================================================================ */
-  let WALLVIEW = null, wv = null, wvOpener = null;
+  const READ = {
+    width: 9.5,      // metres: as wide as the Wishing Wall section in the room (the Newsstand to the corner by the café)
+    height: 7.2,     // floor to ceiling, as in the room (HM)
+    letter: .1,      // the first try at the smallest letters (a small letter's height; a capital's in ALL-CAPS wishes).
+                     // It comes down 4% at a time until every wish fits; WHOLENESS's letters in the room are .14 m
+    stem: .18,       // the thinnest pen stroke, as a share of the smallest letters' height (WHOLENESS's share)
+    bold: 1.3,       // a **word** is painted this many times bigger than the rest of its wish
+    gap: .14,        // the bare wall between two blocks
+    clear: .2,       // how far the words keep from the cowboy's paint
+    ivy: .7,         // the strip at the top where the ivy hangs (no words there)
+    floor: .15,      // the strip along the floor (no words there)
+    base: .1,        // the cowboy's feet are this far above the floor; his hat reaches the ceiling
+    minA: 1.2, minB: .8,    // the smallest space a block can go in: 1.2 m one way, 0.8 m the other
+    title: 2.8,      // WISHING / WALL are at most this wide
+    aspect: 1.5,     // the blocks aim to be this many times wider than tall (so the words can run across)
+    zoom: 16         // zoomed in, the smallest letters are this many pixels tall on screen
+  };
+  const PX = 100;    // pixels to the metre, while it is laid out
+  const CELL = .1;   // the grid's squares, in metres
+
+  // The cowboy stencil, read pixel by pixel: how much of any part of the picture has paint on it.
+  // (A "summed-area table": each entry holds the paint count of everything above and to the left of it, so the
+  //  paint in any rectangle is found with four look-ups instead of counting every pixel.)
+  function stencilInk(img) {
+    const w = img.naturalWidth, h = img.naturalHeight, cv = document.createElement("canvas");
+    cv.width = w; cv.height = h;
+    const cx = cv.getContext("2d"); cx.drawImage(img, 0, 0);
+    const a = cx.getImageData(0, 0, w, h).data, S = new Uint32Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) { let row = 0;
+      for (let x = 0; x < w; x++) { row += a[(y * w + x) * 4 + 3] > 60 ? 1 : 0; S[(y + 1) * (w + 1) + x + 1] = S[y * (w + 1) + x + 1] + row; } }
+    // the share of pixels with paint in the picture's rectangle (u0..u1 across, v0..v1 down, each 0 to 1)
+    return (u0, v0, u1, v1) => {
+      const x0 = Math.max(0, Math.floor(u0 * w)), x1 = Math.min(w, Math.max(x0 + 1, Math.ceil(u1 * w)));
+      const y0 = Math.max(0, Math.floor(v0 * h)), y1 = Math.min(h, Math.max(y0 + 1, Math.ceil(v1 * h)));
+      if (x1 <= x0 || y1 <= y0) return 0;
+      const W1 = w + 1, n = S[y1 * W1 + x1] - S[y0 * W1 + x1] - S[y1 * W1 + x0] + S[y0 * W1 + x0];
+      return n / ((x1 - x0) * (y1 - y0));
+    };
+  }
+
+  // Step 2: the grid. 1 = free wall, 0 = paint (or too near it), the ivy strip or the floor strip.
+  // Rows count down from the top of the wall; columns count across from the left.
+  function freeGrid(H, cow, ink) {
+    const R = Math.round(H / CELL), C = Math.round(READ.width / CELL), g = new Uint8Array(R * C);
+    const top = H - cow.y - cow.h;                                   // the top of the cowboy's picture, from the top of the wall
+    for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+      const v0 = (r * CELL - top) / cow.h, v1 = ((r + 1) * CELL - top) / cow.h, u0 = (c * CELL - cow.x) / cow.w, u1 = ((c + 1) * CELL - cow.x) / cow.w;
+      g[r * C + c] = (v1 <= 0 || v0 >= 1 || u1 <= 0 || u0 >= 1 || ink(u0, v0, u1, v1) <= .1) ? 1 : 0;
+    }
+    // tidy the paint: ignore lone specks (shrink the paint by one square, then grow it back), then keep a margin
+    const grow = (src, paint) => { const out = src.slice(); for (let r = 0; r < R; r++) for (let c = 0; c < C; c++) {
+      const i = r * C + c; if (src[i] !== paint) continue;
+      if (r > 0) out[i - C] = paint; if (r < R - 1) out[i + C] = paint; if (c > 0) out[i - 1] = paint; if (c < C - 1) out[i + 1] = paint; } return out; };
+    let f = grow(g, 1); f = grow(f, 0);                              // specks gone
+    for (let k = 0; k < Math.round(READ.clear / CELL); k++) f = grow(f, 0);   // the clear margin round the paint
+    for (let r = 0; r < R; r++) if (r < READ.ivy / CELL || r >= R - READ.floor / CELL) for (let c = 0; c < C; c++) f[r * C + c] = 0;
+    return { f, R, C };
+  }
+  // Step 3: the biggest free rectangle on the grid (at least minA × minB squares, either way round).
+  // The classic "largest rectangle in a histogram", row by row: h[c] = how many free squares stack up above.
+  function biggestRect(G, minA, minB) {
+    const { f, R, C } = G, h = new Int32Array(C); let best = null, bestA = 0;
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) h[c] = f[r * C + c] ? h[c] + 1 : 0;
+      const st = [];
+      for (let c = 0; c <= C; c++) {
+        const cur = c < C ? h[c] : 0; let start = c;
+        while (st.length && st[st.length - 1][1] >= cur) {
+          const [s, hh] = st.pop(), w = c - s;
+          if (w * hh > bestA && ((w >= minA && hh >= minB) || (w >= minB && hh >= minA))) { bestA = w * hh; best = { r0: r - hh + 1, c0: s, h: hh, w }; }
+          start = s;
+        }
+        st.push([start, cur]);
+      }
+    }
+    return best;
+  }
+  const takeCells = (G, r0, c0, h, w, m) => {                         // mark a rectangle (and a margin m round it) as used
+    for (let r = Math.max(0, r0 - m); r < Math.min(G.R, r0 + h + m); r++) for (let c = Math.max(0, c0 - m); c < Math.min(G.C, c0 + w + m); c++) G.f[r * G.C + c] = 0; };
+  function carve(G) {
+    const out = [], a = Math.round(READ.minA / CELL), b = Math.round(READ.minB / CELL);
+    for (let rect; (rect = biggestRect(G, a, b));) { out.push(rect); takeCells(G, rect.r0, rect.c0, rect.h, rect.w, 1); }
+    return out;
+  }
+  // Step 4b: cut a rectangle into near-square blocks, one per wish, each sized by its weight ("squarified treemap").
+  function squarify(items, r) {
+    if (!items.length) return [];
+    const out = [], total = items.reduce((t, q) => t + q._w, 0), k = r.w * r.h / total;
+    let rest = items.map(q => ({ q, a: q._w * k })), rect = { ...r };
+    const worst = (row, side) => { const s = row.reduce((t, i) => t + i.a, 0); return Math.max(...row.map(i => Math.max(side * side * i.a / (s * s), (s * s) / (side * side * i.a)))); };
+    while (rest.length) {
+      const side = Math.min(rect.w, rect.h); let row = [rest[0]], i = 1;
+      while (i < rest.length && worst([...row, rest[i]], side) <= worst(row, side)) { row.push(rest[i]); i++; }
+      rest = rest.slice(i);
+      const s = row.reduce((t, i) => t + i.a, 0);
+      if (rect.w >= rect.h) {                                        // the row stands as a column down the left
+        const cw = s / rect.h; let y = rect.y;
+        row.forEach(it => { const ch = it.a / cw; out.push({ q: it.q, x: rect.x, y, w: cw, h: ch }); y += ch; });
+        rect = { x: rect.x + cw, y: rect.y, w: rect.w - cw, h: rect.h };
+      } else {                                                       // the row lies along the top
+        const rh = s / rect.w; let x = rect.x;
+        row.forEach(it => { const cw = it.a / rh; out.push({ q: it.q, x, y: rect.y, w: cw, h: rh }); x += cw; });
+        rect = { x: rect.x, y: rect.y + rh, w: rect.w, h: rect.h - rh };
+      }
+    }
+    return out;
+  }
+
+  // THE WHOLE LAYOUT. Returns the finished wall (an element, PX pixels to the metre) and its size.
+  async function wallLayout() {
+    const R = READ, W = R.width, list = DATA.WISHES || [], pause = () => new Promise(r => setTimeout(r, 0));
+    const stencil = await load(IMG + "post/stencil.webp"); if (!stencil) return null;
+    await document.fonts.load('100px Impact, Anton').catch(() => {});
+    const ink = stencilInk(stencil), AR = stencil.naturalWidth / stencil.naturalHeight;
+    const wall = make("div", "nrwv-wall", document.body);           // built off screen, then moved into the popup
+    Object.assign(wall.style, { visibility: "hidden", left: "-99999px", top: "0px", width: (W * PX) + "px" });
+    wall.style.setProperty("--bold-k", R.bold);
+
+    // 1. What each wish needs: its words on one line at the smallest size, times the line's height, plus its name.
+    //    (Measured with letters 1 m tall; at any other size L it needs that times L × L.)
+    let L = 1;                                                       // the smallest letters' height, in metres
+    const ht = q => q.case === "up" ? fontOf(q).cap : fontOf(q).xh;
+    const minFs = q => L / ht(q), byFs = q => L / fontOf(q).xh;
+    const words = q => esc(caseOf(q.wish, q.case)).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    const probe = make("div", "nrwv-probe", wall);
+    list.forEach(q => {
+      const f = fontOf(q);
+      probe.innerHTML = `<span style="font:${minFs(q) * PX}px/${f.lh} '${q.font}';word-spacing:${f.ws}em">${words(q)}</span> <span style="font:${byFs(q) * PX}px/${f.lh} '${q.font}'">— ${esc(q.name)}, Human</span>`;
+      const [a, b] = probe.children;
+      q._unit = (a.offsetWidth * minFs(q) * f.lh + b.offsetWidth * byFs(q) * f.lh) / PX;   // square metres, at L = 1
+    });
+    // WISHING / WALL: how wide each word is at a size of 1 m (so it can be sized to fill the title's width)
+    probe.innerHTML = `<span class="nrwv-title">WISHING</span><span class="nrwv-title">WALL</span>`;
+    [...probe.children].forEach(s => Object.assign(s.style, { fontSize: PX + "px", display: "inline-block" }));
+    const tw = [...probe.children].map(s => s.offsetWidth / PX);
+    probe.remove();
+
+    // 5. Fill one block: the words as big as fit (found by halving the range 13 times), the name underneath at the
+    //    smallest size. The words run across (horizontal). Only if they can't reach the smallest size that way,
+    //    and turning them on their side (reading upward) does better, is the block turned: vertical only when needed.
+    function fill(bk, allowUp) {
+      const q = bk.q, f = fontOf(q), g2 = R.gap / 2, el = make("div", "nrwv-block", wall);
+      const bw = bk.w - R.gap, bh = bk.h - R.gap;
+      Object.assign(el.style, { left: (bk.x + g2) * PX + "px", top: (bk.y + g2) * PX + "px", width: bw * PX + "px", height: bh * PX + "px" });
+      const inner = make("div", "nrwv-in", el);
+      inner.innerHTML = `<div class="nrwv-words">${words(q)}</div><div class="nrwv-name">— ${esc(q.name)}, Human</div>`;
+      const wd = inner.firstChild, nm = inner.lastChild, nfs = byFs(q), fmin = minFs(q);
+      Object.assign(nm.style, { font: `${nfs * PX}px/${f.lh} "${q.font}"`, wordSpacing: f.ws + "em" });
+      nm.style.setProperty("--bold", thicken(q, nfs * PX, R.stem * L * PX) + "px");
+      const set = fs => { Object.assign(wd.style, { font: `${fs * PX}px/${f.lh} "${q.font}"`, wordSpacing: f.ws + "em" }); wd.style.setProperty("--bold", thicken(q, fs * PX, R.stem * L * PX) + "px"); };
+      const fits = () => wd.offsetHeight + nm.offsetHeight <= inner.clientHeight && wd.scrollWidth <= wd.clientWidth + 1 && nm.scrollWidth <= nm.clientWidth + 1;
+      const orient = up => {                                        // lay the block out one way round; returns how big the words got
+        inner.classList.toggle("up", up);
+        Object.assign(inner.style, { width: (up ? bh : bw) * PX + "px", height: (up ? bw : bh) * PX + "px", top: (up ? bh * PX : 0) + "px" });
+        let lo = fmin * .4, hi = fmin * 6;
+        for (let i = 0; i < 13; i++) { const m = (lo + hi) / 2; set(m); if (fits()) lo = m; else hi = m; }
+        set(lo); return fits() ? lo / fmin : 0;
+      };
+      const across = orient(false);
+      if (across >= 1 || !allowUp) return { q, k: across, up: false };
+      const upward = orient(true);
+      if (upward > across) return { q, k: upward, up: true };
+      orient(false); return { q, k: across, up: false };
+    }
+
+    // 2-5 at the current letter size L. Returns the blocks' results, or null if the wishes can't all be given a space.
+    const H = R.height; let title;
+    const cow = { y: R.base, h: H - R.base }; cow.w = cow.h * AR; cow.x = (W - cow.w) / 2;   // the cowboy: floor to ceiling, in the middle
+    function attempt(allowUp) {
+      [...wall.querySelectorAll(".nrwv-block")].forEach(n => n.remove());
+      const G = freeGrid(H, cow, ink);
+      // WISHING / WALL stand on the floor line, in the free space nearest the right-hand edge, as wide as fits
+      // (at most R.title): each word sized to fill that width, so the shorter WALL comes out bigger.
+      title = null;
+      const rB = G.R - Math.round(R.floor / CELL);                   // the first row of the floor strip
+      const isFree = (r0, r1, c0, c1) => { for (let r = r0; r < r1; r++) for (let c = c0; c < c1; c++) if (!G.f[r * G.C + c]) return false; return true; };
+      for (let tW = R.title; tW >= 1.2 && !title; tW -= .1) {
+        const fs1 = tW / tw[0], fs2 = tW / tw[1], tH = (fs1 + fs2) * .86 + .06, cw = Math.ceil(tW / CELL), ch = Math.ceil(tH / CELL);
+        for (let c0 = G.C - cw - 1; c0 >= 0; c0--) if (isFree(rB - ch, rB, c0, c0 + cw)) { title = { x: c0 * CELL, w: tW, fs1, fs2, h: tH }; takeCells(G, rB - ch, c0, ch, cw, 2); break; }
+      }
+      // (no room on the floor? then they go at the top left, under the ivy)
+      for (let tW = R.title, r0 = Math.round(R.ivy / CELL); !title && tW >= 1.2; tW -= .1) {
+        const fs1 = tW / tw[0], fs2 = tW / tw[1], tH = (fs1 + fs2) * .86 + .06, cw = Math.ceil(tW / CELL), ch = Math.ceil(tH / CELL);
+        if (isFree(r0, r0 + ch, 1, 1 + cw)) { title = { x: CELL, w: tW, fs1, fs2, h: tH, top: r0 * CELL }; takeCells(G, r0, 1, ch, cw, 2); }
+      }
+      if (!title) return null;
+      const rects = carve(G).map(r => ({ x: r.c0 * CELL, y: r.r0 * CELL, w: r.w * CELL, h: r.h * CELL, items: [], left: 0 }));
+      rects.forEach(r => (r.left = r.w * r.h));
+      // share the wishes out: the biggest first, each to the rectangle with the most room left
+      for (const q of list.slice().sort((a, b) => b._w - a._w)) {
+        const r = rects.reduce((best, r) => (!best || r.left > best.left ? r : best), null);
+        if (!r || r.left < q._w) return null;
+        r.items.push(q); r.left -= q._w;
+      }
+      rects.forEach(r => r.items.sort((a, b) => list.indexOf(a) - list.indexOf(b)));
+      // (the treemap makes squares; drawing it on a wall stretched R.aspect times taller and squashing it back
+      //  turns them into blocks R.aspect times wider than tall, the shape words running across fill best)
+      const a = R.aspect, wide = r => squarify(r.items, { x: r.x, y: r.y * a, w: r.w, h: r.h * a }).map(b => ({ ...b, y: b.y / a, h: b.h / a }));
+      return rects.flatMap(wide).map(bk => fill(bk, allowUp));
+    }
+    // Start with letters R.letter tall and every block a bit bigger than its words need. Then, all words running
+    // across: grow the blocks that came out too small and lay it out again (up to 6 tries). Still not there? Let the
+    // blocks that need it turn on their side (6 more tries). Still not? Make every letter 4% smaller and start
+    // again. And if the wishes don't all get a space at all, the letters get smaller straight away.
+    const scaleTo = v => { list.forEach(q => (q._w = (q._w || q._unit * 1.8 * L * L) * (v / L) ** 2)); L = v; };
+    list.forEach(q => (q._w = 0)); scaleTo(R.letter);
+    let done = false, allowUp = false;
+    for (let round = 0, tries = 0; round < 200 && !done; round++) {
+      const res = attempt(allowUp);
+      if (res && res.every(r => r.k >= 1)) { done = true; break; }
+      if (!res) { scaleTo(L * .96); tries = 0; allowUp = false; continue; }
+      if (++tries > 6) { tries = 0; if (!allowUp) allowUp = true; else { scaleTo(L * .96); allowUp = false; continue; } }
+      res.filter(r => r.k < 1).forEach(r => (r.q._w *= r.k ? Math.min(2.2, Math.max(1.06, 1.03 / (r.k * r.k))) : 1.5));
+      await pause();                                                 // let the room breathe while it works
+    }
+    if (!done) { wall.remove(); return null; }                      // (it never found a layout: the popup keeps its "Painting the wall…" note)
+
+    // The wall itself: the same white brick and ivy as the room, the cowboy, WISHING / WALL.
+    Object.assign(wall.style, { height: (H * PX) + "px", backgroundImage: `url(${TILE.white.url})`,
+      backgroundSize: `${TILE.white.wm * PX}px ${TILE.white.hm * PX}px`, backgroundPosition: "0 100%" });
+    const ivy = make("div", "nrp-greens", null); wall.insertBefore(ivy, wall.firstChild);
+    Object.assign(ivy.style, { left: 0, top: (R.ivy - TILE.planter.hm) * PX + "px", width: W * PX + "px", height: TILE.planter.hm * PX + "px",
+      backgroundImage: `url(${TILE.planter.url})`, backgroundSize: `${TILE.planter.wm * PX}px ${TILE.planter.hm * PX}px` });
+    const art = make("div", "nrp-graffiti", wall, `<img src="${IMG}post/stencil.webp" alt="Stencil graffiti of a cowboy holding a rifle">`);
+    Object.assign(art.style, { left: cow.x * PX + "px", top: (H - cow.y - cow.h) * PX + "px", width: cow.w * PX + "px", height: cow.h * PX + "px" });
+    const t = make("div", "nrwv-titles", wall, `<span class="nrwv-title">WISHING</span><span class="nrwv-title">WALL</span>`);
+    Object.assign(t.style, { left: title.x * PX + "px", top: (title.top != null ? title.top : H - R.floor - title.h) * PX + "px", width: title.w * PX + "px" });
+    t.children[0].style.fontSize = title.fs1 * PX + "px"; t.children[1].style.fontSize = title.fs2 * PX + "px";
+    t.style.gap = (.06 * PX) + "px";
+    return { el: wall, w: W * PX, h: H * PX, L };
+  }
+  let wallReady = null;                                              // the layout, once it has been started
+  const prepareWall = () => (wallReady = wallReady || wallLayout());
+
+  let wv = null, wvOpener = null, wvZoom = false;
+  const coarse = matchMedia("(pointer: coarse)").matches;          // a touch screen (a phone or tablet)
   function openWall(opener) {
-    if (!WALLVIEW) return;
     wvOpener = opener;
     if (!wv) {
-      wv = make("div", "nrwv", document.body, `<button class="nrlb-btn nrlb-close" type="button" aria-label="Close">×</button><div class="nrwv-scroll"><div class="nrwv-frame"></div></div>`);
+      wv = make("div", "nrwv", document.body, `<button class="nrlb-btn nrlb-close" type="button" aria-label="Close">×</button><div class="nrwv-scroll"><div class="nrwv-frame"><p class="nrwv-wait">Painting the wall…</p></div></div><p class="nrwv-hint" aria-hidden="true">${coarse ? "Tap" : "Click"} the wall to zoom in</p>`);
       wv.setAttribute("role", "dialog"); wv.setAttribute("aria-modal", "true"); wv.setAttribute("aria-label", "The Wishing Wall");
       wv.querySelector(".nrlb-close").onclick = closeWall;
       wv.addEventListener("click", e => { if (e.target === wv || e.target.classList.contains("nrwv-scroll")) closeWall(); });
+      // click (or tap) the wall: zoom in on that spot to read; again: back to the whole wall
+      wv.querySelector(".nrwv-frame").addEventListener("click", e => {
+        if (!wallReady) return;
+        wallReady.then(res => { if (!res) return;
+          wvZoom = !wvZoom; showWall(res, e);
+          const hint = wv.querySelector(".nrwv-hint");
+          hint.textContent = wvZoom ? `${coarse ? "Tap" : "Click"} again to see the whole wall` : `${coarse ? "Tap" : "Click"} the wall to zoom in`;
+        });
+      });
     }
-    // copy the wall as it is painted now, without the Newsstand, the click panel or the shading
-    const src = $("nrp-left"), copy = src.cloneNode(true);
-    copy.removeAttribute("id"); copy.className = "nrwv-wall";
-    copy.querySelectorAll(".nrp-news, .nrp-wallhot, .nrp-wallshade").forEach(n => n.remove());
-    copy.querySelectorAll("a").forEach(n => { n.removeAttribute("href"); n.classList.remove("nrp-hot"); n.tabIndex = -1; });
-    const V = WALLVIEW, vw = (V.x1 - V.x0) * u, vh = (V.y1 - V.y0) * u;
-    Object.assign(copy.style, { width: src.offsetWidth + "px", height: src.offsetHeight + "px", left: (-V.x0 * u) + "px", top: (-(HM - V.y1) * u) + "px" });
-    const frame = wv.querySelector(".nrwv-frame"); frame.innerHTML = ""; frame.appendChild(copy);
-    const pad = 24, k = Math.min((innerHeight - pad * 2) / vh, innerWidth < 760 ? Infinity : (innerWidth - pad * 2) / vw);   // fit the height (and the width, on a wide screen)
-    Object.assign(frame.style, { width: vw + "px", height: vh + "px", transform: `scale(${k})` });
-    frame.style.setProperty("--u", u + "px");                                                  // the hollow letters' outline is measured in metres
-    frame.parentNode.style.setProperty("--fw", (vw * k) + "px"); frame.parentNode.style.setProperty("--fh", (vh * k) + "px");
+    wvZoom = false;
     wv.hidden = false; document.documentElement.classList.add("nrlb-open");
-    wv.querySelector(".nrwv-scroll").scrollLeft = 0;
     wv.querySelector(".nrlb-close").focus({ preventScroll: true });
+    prepareWall().then(res => { if (res) showWall(res); });
+  }
+  // Put the finished wall in the popup at the right size. Whole: the entire wall fits the screen.
+  // Zoomed: the smallest letters are READ.zoom pixels tall (and at least 1.6 times the whole view), and the spot
+  // you clicked stays under your finger or pointer; you scroll around the wall to read the rest.
+  function showWall({ el, w, h, L }, at) {
+    if (!wv || wv.hidden) return;
+    const frame = wv.querySelector(".nrwv-frame"), sc = wv.querySelector(".nrwv-scroll");
+    if (el.parentNode !== frame) { frame.innerHTML = ""; frame.appendChild(el); Object.assign(el.style, { visibility: "", left: "0px", top: "0px" }); }
+    const pad = 24, fit = Math.min((innerWidth - pad * 2) / w, (innerHeight - pad * 2) / h);
+    const k = wvZoom ? Math.max(fit * 1.6, READ.zoom / (L * PX)) : fit;
+    const r0 = frame.getBoundingClientRect(), fx = at ? (at.clientX - r0.left) / r0.width : .5, fy = at ? (at.clientY - r0.top) / r0.height : .5;
+    Object.assign(frame.style, { width: (w * k) + "px", height: (h * k) + "px" });
+    el.style.transform = `scale(${k})`;
+    frame.classList.toggle("zoomed", wvZoom);
+    const sr = sc.getBoundingClientRect(), cx = at ? at.clientX - sr.left : sr.width / 2, cy = at ? at.clientY - sr.top : sr.height / 2;
+    sc.scrollLeft = pad + fx * w * k - cx; sc.scrollTop = pad + fy * h * k - cy;
   }
   function closeWall() { wv.hidden = true; document.documentElement.classList.remove("nrlb-open"); if (wvOpener) wvOpener.focus({ preventScroll: true }); }
-  addEventListener("keydown", e => { if (wv && !wv.hidden && e.key === "Escape") closeWall(); });
+  addEventListener("keydown", e => {
+    if (!wv || wv.hidden) return;
+    if (e.key === "Escape") closeWall();
+    const sc = wv.querySelector(".nrwv-scroll"), step = { ArrowDown: [0, 1], ArrowUp: [0, -1], PageDown: [0, 1], PageUp: [0, -1], ArrowRight: [1, 0], ArrowLeft: [-1, 0] }[e.key];
+    if (step) { e.preventDefault(); sc.scrollBy({ left: step[0] * sc.clientWidth * .8, top: step[1] * sc.clientHeight * .8, behavior: reduceMotion ? "auto" : "smooth" }); }
+  });
+  addEventListener("resize", () => { if (wv && !wv.hidden && wallReady) wallReady.then(res => res && showWall(res)); });
 
   /* ================================================================
      STEP 6B · THE GALLERY VIEWER
@@ -1066,7 +1374,8 @@
   // roof-glass.webp = one pane of glass cut from Kathi's glass-roof photo
   // ...and the six spray-paint fonts the Wishing Wall is lettered in (the wall is measured in them, so they must be
   // ready first; if one is slow, the wall goes ahead after 2.5 seconds with a stand-in)
-  const wallFonts = Promise.race([Promise.all(["Permanent Marker", "Sedgwick Ave Display", "Rock Salt", "Bebas Neue", "Black Ops One", "Reenie Beanie"]
+  // (and Anton, the free stand-in for Impact, for WISHING / WALL on phones that don't have Impact)
+  const wallFonts = Promise.race([Promise.all(["Permanent Marker", "Sedgwick Ave Display", "Rock Salt", "Bebas Neue", "Black Ops One", "Reenie Beanie", "Anton"]
     .map(f => document.fonts.load(`40px "${f}"`).catch(() => {}))), new Promise(r => setTimeout(r, 2500))]);
   // (The ivy photo, ivy-colour.webp, is no longer loaded here: the roof's leaves now take the ivy's colours from
   //  IVY_PALETTE instead. The storefront still uses that photo for its own ivy.)
@@ -1075,6 +1384,7 @@
     paintTextures();
     build();
     root.classList.add("ready");
+    setTimeout(prepareWall, 1500);   // lay out the Wishing Wall's popup while you look around (STEP 6A)
     if (!reduceMotion) root.classList.add("walk-in");
   });
   let t, lastW = innerWidth, lastH = innerHeight;

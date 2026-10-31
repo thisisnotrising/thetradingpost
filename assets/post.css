@@ -144,7 +144,9 @@
   box-shadow: inset 0 0 calc(var(--u) * .05) rgba(0,0,0,.4); }
 .nrp-galword { display: grid; place-items: center; color: #f1ece2; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; letter-spacing: .16em; line-height: 1; opacity: .92; pointer-events: none;
   text-shadow: 0 calc(var(--u) * .02) calc(var(--u) * .05) rgba(0,0,0,.7); }
-.nrp-wishword { color: #111; opacity: .9; text-shadow: 0 calc(var(--u) * .01) calc(var(--u) * .02) rgba(0,0,0,.25); white-space: nowrap; text-decoration: none; pointer-events: auto; }   /* WISHING / WALL: black on the white brick
+.nrp-wishword { color: #111; font-family: Impact, Anton, "Arial Narrow Bold", sans-serif; font-weight: 400; letter-spacing: .03em; opacity: .95;
+  text-shadow: 0 calc(var(--u) * .01) calc(var(--u) * .02) rgba(0,0,0,.25); white-space: nowrap; text-decoration: none; pointer-events: auto; }
+/* WISHING / WALL: black Impact on the white brick (Anton, a free look-alike, on phones that don't have Impact) */
 
 /* ---------- THE FLOOR ---------- */
 /* Sun through the glass: a bright wash, striped by the shadows of the mullions */
@@ -388,38 +390,62 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
 
 /* ---------- THE WISHING WALL (laid out by wishingWall() in post.js) ----------
    The six spray-paint and marker fonts, kept in assets/fonts/wall (free fonts, trimmed to plain letters; see LICENSES.txt).
-   .nrp-wish   one wish, painted on the brick: "multiply" lets the brick's light and shadow show through the paint
+   .nrp-wish   one wish, painted on the brick in solid black (--ink). Every letter also gets a black edge painted round
+               it (-webkit-text-stroke) to make it bolder: --bold is how wide, worked out by thicken() in post.js so even
+               the thin handwriting (Reenie Beanie, Rock Salt) is at least as thick as WHOLENESS
    b           a word painted bigger (written **like this** in data.js)
-   .by         the signature underneath: "— Name, Human"
-   .outline    hollow letters */
+   .by         the signature underneath: "— Name, Human" (its own edge width, --bold-by, because it is a different size) */
 @font-face { font-family: "Permanent Marker"; src: url(fonts/wall/permanent-marker.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Sedgwick Ave Display"; src: url(fonts/wall/sedgwick-ave-display.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Rock Salt"; src: url(fonts/wall/rock-salt.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Bebas Neue"; src: url(fonts/wall/bebas-neue.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Black Ops One"; src: url(fonts/wall/black-ops-one.woff2) format("woff2"); font-display: swap; }
 @font-face { font-family: "Reenie Beanie"; src: url(fonts/wall/reenie-beanie.woff2) format("woff2"); font-display: swap; }
-.nrp-wish { width: max-content; padding: .06em 0; color: var(--ink); opacity: .9; pointer-events: none; transform-origin: 50% 50%; }
-.nrp-wish b { font-weight: inherit; font-size: 1.6em; line-height: .95; }
-.nrp-wish .by { display: block; margin-top: .25em; font-size: var(--by); opacity: .82; white-space: nowrap; }
-.nrp-wish.outline { color: transparent; -webkit-text-stroke: calc(var(--u) * .012) var(--ink); }
-.nrp-wish.outline .by { color: var(--ink); -webkit-text-stroke: 0; }
+@font-face { font-family: "Anton"; src: url(fonts/wall/anton.woff2) format("woff2"); font-display: swap; }   /* the stand-in for Impact */
+.nrp-wish { width: max-content; padding: .06em 0; color: var(--ink); -webkit-text-stroke: var(--bold, 0px) var(--ink);
+  letter-spacing: calc(var(--bold, 0px) * .6);   /* the fattened letters get a little more room, so they don't run together */
+  pointer-events: none; transform-origin: 50% 50%; }
+.nrp-wish b { font-weight: inherit; font-size: calc(var(--bold-k, 1.6) * 1em); line-height: .95; }
+.nrp-wish .by { display: block; margin-top: .25em; font-size: var(--by); -webkit-text-stroke-width: var(--bold-by, 0px);
+  letter-spacing: calc(var(--bold-by, 0px) * .6); white-space: nowrap; }
 
-/* ---------- THE WISHING WALL, FULL SCREEN (openWall() in post.js) ----------
+/* ---------- THE WISHING WALL, UP CLOSE (openWall() and wallLayout() in post.js) ----------
    .nrwv         the dark room it opens into
-   .nrwv-scroll  scrolls sideways when the wall is wider than the screen (phones)
-   .nrwv-frame   the wall at its real size, shrunk to fit (transform: scale), from its top-left corner
-   .nrwv-wall    the copy of the painted wall inside it
+   .nrwv-scroll  lets you move around the wall when it is zoomed in
+   .nrwv-frame   the space the wall takes up on screen; click it to zoom in or out
+   .nrwv-wall    the wall, painted for reading (the same size as in the room)
+   .nrwv-block   one wish's block (no frame: the gaps between blocks are bare wall)
+   .nrwv-in      the words inside it; ".up" = turned on its side, reading upward
+   .nrwv-words   the wish itself (**word** painted bigger), .nrwv-name the "— Name, Human" underneath
+   .nrwv-titles  WISHING / WALL on the floor line, in Impact
+   .nrwv-hint    "Click the wall to zoom in" (or "Tap", on a phone)
    .nrp-wallhot  the invisible click panel over the wishes in the room */
 .nrp-wallhot { display: block; }
 .nrp-wallhot::after { top: 50%; }
 .nrwv { position: fixed; inset: 0; z-index: 2147483000; background: #0d0d0c; animation: nrlb-in .35s ease-out both; }
 .nrwv[hidden] { display: none !important; }
-.nrwv-scroll { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; display: grid; place-items: center;
+.nrwv-scroll { position: absolute; inset: 0; overflow: auto; display: grid; place-items: center;
   padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); -webkit-overflow-scrolling: touch; }
-.nrwv-scroll::before { content: ""; display: block; width: var(--fw); height: var(--fh); grid-area: 1 / 1; }   /* takes up the scaled wall's room */
-.nrwv-frame { grid-area: 1 / 1; place-self: start; position: relative; overflow: hidden; transform-origin: 0 0; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
-.nrwv-wall { position: absolute; overflow: hidden; transform: none !important; }
+.nrwv-frame { position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.6); cursor: zoom-in; }
+.nrwv-frame.zoomed { cursor: zoom-out; }
+.nrwv-wait { margin: 0; padding: 40px; color: #8d8a86; font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; }
+.nrwv-wall { position: absolute; overflow: hidden; transform-origin: 0 0; background-color: #f2efe9; }
 .nrwv-wall > * { position: absolute; }
+.nrwv-probe { white-space: nowrap; visibility: hidden; }
+.nrwv-in { position: absolute; left: 0; display: flex; flex-direction: column; justify-content: center; color: #111; }
+.nrwv-in.up { transform-origin: 0 0; transform: rotate(-90deg); }
+.nrwv-words, .nrwv-name { -webkit-text-stroke: var(--bold, 0px) #111; letter-spacing: calc(var(--bold, 0px) * .6); }
+.nrwv-words b { font-weight: inherit; font-size: calc(var(--bold-k, 1.3) * 1em); line-height: .95; }
+.nrwv-name { padding-top: .12em; }
+.nrwv-titles { display: flex; flex-direction: column; }
+.nrwv-title { display: block; color: #111; font-family: Impact, Anton, "Arial Narrow Bold", sans-serif; font-weight: 400; line-height: .86; white-space: nowrap; letter-spacing: .01em; }
+.nrwv-hint { position: fixed; z-index: 2; left: 50%; bottom: max(6px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
+  display: flex; align-items: center; gap: 10px; white-space: nowrap; pointer-events: none; color: #f1ece2;
+  font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  padding: 7px 12px; background: rgba(13,13,12,.75); transition: opacity .4s; }
+.nrwv-hint::after { content: ""; width: 8px; height: 8px; border: 2px solid currentColor; border-radius: 50%; animation: nrwv-nudge 1.6s ease-in-out infinite; }   /* a little pulsing dot: tap here */
+@keyframes nrwv-nudge { 50% { transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .nrwv-hint::after { animation: none; } }
 .nrwv .nrlb-close { z-index: 2; position: fixed; top: max(10px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); border-radius: 50%; background: rgba(13,13,12,.85); opacity: 1; }
 
 /* ---------- THE LOUNGE (built by lounge3d() in post.js) ----------
