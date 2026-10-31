@@ -692,7 +692,7 @@
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
           : `<div class="ph"><div class="ph-mast">NOT RISING</div><div class="ph-date">ISSUE ${two(n)} | ${esc(monthYear(item.date).toUpperCase())}</div><div class="ph-photo"><span class="ph-name">${esc(item.name)}</span></div></div>`;
-        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read || READ_ONLINE));   // READ ONLINE button: the item's own "read" link, or the features page
+        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read === false ? "" : (item.read || READ_ONLINE)));   // READ ONLINE button: the item's own "read" link, or the features page; read: false = no button
         const stack = document.createElement("div");
         stack.className = "stack";
         if (item.paper) {                                                   // light covers get light copies behind them (the "paper" field in data.js)
