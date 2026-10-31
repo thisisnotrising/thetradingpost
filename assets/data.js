@@ -125,8 +125,9 @@ window.NR = {
     { name: "Marlana", date: "2026-10-11", url: "https://thisisnotrising.org/2026/10/11/marlana/", cover: "cover17" },
     { name: "Pragya", date: "2026-10-25", url: "https://thisisnotrising.org/2026/10/25/pragya/", cover: "cover18" },
     /* "soon" = this issue's own marquee text (one line per \n), used instead of the
-       automatic "Coming December 19". Add url: "..." once the feature is live. */
-    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus : Issue 19\nArrives in one week" }
+       automatic "Coming December 19". Add url: "..." once the feature is live.
+       read: false = no READ ONLINE button on its marquee (delete it once the feature is live). */
+    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus : Issue 19\nArrives in one week", read: false }
   ],
 
   /* One magazine per issue. Each question can pick its layout:
