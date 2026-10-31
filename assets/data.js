@@ -46,6 +46,7 @@ window.NR = {
     cover16: "issue16-cover.webp",
     cover17: "issue17-cover.webp",
     cover18: "issue18-cover.webp",
+    cover19: "issue19-cover.webp",
     portrait01: "issue01-portrait.webp",
     name01: "issue01-name.webp",
     coverPhoto01: "issue01-cover-photo.webp",
@@ -115,7 +116,10 @@ window.NR = {
     { name: "Constantinos Tachtsidis", date: "2026-09-13", url: "https://thisisnotrising.org/2026/09/13/constantinos-tachtsidis/", cover: "cover15" },
     { name: "Rebecca Wicker", date: "2026-09-27", url: "https://thisisnotrising.org/2026/09/27/thestrategiclinguist/", cover: "cover16" },
     { name: "Marlana", date: "2026-10-11", url: "https://thisisnotrising.org/2026/10/11/marlana/", cover: "cover17" },
-    { name: "Pragya", date: "2026-10-25", url: "https://thisisnotrising.org/2026/10/25/pragya/", cover: "cover18" }
+    { name: "Pragya", date: "2026-10-25", url: "https://thisisnotrising.org/2026/10/25/pragya/", cover: "cover18" },
+    /* "soon" = this issue's own marquee text (one line per \n), used instead of the
+       automatic "Coming December 19". Add url: "..." once the feature is live. */
+    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus\nDigital Issue\nComing November 8" }
   ],
 
   /* One magazine per issue. Each question can pick its layout:

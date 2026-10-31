@@ -116,11 +116,12 @@ body {
 .nrns .sign h1 {
   display: flex; justify-content: center; gap: .06em;
   font-family: "Oswald", "Arial Narrow", "Helvetica Neue", sans-serif; font-weight: 600; text-transform: uppercase;
-  font-size: min(140px, 14cqw); line-height: 1; letter-spacing: 0; color: #111; white-space: nowrap;
+  font-size: min(140px, 12cqw);        /* 12% of the board width, so NOW SOARING (word gap included) always fits */
+  line-height: 1; letter-spacing: 0; color: #111; white-space: nowrap;
 }
-.nrns .lt.sp { width: .3em; }
+.nrns .lt.sp { width: .3em; flex-shrink: 0; }   /* the gap between words: never squeezed away on a narrow screen */
 .nrns .sign h1 .lt {                    /* one letter tile */
-  display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg));
+  display: inline-block;                /* straight and level */
   text-shadow: 0 2px 0 rgba(0, 0, 0, .12), 0 4px 6px rgba(0, 0, 0, .12);   /* the tile casts a little shadow on the lit board */
 }
 /* Awning: black and white striped canvas on an aluminium rail.
@@ -156,7 +157,7 @@ body {
   filter: brightness(.8) saturate(.15);             /* switched off: a soft light gray, so the black letters still read clearly */
   transition: filter .25s;
 }
-.nrns .tab .lt { display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg)); }
+.nrns .tab .lt { display: inline-block; }   /* straight and level */
 .nrns .tab:hover .tb { filter: brightness(.92) saturate(.4); }
 .nrns .tab[aria-selected="true"] .tb { filter: none; box-shadow: 0 0 22px rgba(255, 236, 200, .28); }   /* lit */
 .nrns .tab.upcoming .tb { filter: brightness(.66) saturate(.1); }          /* not out yet: a step darker than the other off tabs, still readable */
@@ -352,8 +353,8 @@ body {
 .nrns .toast .mq-orn b { font-weight: 400; font-size: 1.35em; }
 
 /* One line of letters. Size scales with screen width so the longer name line still fits on a phone */
-.nrns .toast .mq-row { white-space: nowrap; font-size: clamp(16px, 4.2vw, 40px); letter-spacing: .05em; padding: 4px 0; }
-/* Each letter is its own tile; the script nudges each one a little off-level */
+.nrns .toast .mq-row { white-space: nowrap; font-size: calc(clamp(16px, 4.2vw, 40px) * var(--fit, 1)); letter-spacing: .05em; padding: 4px 0; }   /* --fit: set by fitBoard() in newsstand.js, shrinks the letters on a narrow phone */
+/* Each letter is its own tile, sitting straight on the rail */
 .nrns .toast .mq-tile { display: inline-block; text-shadow: 0 1px 0 rgba(255, 255, 255, .6); }
 
 /* Small x to close, top-right corner of the board */

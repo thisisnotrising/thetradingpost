@@ -38,13 +38,10 @@
        Each function returns the HTML for one page.
        ============================================================ */
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-    // Marquee letter tiles: each letter its own tile, set a hair crooked. The wobble comes
-    // from the letter's position (not true random), so it looks the same on every visit.
-    const tiles = (word, seed = 0) => [...word].map((ch, i) => {
-      const r = Math.sin((i + seed) * 12.9898 + 4.1) * 43758.5453, f = r - Math.floor(r);
-      const g = Math.sin((i + seed) * 78.233 + 1.7) * 12345.678, h = g - Math.floor(g);
-      return ch === " " ? `<span class="lt sp"> </span>` : `<span class="lt" aria-hidden="true" style="--rot:${((f - .5) * 3.2).toFixed(2)}deg;--dy:${((h - .5) * .05).toFixed(3)}em">${esc(ch)}</span>`;
-    }).join("");
+    // Marquee letter tiles: each letter its own tile, all sitting straight and level on the rail.
+    const tiles = word => [...word].map(ch =>
+      ch === " " ? `<span class="lt sp"> </span>` : `<span class="lt" aria-hidden="true">${esc(ch)}</span>`
+    ).join("");
     const P = n => `calc(${n} * var(--p))`;                 // design pixels -> CSS
     const two = n => String(n).padStart(2, "0");
     const img = (key, cls, alt = "", style = "") => {
@@ -662,11 +659,15 @@
         el.className = "tab" + (t.upcoming ? " upcoming" : "") + (t.memoirs ? " memoirs" : "");
         el.setAttribute("aria-selected", String(t.key === activeKey));
         el.setAttribute("aria-label", t.label);
-        el.innerHTML = `<span class="tb">${tiles(t.label.toUpperCase(), t.label.length * 3)}</span>`;   // a little letter board
+        el.innerHTML = `<span class="tb">${tiles(t.label.toUpperCase())}</span>`;   // a little letter board
         el.addEventListener("click", () => { renderTabs(t.key); renderShelf(t); });
         tabsEl.appendChild(el);
       });
     }
+
+    // Name for the marquee board: three or more words? Keep just the first and last
+    // ("Neela Kavita Ragbirsingh" -> "Neela Ragbirsingh") so the line stays short.
+    const marqueeName = name => { const w = name.trim().split(/\s+/); return w.length > 2 ? `${w[0]} ${w[w.length - 1]}` : name; };
 
     // One pocket on the rack: a cover (or stand-in), or an empty slot
     function pocket(item, tagText, n) {
@@ -679,9 +680,11 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "cover-btn" + (item.cover ? "" : " placeholder");   // grey stand-in only when there is no cover yet
-        let soon = `${item.name}: Digital Issue\nComing ${RELEASE_MONTH} ${n}`;   // issue 2 -> "Jennifer Hong: Digital Issue / Coming December 2" (the CSS shows it in capitals)
-        if (item.soon) soon = item.soon;                                    // a memoir can say its own "coming soon" line (see MEMOIRS in data.js)
-        btn.setAttribute("aria-label", item.issue ? `Open ${tagText}: ${item.name}` : `${tagText}. ` + soon.replace("\n", " "));
+        // The marquee text, three short lines so it fits a phone:
+        //   issue 2 -> "Jennifer Hong / Digital Issue / Coming December 2" (the CSS shows it in capitals)
+        let soon = `${marqueeName(item.name)}\nDigital Issue\nComing ${RELEASE_MONTH} ${n}`;
+        if (item.soon) soon = item.soon;                                    // an issue or memoir can say its own lines instead (the "soon" field in data.js)
+        btn.setAttribute("aria-label", item.issue ? `Open ${tagText}: ${item.name}` : `${tagText}. ` + soon.replace(/\n/g, " "));
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
           : `<div class="ph"><div class="ph-mast">NOT RISING</div><div class="ph-date">ISSUE ${two(n)} | ${esc(monthYear(item.date).toUpperCase())}</div><div class="ph-photo"><span class="ph-name">${esc(item.name)}</span></div></div>`;
@@ -738,12 +741,11 @@
       t.innerHTML = "";                                         // clear the last message
       const add = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; t.appendChild(el); return el; };
 
-      add("span", "mq-sr", msg.replace("\n", ". "));            // what screen readers hear
+      add("span", "mq-sr", msg.replace(/\n/g, ". "));            // what screen readers hear
       const orn = add("div", "mq-orn");                          // the "oOo" ornament
       orn.setAttribute("aria-hidden", "true");
       orn.innerHTML = "o<b>O</b>o";
 
-      let k = 0;                                                 // counts every letter on the board
       msg.split("\n").forEach(line => {                          // one row per line of text
         const row = add("div", "mq-row");
         row.setAttribute("aria-hidden", "true");
@@ -751,13 +753,7 @@
           const tile = document.createElement("span");
           tile.className = "mq-tile";
           tile.textContent = ch === " " ? "\u00a0" : ch;    // \u00a0 = a space that won't collapse
-          // Hand-placed look: each letter sits a hair off-level. The amounts come from the
-          // letter's position (not Math.random), so the board looks the same every time it opens.
-          const lift = (((k * 7) % 5) - 2) * 4 / 10;             // -0.8 to 0.8 px
-          const tilt = (((k * 3) % 7) - 3) * 3 / 10;             // -0.9 to 0.9 degrees
-          tile.style.transform = `translateY(${lift}px) rotate(${tilt}deg)`;
-          row.appendChild(tile);
-          k++;
+          row.appendChild(tile);                                 // letters sit straight and level
         });
       });
 
@@ -768,9 +764,21 @@
 
       if (t.hidden) toastBack = lastInput === "key" ? document.activeElement : null;   // opened with the keyboard? remember the cover (first open only)
       t.hidden = false;
+      fitBoard(t);
       t.style.animation = "none"; void t.offsetWidth; t.style.animation = "";   // replay the fade-in when the message changes
       if (toastBack) x.focus({ preventScroll: true });           // keyboard users land on the x (Enter or Esc closes); mouse clicks skip this, so no focus box on the x
     }
+    // Shrink-to-fit: if the longest line is wider than the board has room for
+    // (a narrow phone), scale every line down by the same amount so all of it fits.
+    function fitBoard(t) {
+      t.style.setProperty("--fit", 1);                           // start at full size
+      const cs = getComputedStyle(t);
+      const room = t.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);   // inside width of the board
+      const widest = Math.max(...[...t.querySelectorAll(".mq-row")].map(r => r.scrollWidth));
+      if (widest > room) t.style.setProperty("--fit", (room / widest * .98).toFixed(3));
+    }
+    window.addEventListener("resize", () => { const t = document.getElementById("nrns-toast"); if (!t.hidden) fitBoard(t); });
+
     // Escape key also closes the marquee
     document.addEventListener("keydown", e => { if (e.key === "Escape") closeToast(); });
 
