@@ -68,20 +68,20 @@ html, body { margin: 0; height: 100%; background: #0d0d0e; overflow: hidden; }
     radial-gradient(ellipse 80% 70% at 50% 50%, transparent 60%, rgba(20,12,6,.2)),
     linear-gradient(rgba(255,236,200,.1), rgba(255,236,200,.1)); }
 
-/* --- The page furniture: the way back out, the "Scroll up" cue, the phone directory --- */
+/* --- The page furniture: the way back out, the "Scroll up" cue (at the bottom of the screen), the phone directory --- */
 .back { position: fixed; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
   font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
   color: #2f2f2f; text-decoration: none; padding: 6px 8px; background: rgba(244,239,230,.8); }
 .back:hover { color: #000; }
 .back:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
-.cue { position: fixed; z-index: 5; left: 50%; top: max(18px, env(safe-area-inset-top, 0px)); transform: translateX(-50%); margin: 0;
+.cue { position: fixed; z-index: 5; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
   display: grid; justify-items: center; gap: 6px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
   font: 700 11px/1 Arimo, "Helvetica Neue", Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
 .cue::before { content: ""; width: 12px; height: 12px; border-left: 2px solid currentColor; border-top: 2px solid currentColor;
   transform: rotate(45deg); animation: bob 1.6s ease-in-out infinite; }       /* a little arrow pointing up */
 .cue.gone { opacity: 0; }
-@media (max-aspect-ratio: 9/10) { .cue { top: max(50px, calc(env(safe-area-inset-top, 0px) + 40px)); } }   /* phones: under the back link */
+@media (max-aspect-ratio: 9/10) { .cue { bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 84px); } }   /* phones: just above the directory */
 @keyframes bob { 50% { transform: translateY(-5px) rotate(45deg); } }
 
 /* The directory: the white panel by the door, for phones only (on a phone some of the room is off to the side) */
