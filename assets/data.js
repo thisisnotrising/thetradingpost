@@ -119,7 +119,7 @@ window.NR = {
     { name: "Pragya", date: "2026-10-25", url: "https://thisisnotrising.org/2026/10/25/pragya/", cover: "cover18" },
     /* "soon" = this issue's own marquee text (one line per \n), used instead of the
        automatic "Coming December 19". Add url: "..." once the feature is live. */
-    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus\nDigital Issue\nComing November 8" }
+    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus : Issue 19\nArrives in one week" }
   ],
 
   /* One magazine per issue. Each question can pick its layout:
