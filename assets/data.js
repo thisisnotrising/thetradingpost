@@ -409,7 +409,8 @@ window.NRPOST = {
 
   /* THE GALLERY: black-and-white photos, each a framed canvas print, all the same size, in an even grid
      along the black brick wall (top row first, from the far end toward the door).
-     Put the file in assets/img/post/gallery/life, then list it here.
+     Put the print in assets/img/post/gallery/life-exhibit and its small copy in life-exhibit/wall (same name),
+     then list it here.
      The canvases on the wall are square, so each photo is trimmed to a square there.
      "crop" (optional) says which part of the photo to keep, as "across down":
        "50% 50%" = the middle (the default), "50% 100%" = keep the bottom, "50% 0%" = keep the top.
@@ -417,33 +418,38 @@ window.NRPOST = {
      "ar" is the photo's real shape, width ÷ height (1 = square, 1.5 = landscape, 0.75 = portrait):
      the viewer uses it to size the photo.
      Clicking a frame opens the photo big, with a museum wall label beside it.
-     GALLERY_LABEL is the label every photo uses. To give one photo its own wording,
+     GALLERY_LABEL is the label every photo uses: four lines (artist, title, medium, credit).
+     Put *stars* around words to set them in italics, as museums do for a work's title. To give one photo its own wording,
      add the same field names to that photo's line, e.g.
        { img: "...", ar: 1.5, alt: "...", title: "Juniper, Ogden Valley, 2026" }
      and only that line changes; the rest of its label stays the same. */
   GALLERY_LABEL: {
-    artist: "KATHI ERIC DALGUNTAS (b. 1986)",   // line 1, bold
-    title:  "LIFE Exhibit, 2026",               // line 2
-    medium: "Digital C-Print"                   // line 3, small
+    artist: "KATHI ERIC DALGUNTAS (Filipino-American, b. 1986)",       // line 1, bold
+    title:  "*Life Exhibit*, 2026",                                     // line 2  (*words* = in italics)
+    medium: "Gelatin silver print",                                     // line 3
+    credit: "Collection of THE GALLERY on Daydream St., Gift of the artist"   // line 4, small
   },
+  /* The prints are made from Kathi's originals by tools/tone-gallery.py: stark black and white in the Wishing
+     Wall's own two tones. It saves each one twice: the print (life-exhibit/) and a small copy for the wall
+     (life-exhibit/wall/, same name). */
   GALLERY: [
-    // LIFE Exhibit, 2026. Hung in this order: top row first (far end to door end), then the next row down.
-    { img: "post/gallery/life/01-main-street.webp",       ar: 1.35, alt: "A sunny small-town main street: shopfronts, SALE signs, and a marquee reading LOST DOG STREET BAND" },
-    { img: "post/gallery/life/02-straw-hat.webp",         ar: 0.76, alt: "A straw hat and a fly swatter hanging from hooks on a wooden wall" },
-    { img: "post/gallery/life/03-payphone.webp",          ar: 0.81, alt: "A pay phone glimpsed between two posts" },
-    { img: "post/gallery/life/04-dog-sofa.webp",          ar: 1.36, alt: "A small white dog resting on a tufted sofa beside a knit pillow" },
-    { img: "post/gallery/life/05-holding-hands.webp",     ar: 1.34, alt: "Two people holding hands on a hospital bed, paper bands on one wrist" },
-    { img: "post/gallery/life/06-commonwealth-room.webp", ar: 1.95, alt: "The Commonwealth Room marquee: Sept 15 Houndmouth, 27 Graham Nash" },
-    { img: "post/gallery/life/07-ivy-bench.webp",         ar: 0.68, crop: "50% 100%", alt: "An iron bench below a stone wall climbing with ivy" },
-    { img: "post/gallery/life/08-string-lights.webp",     ar: 1.52, alt: "A string of bulb lights, the rest of the strand melting into blur" },
-    { img: "post/gallery/life/09-open-sign.webp",         ar: 0.99, alt: "Neon OPEN signs over a door numbered 1108, one reflected backward" },
-    { img: "post/gallery/life/10-window-light.webp",      ar: 1.01, alt: "Sun through tall windows laying cross-shaped shadows down a hallway" },
-    { img: "post/gallery/life/11-window-blinds.webp",     ar: 1.03, alt: "A man in silhouette eating at a table in front of window blinds" },
-    { img: "post/gallery/life/12-state-room.webp",        ar: 1.11, alt: "The State Room marquee: Tonight, OK Go, Sold Out" },
-    { img: "post/gallery/life/13-dont-wait.webp",         ar: 0.81, alt: "A wrist tattoo reading DONT WAIT" },
-    { img: "post/gallery/life/14-guitar-case.webp",       ar: 0.68, alt: "A guitar case leaning against sheer curtains in soft light" },
-    { img: "post/gallery/life/15-towers.webp",            ar: 1.00, alt: "Looking straight up between glass towers into cloud" },
-    { img: "post/gallery/life/16-stencil-cowboy.webp",    ar: 0.75, crop: "50% 15%", alt: "Stencil graffiti of a cowboy with a rifle on a painted cinder-block wall" }
+    // Life Exhibit, 2026. Hung in this order: top row first (far end to door end), then the next row down.
+    { img: "post/gallery/life-exhibit/01-brick-coffee-house.webp", ar: 0.75, crop: "50% 25%", alt: "The BRICK Coffee House Cafe: a brick shopfront with a Breakfast & Lunch sign over a wooden door, a flag in the window" },
+    { img: "post/gallery/life-exhibit/02-chalk-heart.webp",        ar: 1.35, alt: "A chalk heart on wet pavement scattered with fallen leaves, a pair of black shoes at its point" },
+    { img: "post/gallery/life-exhibit/03-string-lights.webp",      ar: 1.52, alt: "A string of bulb lights, the rest of the strand melting into blur" },
+    { img: "post/gallery/life-exhibit/04-state-room.webp",         ar: 1.11, alt: "The State Room marquee: Tonight, OK Go, Sold Out" },
+    { img: "post/gallery/life-exhibit/05-guitar-case.webp",        ar: 0.68, alt: "A guitar case leaning against sheer curtains in soft light" },
+    { img: "post/gallery/life-exhibit/06-holding-hands.webp",      ar: 1.34, alt: "Two people holding hands on a hospital bed, paper bands on one wrist" },
+    { img: "post/gallery/life-exhibit/07-fireplace.webp",          ar: 0.72, crop: "50% 30%", alt: "A fire behind a mesh screen, a book resting on a fur rug in front of it" },
+    { img: "post/gallery/life-exhibit/08-mural-alley.webp",        ar: 0.75, alt: "A narrow alley between graffiti-painted brick walls, set with café tables and chairs under string lights" },
+    { img: "post/gallery/life-exhibit/09-stencil-cowboy.webp",     ar: 0.75, crop: "50% 15%", alt: "Stencil graffiti of a cowboy with a rifle on a painted cinder-block wall" },
+    { img: "post/gallery/life-exhibit/10-towers.webp",             ar: 1.00, alt: "Looking straight up between glass towers into cloud" },
+    { img: "post/gallery/life-exhibit/11-steel-door.webp",         ar: 0.62, crop: "50% 20%", alt: "A black steel door set deep in a brick wall under a pair of caged lights" },
+    { img: "post/gallery/life-exhibit/12-dog-sofa.webp",           ar: 1.36, alt: "A small white dog resting on a tufted sofa beside a knit pillow" },
+    { img: "post/gallery/life-exhibit/13-payphone.webp",           ar: 0.81, alt: "A pay phone glimpsed between two posts" },
+    { img: "post/gallery/life-exhibit/14-plant-window.webp",       ar: 1.33, alt: "A man in a hoodie at a café table by a sunny window, surrounded by tall leafy plants" },
+    { img: "post/gallery/life-exhibit/15-mca-denver.webp",         ar: 1.34, crop: "100% 50%", alt: "Museum of Contemporary Art Denver, in white letters on a dark wooden wall beside a long ramp" },
+    { img: "post/gallery/life-exhibit/16-window-blinds.webp",      ar: 1.03, alt: "A man in silhouette eating at a table in front of window blinds" }
   ]
 };
 

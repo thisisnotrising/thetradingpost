@@ -694,7 +694,7 @@
     const gx1 = Math.min(Dm - .2, flushX(right, yBot)), gx0 = Math.max(1.6, gx1 - gridW);   // the grid's door end, and its far end
     G.slice(0, COLS * ROWS).forEach((p, gi) => {
       const r = Math.floor(gi / COLS), c = gi % COLS;
-      const wallImg = p.thumb || p.img.replace("/life/", "/life/wall/");                          // a small copy for the wall; the big one loads only in the viewer
+      const wallImg = p.thumb || p.img.replace(/[^/]+$/, "wall/$&");                             // a small copy for the wall; the big one loads only in the viewer
       const a = onWall(make("a", "nrp-photo nrp-canvas nrp-hot", right,
         `<img src="${IMG}${wallImg}" alt="" decoding="async" style="object-position:${p.crop || "50% 50%"}">`),
         { x: gx0 + c * (cs + GAP), y: yBot + (ROWS - 1 - r) * (cs + GAP), w: cs, h: cs });      // y is measured up from the floor, so row 0 is the top
