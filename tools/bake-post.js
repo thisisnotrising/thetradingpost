@@ -114,10 +114,13 @@ const pct = (b, fw, fh, ox = 0, oy = 0) => {
   //     (the lounge photo is left out of this one: it stands well in front of the bar)
   console.log('the cafe');
   const big = await openRoom(browser, 4, EYE_CAFE);
-  await big.addStyleTag({ content: '.nrp-lounge-photo, .nrp-lounge-cord { display: none !important; }' });
+  // (the bench by the left wall is left out too: its corner poked into the bottom of the picture)
+  await big.addStyleTag({ content: '.nrp-lounge-photo, .nrp-lounge-cord, .nrp-bench3d { display: none !important; }' });
   await big.evaluate(() => { const b = document.querySelectorAll('.nrp-bulbs'); if (b[1]) b[1].style.display = 'none'; });   // (the lounge's bulbs)
-  const a = await boxOf(big, '.nrp-arch'), pad = 30;
-  const clip = { x: a.x0 - pad, y: a.y0 - pad, width: a.x1 - a.x0 + pad * 2, height: a.y1 - a.y0 + pad };
+  // THE FRAME (Oct 31): the picture is cut exactly to the arch wall (the black back wall the arch is cut into), so the
+  // black wall and its ivy frame the café. (It used to be the arch plus a margin, which caught slivers of both side walls.)
+  const a = await boxOf(big, '#nrp-back');
+  const clip = { x: a.x0, y: a.y0, width: a.x1 - a.x0, height: a.y1 - a.y0 };
   console.log('   neon sign   ', pct(await boxOf(big, '.nrp-pink'), clip.width, clip.height, clip.x, clip.y));
   const cpng = path.join(TMP, 'cafe.png');
   await big.screenshot({ path: cpng, clip });
