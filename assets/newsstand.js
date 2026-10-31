@@ -695,6 +695,10 @@
         btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read || READ_ONLINE));   // READ ONLINE button: the item's own "read" link, or the features page
         const stack = document.createElement("div");
         stack.className = "stack";
+        if (item.paper) {                                                   // light covers get light copies behind them (the "paper" field in data.js)
+          stack.classList.add("paper");
+          stack.style.setProperty("--paper", item.paper);
+        }
         el.append(stack, btn);
       }
       el.insertAdjacentHTML("beforeend", `<span class="glass" aria-hidden="true"></span>${tagText ? `<span class="tag" aria-hidden="true">${esc(tagText)}</span>` : ""}`);
