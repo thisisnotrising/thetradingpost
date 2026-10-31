@@ -291,15 +291,16 @@
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
     // The A-frame floor sign: a white frame and legs, two dark clips holding a black poster. On the poster, in
     // tall white letters (Oswald): INSPIRED BY / RAMH / LIBRARY, a tiny hairline ornament, and the
-    // Robots Ate My Homework logo (img/ramh-logo.webp) along the bottom.
+    // Robots Ate My Homework logo (img/ramh-logo.webp) along the bottom, on a little white card (the logo is drawn on white,
+    // with black outlines and a wavy black line, so it needs white behind it to show on the black poster).
     // Drawn on a 100 x 172 grid; the poster is 70 wide (x 15-85) and 112 tall (y 13-125), so everything is
     // centred on x = 50. The three lines are all stretched to the same width (textLength 54), so they make a neat block.
-    // The logo picture is 373 x 76 pixels, so its height is its width divided by 4.91.
+    // The logo picture is 900 x 161 pixels, so its height is its width divided by 5.59.
     // The poster is written once (FLOOR_POSTER) and used twice: on the sign, and blown up when you click the sign.
     let FLOOR_POSTER = "";
     {
       const [l1, l2, l3] = SIGNS.floorSign || [], fs = $("nrsf-floorsign");
-      const LW = 61, LH = LW * 76 / 373, LX = 50 - LW / 2, LY = 100;  // the logo's width, height, left edge and top edge
+      const LW = 58, LH = LW * 161 / 900, LX = 50 - LW / 2, LY = 100;  // the logo's width, height, left edge and top edge
       const line = (y, size, text, adjust) => `<text x="50" y="${y}" font-size="${size}" textLength="54" lengthAdjust="${adjust}">${esc((text || "").toUpperCase())}</text>`;
       FLOOR_POSTER = `<rect x="15" y="13" width="70" height="112" rx="1" fill="#0a0a0a"/>
         <rect x="18.5" y="16.5" width="63" height="105" fill="none" stroke="rgba(244,241,234,.4)" stroke-width=".4"/>
@@ -310,6 +311,7 @@
         </g>
         <g stroke="rgba(244,241,234,.6)" stroke-width=".35"><path d="M40 90 H47.5 M52.5 90 H60"/></g>
         <circle cx="50" cy="90" r=".8" fill="#f4f1ea"/>
+        <rect x="${LX - 1}" y="${LY - 2}" width="${LW + 2}" height="${(LH + 4).toFixed(2)}" rx="1.6" fill="#fff"/>
         <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>`;
       fs.href = LINKS.ramh;
       fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")}: see the sign up close`);
