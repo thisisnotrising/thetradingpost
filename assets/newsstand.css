@@ -656,3 +656,8 @@ body {
 .nrns a.nrns-back:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
 /* ...and its twin on the right: onward into THE POST. Same look, mirrored to the right edge */
 .nrns a.nrns-back.nrns-fwd { left: auto; right: max(16px, env(safe-area-inset-right, 0px)); }
+/* The bottom pair: same two links, pinned to the bottom edge of the stand instead of the top */
+.nrns .nrns-foot a.nrns-back { top: auto; bottom: 10px; }
+/* On the narrowest phones, "Nebula Cafe" is long enough to bump into "777 Daydream St.",
+   so both signposts pull their letters a little closer together there */
+@media (max-width: 360px) { .nrns a.nrns-back { letter-spacing: .1em; } }
