@@ -155,15 +155,17 @@
 
 /* ---------- CLICKABLE THINGS IN THE ROOM ---------- */
 /* (For smoothness, hovering no longer puts a filter on the thing itself: that made the browser redraw the whole
-   Newsstand or wall each time the mouse crossed it. The glow is a separate soft halo, ::before, on its own layer.) */
+   Newsstand or wall each time the mouse crossed it. The glow is a separate soft halo, ::before. It is NOT given its own
+   pre-drawn layer (will-change): some of these are as big as a whole wall, and on a Mac that ran the graphics chip out
+   of memory, so parts of the room vanished.) */
 .nrp-hot { cursor: pointer; }
 .nrp-hot:hover, .nrp-hot:focus-visible { outline: none; }
-.nrp-hot::before { content: ""; position: absolute; inset: calc(var(--u) * -.08); pointer-events: none; opacity: 0; transition: opacity .25s; will-change: opacity;
+.nrp-hot::before { content: ""; position: absolute; inset: calc(var(--u) * -.08); pointer-events: none; opacity: 0; transition: opacity .25s;
   box-shadow: 0 0 calc(var(--u) * .14) calc(var(--u) * .03) rgba(255,236,170,.75), inset 0 0 calc(var(--u) * .1) rgba(255,236,170,.35); border-radius: inherit; }
 .nrp-hot:hover::before, .nrp-hot:focus-visible::before { opacity: 1; }
 .nrp-hot::after { content: attr(data-tip); position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none;
   background: #111; color: #fff; font: 700 calc(var(--u) * .14) / 1 Arimo, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase;
-  padding: .5em .8em; opacity: 0; transition: opacity .2s; will-change: opacity; }
+  padding: .5em .8em; opacity: 0; transition: opacity .2s; }
 .nrp-hot:hover::after, .nrp-hot:focus-visible::after { opacity: 1; }
 
 /* ---------- THE AIR IN THE ROOM: sunbeams, haze, a touch of film grain ---------- */
