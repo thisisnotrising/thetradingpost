@@ -393,6 +393,28 @@ body {
 .nrns .icon-btn:disabled { opacity: .35; cursor: default; }
 .nrns .stage { position: relative; min-height: 0; display: grid; place-items: center; padding: 8px 16px; }
 .nrns .sizer { position: relative; }
+/* The nudge on phones: the cover's bottom-right corner peels up and settles back.
+   It is a square split along its diagonal ("to top left" runs from the bottom-right
+   corner to the top-left corner):
+     bottom-right half = the dark reader behind the page, where the corner has lifted away
+     top-left half     = the underside of the lifted corner: off-white paper, a soft
+                         crease shadow along the fold, a little shade toward the tip.
+   translate(-100%, -100%) hangs the square up and to the left of the point the
+   script pins it to, so it sits exactly on the cover's corner. */
+.nrns .peel {
+  position: absolute; width: 0; height: 0; z-index: 2; pointer-events: none;
+  transform: translate(-100%, -100%);
+  background: linear-gradient(to top left, #060606 0 50%, rgba(0,0,0,.45) 50%, #f3f1eb 53%, #ffffff 68%, #d8d5ce 100%);
+  filter: drop-shadow(-3px -3px 5px rgba(0, 0, 0, .35));        /* the lifted corner casts a soft shadow on the cover */
+  animation: nr-peel 2.8s cubic-bezier(.4, 0, .2, 1) .5s 2 both;  /* starts half a second after landing, plays twice */
+}
+@keyframes nr-peel {
+  0%        { width: 0;    height: 0; }
+  22%       { width: 54px; height: 54px; }   /* lifts */
+  34%, 42%  { width: 46px; height: 46px; }   /* eases a touch, holds */
+  62%, 100% { width: 0;    height: 0; }      /* settles flat, then a pause before the second nudge */
+}
+@media (prefers-reduced-motion: reduce) { .nrns .peel { display: none; } }
 .nrns .counter { font-variant-numeric: tabular-nums; min-width: 9ch; text-align: center; }
 .nrns .hint { color: var(--muted); font-weight: 400; letter-spacing: .08em; text-transform: none; font-size: 13px; }
 @media (max-width: 560px) { .nrns .hint, .nrns .site-link { display: none; } }
