@@ -291,7 +291,7 @@
   }
   // Bird of paradise in a big basket: tall paddle leaves on long stalks
   function bigPlant(seed = 5) {
-    const M = 240, w = 1.7 * M, h = 2.6 * M, R = relief(w, h), r = seeded(seed), bx = w / 2, by = h - 4;
+    const M = 240, w = 2.7 * M, h = 2.6 * M, R = relief(w, h), r = seeded(seed), bx = w / 2, by = h - 4;   // (2.7 m wide, so no leaf runs off the picture's edge)
     for (let i = 0; i < 13; i++) {
       const a = -Math.PI / 2 + (r() - .5) * 1.5, L = (.9 + r() * 1.1) * M, ex = bx + Math.cos(a) * L * .7, ey = by - .45 * M + Math.sin(a) * L * .9;
       tube(R, [[bx + (r() - .5) * .1 * M, by - .4 * M], [(bx + ex) / 2, (by + ey) / 2 - .05 * M], [ex, ey]], .025 * M, [70, 98, 54], { hi: .6 });
@@ -638,5 +638,5 @@
     return out;
   }
   // rug() is painted later, by post.js, once it knows the lounge's size
-  window.NRPAINT = { paintAll, rug, planterTile };   // planterTile: so the planter picture can be re-baked on its own
+  window.NRPAINT = { paintAll, rug, planterTile, bigPlant };   // planterTile, bigPlant: so those pictures can be re-baked on their own
 })();

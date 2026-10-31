@@ -137,7 +137,7 @@
    shadow gap, then the canvas itself, edge to edge, with a faint weave and soft wrapped edges. */
 .nrp-photo.nrp-canvas { padding: calc(var(--u) * .045); background: #050505;
   box-shadow: 0 0 0 calc(var(--u) * .035) #1d1d1d, 0 0 0 calc(var(--u) * .042) #444,
-    0 calc(var(--u) * .1) calc(var(--u) * .25) rgba(0,0,0,.75); }
+    0 calc(var(--u) * .02) calc(var(--u) * .05) rgba(0,0,0,.8); }   /* hung flat against the brick: a tight contact shadow (Oct 31) */
 .nrp-photo.nrp-canvas::before { content: ""; position: absolute; inset: calc(var(--u) * .045); z-index: 1; pointer-events: none;   /* a whisper of canvas grain */
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.55 .9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='180' height='180' filter='url(%23c)'/></svg>");
   opacity: .1;   /* plain, faint (a blend mode here cost a redraw per photo, every frame) */
@@ -512,9 +512,9 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
   opacity: 0; animation: nrp-twinkle 4s ease-in-out infinite; }
 @keyframes nrp-twinkle { 0%, 70%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 82% { opacity: 1; transform: scale(1) rotate(20deg); } }
 @media (prefers-reduced-motion: reduce) { .nrp-obsidian i { animation: none; opacity: .5; transform: scale(.7); } }
-/* the red neon on the obsidian: a deeper, wider red glow, reflected in the polished stone */
+/* the red neon's glow on the café's white brick (Oct 31: the sign moved up off the obsidian): soft, like light on a wall */
 .nrp-pink-wash {
-  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(230, 30, 56, .55), rgba(214, 26, 50, .2) 45%, rgba(214, 26, 50, 0) 72%); }
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(230, 30, 56, .3), rgba(214, 26, 50, .1) 45%, rgba(214, 26, 50, 0) 72%); }
 
 /* THE IVY ON THE ARCH WALL (placed by post.js): pictures grown by tools/grow-ivy.py */
 .nrp-archivy { pointer-events: none; background-repeat: no-repeat; }

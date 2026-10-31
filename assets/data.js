@@ -346,6 +346,9 @@ window.NRSF = {
    NOT RISING · THE POST — THE DATA FILE
    The room you walk into through the right-hand door (unit 9).
    The engine (post.js) reads this; the drawing of the room lives there.
+   THE POST itself (post/index.html) is a stage set photographed from that room (post/recipe.html), so a change
+   here that shows in the room appears there after re-photographing with tools/bake-stage.js. The gallery's photos
+   and label, and the wishes as words (for screen readers), are read live by post/index.html.
    ============================================================ */
 window.NRPOST = {
 

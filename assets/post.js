@@ -146,7 +146,7 @@
     // Kathi's ivy photo (6.4 m wide, 2.5 m tall, repeating along the wall with no seam). It is still called "planter"
     // here because it took the place of the old planters (Oct 2026).
     TILE.planter = { url: IMG + "post/ivy-wall.webp", wm: 6.4, hm: 2.5, pw: 2176, ph: 850, pad: 0 };
-    TILE.bigA = t("bigA.webp", 1.7, 2.6, 408, 624);
+    TILE.bigA = t("bigA.webp", 2.7, 2.6, 648, 624);   // (repainted 1 m wider, Oct 31: its outer leaves used to be cut off)
     TILE.bell = t("bell.webp", .62, .7, 248, 280); TILE.raffia = t("raffia.webp", .62, .7, 248, 280);
     TILE.bar = t("bar.webp", 4, 2.4, 960, 576);
     // Kathi's photo of her walnut bench. (The lounge is built in 3D: see lounge3d().)
@@ -154,6 +154,12 @@
     // a 2 m square repeating in every direction. (It replaced the pale stone floor, stone.webp, which is gone.)
     TILE.floor = { url: IMG + "post/obsidian-floor.webp", wm: 2, hm: 2 };
     TILE.bench = { url: IMG + "post/bench.webp", pw: 903, ph: 220 };
+    // THE LOUNGE (Oct 31, 2026): Kathi's own lounge photo, cut into three pieces by tools/cut-lounge.py
+    TILE.lounge = { url: IMG + "post/lounge-photo.webp" };
+    TILE.loungePendant = { url: IMG + "post/lounge-pendant.webp" };
+    TILE.loungePlant = { url: IMG + "post/lounge-plant.webp" };                         // (not used since Oct 31: the monstera took its place)
+    // THE PINK MONSTERA: a 3D render (tools/render-monstera.py). pw x ph pixels, m metres per pixel, pot = its pot's middle (px from the left)
+    TILE.monstera = { url: IMG + "post/pink-monstera.webp", pw: 932, ph: 965, m: .002, pot: 450, reach: .744 };   // reach = how far its leaves reach right of the pot (m)
   }
 
   /* ================================================================
@@ -634,16 +640,16 @@
     neon.dataset.room = "cafe"; neon.dataset.tip = "Nebula Cafe"; neon.setAttribute("aria-label", "Nebula Cafe");
     neon.style.setProperty("--nw", (nw * u) + "px");
     onWall(make("div", "nrp-plastershade", back), { x: 0, y: 0, w: Wm, h: HM });
-    // THE PINK NEON on the front of the stone bar, after your photo: two lines of hand-written neon tube.
+    // THE PINK NEON, after your photo: hand-written neon tube. (Oct 31: moved up off the front of the stone bar, onto the
+    // café's white brick between the top shelf and NEBULA cafe, so the lounge in front of the café never hides it.)
     // It is three layers of the same words: a wide soft pink glow, a brighter pink tube, and a near-white
     // core where the light is strongest (see .nrp-pink in post.css). It also throws a pink wash on the counter.
     const NE = DATA.NEON || { lines: [] };
     if (NE.lines.length) {
-      // it sits on the open stretch of the bar, left of the couch corner (which stands in front of the bar's right end)
-      // centred on the bar, with the same margin at each end
+      // centred on the café wall, with the same margin at each end, just above the top shelf (barH is the bar's height)
       const free0 = aX + (narrow ? 0.15 : 1.25), free1 = Wm - free0;
       const pw = Math.min(free1 - free0, 2.2), ph = 0.52, sign = onWall(make(NE.link ? "a" : "div", "nrp-pink", back,
-        `<span class="nrp-pink-wash"></span>${NE.lines.map(l => `<span class="nrp-pink-line" data-t="${esc(l)}">${esc(l)}</span>`).join("")}`), { x: (Wm - pw) / 2, y: 0.34, w: pw, h: ph });   // smaller (Oct 2026), still centred on the bar front
+        `<span class="nrp-pink-wash"></span>${NE.lines.map(l => `<span class="nrp-pink-line" data-t="${esc(l)}">${esc(l)}</span>`).join("")}`), { x: (Wm - pw) / 2, y: barH + 0.1, w: pw, h: ph });   // smaller (Oct 2026), centred on the café wall
       sign.style.setProperty("--fs", Math.min(ph / NE.lines.length * .85, pw / Math.max(...NE.lines.map(l => l.length)) * 2.7) * u + "px");   // as big as fits (this script's letters are narrow)
       if (NE.link) { sign.href = NE.link; sign.target = "_blank"; sign.rel = "noopener"; sign.setAttribute("aria-label", NE.lines.join(" ") + " (Buy Me a Coffee, opens in a new tab)"); sign.classList.add("nrp-hot"); sign.dataset.tip = "Buy me a coffee"; }
       else sign.setAttribute("aria-label", NE.lines.join(" "));
@@ -699,13 +705,8 @@
     const lifeW = 1.1, life = onWall(make("div", "nrp-life", right, "<span>L</span><span>I</span><span>F</span><span>E</span>"),
       { x: gx0 - GAP - lifeW, y: yBot, w: lifeW, h: yTop - yBot });
     life.style.fontSize = (cs * 0.95 * u) + "px"; life.style.rowGap = (GAP * u) + "px"; life.setAttribute("aria-hidden", "true");
-    // the track, with one spotlight over each column of canvases
-    onWall(make("div", "nrp-track", right), { x: gx0 - lifeW - GAP, y: 5.75, w: gridW + lifeW + GAP + .3, h: .07 });
-    for (let c = 0; c < COLS; c++) {
-      const x = gx0 + c * (cs + GAP) + cs / 2;
-      onWall(make("div", "nrp-beamlight", right), { x: x - cs * .8, y: 0.9, w: cs * 1.6, h: 4.85 });
-      onWall(make("div", "nrp-spot", right), { x: x - .12, y: 5.45, w: .24, h: .3 });
-    }
+    // (Oct 31: the track, its spotlights and their beams of light are gone. The canvases hang straight on the brick,
+    //  so the wall reads as one brick wall and the ivy runs down it without a rail cutting across.)
     // GALLERY, on the floor line, slid toward the door until its near end meets the front (right-hand) edge of the
     // screen. The wall runs away from you in 3D, so the right spot depends on the screen's shape: placeGalleryWord()
     // finds it by measuring (see the end of build()).
@@ -799,9 +800,9 @@
     // so they mirror each other either side of the café bar
     // LINE_X = how far out from the left wall the plant stands (m); the two benches stand on the same line.
     // The right-hand plant mirrors it.
-    const bpw = narrow ? 1.0 : 1.3, bpx = LINE_X / Wm;
+    const bpw0 = narrow ? 1.0 : 1.3, bpw = bpw0 * 2.7 / 1.7, bpx = LINE_X / Wm;   // bpw0 = the basket-and-stalks width it was sized by
     [[bpx, false], [1 - bpx, true]].forEach(([x, flip], i) => {
-      shadow(floor, { x, z: .96, w: bpw * .85, d: .9, a: .5 });
+      shadow(floor, { x, z: .96, w: bpw0 * .85, d: .9, a: .5 });
       const bp = put(TILE.bigA, bpw, { x, z: 0.975 });
       if (flip) bp.querySelector("img").style.transform = "scaleX(-1)";
       bp.classList.add("nrp-sway"); bp.style.setProperty("--d", (1.35 + i * .1) + "s");
@@ -823,11 +824,13 @@
     // three-blade fans). Six long slender blades that widen toward their tips, a small dark motor, and a thin rod
     // hanging all the way down from the ridge. It's built in real 3D (post.css): the blades lie flat, level with
     // the floor, and turn slowly about the rod, so you see them from below at an angle.
-    // FAN_SPAN = how far it reaches, tip to tip (m). FAN_Y = how high above the floor the blades turn (m).
+    // FAN_SPAN = how far it reaches, tip to tip (m). FAN_Y = how high above the floor the blades turn (m): raised from
+    // 3.4 to 4.1 (Oct 31), a shorter rod, so the blades sit higher, above the bar and clear of the lounge's pendant.
     // FAN_Z = where it hangs, front to back (0 = the door, 1 = the café): forward enough that, seen from the door,
-    // it floats above the NEBULA cafe sign instead of across it.
+    // it floats above the NEBULA cafe sign instead of across it, and (Oct 31) from the landing view up high it hangs
+    // below the "buy me a coffee" neon instead of across it.
     {
-      const FAN_SPAN = narrow ? 2.7 : 3.4, FAN_Y = 3.4, FAN_Z = narrow ? .3 : .24, ridge = HM + roofH(Wm / 2), h = ridge - FAN_Y;
+      const FAN_SPAN = narrow ? 2.7 : 3.4, FAN_Y = 4.1, FAN_Z = narrow ? .22 : .1, ridge = HM + roofH(Wm / 2), h = ridge - FAN_Y;
       const fan = stand(add("nrp-fan", `<i class="nrp-fan-rod"></i><div class="nrp-fan-blades"><div class="nrp-fan-spin">${"<b></b>".repeat(6)}</div></div><i class="nrp-fan-motor"></i>`),
         { x: .5, z: FAN_Z, w: FAN_SPAN, h, lift: FAN_Y });
       const bl = fan.querySelector(".nrp-fan-blades");
@@ -835,8 +838,56 @@
     }
 
     placeGalleryWord();
-    const L = lounge3d(floor);
-    bulbCluster("nrp-cl", (L.Xr - 1.1) / Wm, (L.Zb - 1.3) / Dm, narrow ? 1.4 : 1.8, [3.7, 4.5, 3.9, 4.9, 4.2, 5.1, 3.8, 4.6, 4.3]);
+    // THE LOUNGE (Oct 31, 2026): the L-sofa, pouf and rug built here are gone. The new lounge is Kathi's own lounge
+    // photo (green floor sofa, jute rug and pouf, rattan pendant, plants), cut out and set into THE POST's photograph
+    // by tools/bake-post.js. lounge3d() above is kept only as a record; it is no longer called.
+    // THE RIGHT-HAND EDISON BULBS hang back by the café now, in front of the arch's right side, to the right of the
+    // NEBULA neon (they used to hang out over the lounge, in front of the Gallery). The left cluster mirrors them.
+    // THE LOUNGE: Kathi's lounge photo, cut into three pieces by tools/cut-lounge.py, each stood in the room like a
+    // stage cut-out (the way the plants are). The numbers in [ ] are the part of her photo each piece came from
+    // (left, top, right, bottom, in the photo's pixels), so every piece goes back exactly where it was in the photo.
+    // LOUNGE_W = how wide the lounge is (m): the whole photo, edge to edge (the sofa comes out about 2 m long).
+    //   Its right edge is against the black wall, so the sofa's back cushions lean on that wall.
+    // LOUNGE_D = how far in from the door it stands (m): pushed back toward the café, so it sits in front of the plain
+    //   stretch of black brick, and the Gallery (the front half of that wall) has open standing room.
+    // REF = how many of the photo's pixels make one metre.
+    // (On phones the room is a narrow corridor, 4.2 m wide and 17 m deep: there the lounge is a little smaller, and
+    //  it stands the same 5.5 m in front of the café as on a wide screen.)
+    {
+      const LOUNGE_W = narrow ? 3.3 : 4.14, LOUNGE_D = Dm - 5.5, REF = 736 / LOUNGE_W, L0 = Wm - LOUNGE_W;    // L0 = its left edge (m from the left wall)
+      const piece = (t, box, o) => {
+        const el = stand(add("nrp-painted nrp-lounge-photo", `<img src="${t.url}" alt="">`), { w: (box[2] - box[0]) / REF, h: (box[3] - box[1]) / REF, ...o });
+        return el;
+      };
+      // 1 · the sofa, coffee table, pouf and rug (and the plant behind the sofa): the rug's front edge on the floor
+      piece(TILE.lounge, [0, 255, 736, 726], { x: (L0 + 368 / REF) / Wm, z: LOUNGE_D / Dm });
+      // 2 · the rattan pendant over the coffee table. PEND_LOW = how high its bottom hangs (m): a little lower than in
+      //     the photo, so from the door it hangs below the ceiling fan's blades, not across them. Its cord runs up to the roof.
+      const PEND_LOW = 2.0, pX = L0 + 367 / REF, pH = 234 / REF, pZ = (LOUNGE_D - .05) / Dm;
+      piece(TILE.loungePendant, [316, 0, 418, 234], { x: pX / Wm, z: pZ, lift: PEND_LOW });
+      const cord = stand(add("nrp-lounge-cord nrp-lounge-photo", ""), { x: pX / Wm, z: pZ, w: .014, h: HM + roofH(pX) - PEND_LOW - pH + .05, lift: PEND_LOW + pH - .05 });
+      cord.style.background = "#1b1a19";
+      // 3 · THE PINK PLANT (Oct 31), at the open end of the L, against the black wall, a little in front of the sofa:
+      //     its leaves hide the end of the sofa, where the photo runs out. (It replaces the small potted plant from the
+      //     photo.) After Kathi's reference: pink heart-shaped leaves with green edges and rose veins, in a white pot
+      //     with thin gold lines. It's a 3D render (tools/render-monstera.py), photographed at MON.m metres per pixel,
+      //     with its pot's middle MON.pot pixels in from its left edge. MON_K = how big it stands compared with the render
+      //     (1 = its true size, about 1.6 m tall); MON_X = how far its pot's middle is from the black wall (m): just far
+      //     enough that its widest leaf reaches the wall without poking through it (which would cut the leaf off).
+      const MON = TILE.monstera, MON_K = narrow ? .85 : 1, MON_X = MON.reach * MON_K + .05;
+      const mw = MON.pw * MON.m * MON_K, mh = MON.ph * MON.m * MON_K, mx = Wm - MON_X - MON.pot * MON.m * MON_K + mw / 2;
+      stand(add("nrp-painted nrp-lounge-photo", `<img src="${MON.url}" alt="">`), { x: mx / Wm, z: (LOUNGE_D - .8) / Dm, w: mw, h: mh });   // (0.8 m in front of the sofa: from the door its leaves then cover the end of the sofa)
+      // THE EDISON BULBS hang over the sofa's corner, in front of the plain black brick (not the Gallery):
+      // a cluster 0.8 m wide, 0.35 m in from the wall (clear of the pendant). Five bulbs at the same uneven heights as
+      // the cluster left of NEBULA (the same drops, each 1.5 m longer, so they hang over the sofa below the fan's
+      // blades): 1.7 to 3.1 m off the floor. (drops = metres below the ceiling)
+      // Their glow is faded out before it reaches the wall (a glow that ran on past the wall was cut off by it in a hard
+      // line), and a soft warm patch is laid on the wall itself, as if the bulbs light it.
+      const cl = bulbCluster("nrp-cl", (Wm - .75) / Wm, (LOUNGE_D - .1) / Dm, .8, [2.6, 3.5, 2.9, 4.0, 3.2].map(d => d + 1.5));
+      const glow = cl.querySelector("canvas");
+      if (glow) glow.style.maskImage = glow.style.webkitMaskImage = "linear-gradient(to right, #000 71%, transparent 82%)";
+      onWall(make("div", "nrp-wallglow", $("nrp-right")), { x: Dm - LOUNGE_D - 1.4, y: .9, w: 2.8, h: 2.8 });
+    }
     wire();
   }
 
