@@ -159,7 +159,7 @@
     TILE.loungePendant = { url: IMG + "post/lounge-pendant.webp" };
     TILE.loungePlant = { url: IMG + "post/lounge-plant.webp" };                         // (not used since Oct 31: the monstera took its place)
     // THE PINK MONSTERA: a 3D render (tools/render-monstera.py). pw x ph pixels, m metres per pixel, pot = its pot's middle (px from the left)
-    TILE.monstera = { url: IMG + "post/pink-monstera.webp", pw: 932, ph: 965, m: .002, pot: 450, reach: .744 };   // reach = how far its leaves reach right of the pot (m)
+    TILE.monstera = { url: IMG + "post/pink-monstera.webp", pw: 933, ph: 965, m: .002, pot: 451, reach: .744 };   // reach = how far its leaves reach right of the pot (m)
   }
 
   /* ================================================================
@@ -843,50 +843,77 @@
     // by tools/bake-post.js. lounge3d() above is kept only as a record; it is no longer called.
     // THE RIGHT-HAND EDISON BULBS hang back by the café now, in front of the arch's right side, to the right of the
     // NEBULA neon (they used to hang out over the lounge, in front of the Gallery). The left cluster mirrors them.
-    // THE LOUNGE: Kathi's lounge photo, cut into three pieces by tools/cut-lounge.py, each stood in the room like a
-    // stage cut-out (the way the plants are). The numbers in [ ] are the part of her photo each piece came from
-    // (left, top, right, bottom, in the photo's pixels), so every piece goes back exactly where it was in the photo.
-    // LOUNGE_W = how wide the lounge is (m): the whole photo, edge to edge (the sofa comes out about 2 m long).
-    //   Its right edge is against the black wall, so the sofa's back cushions lean on that wall.
-    // LOUNGE_D = how far in from the door it stands (m): pushed back toward the café, so it sits in front of the plain
-    //   stretch of black brick, and the Gallery (the front half of that wall) has open standing room.
-    // REF = how many of the photo's pixels make one metre.
-    // (On phones the room is a narrow corridor, 4.2 m wide and 17 m deep: there the lounge is a little smaller, and
-    //  it stands the same 5.5 m in front of the café as on a wide screen.)
+    // THE LOUNGE: Kathi's lounge photo, cut into layers by tools/cut-lounge.py, each put back in the room at its own
+    // distance, so everything stands on the floor (Oct 31; it used to be one upright picture, which looked raised from
+    // low down: the rug filled its bottom metre, so the sofa stood on top of it):
+    //   the rug lies flat on the floor; the sofa's long run, its short run (the L), the coffee table and the pouf each
+    //   stand upright at the distance where their feet touch the floor.
+    // THE PHOTO'S CAMERA (the same numbers as in cut-lounge.py): FOCAL = pixels per metre 1 m away, HORIZON = the photo
+    // row level with the camera, CAM_H = its height (m), CX = the column straight ahead. A spot on the floor at photo row
+    // y is DIST(y) metres from that camera; something there that is p pixels wide is p x DIST / FOCAL metres wide.
+    // PUTTING THE PHOTO IN THE ROOM: LS = its size (1.15 = a little bigger than life; the phone corridor is narrower,
+    //   so 0.9 there); the short run's near end stands just past the end of the Gallery (ZN m from the door), so the
+    //   Gallery keeps its open standing room; ZB = where the sofa's long run stands; the short run's near end is against
+    //   the black wall. A spot DIST metres from the photo's camera stands at ZC + LS x DIST metres from the door.
+    // The numbers in [ ] are the part of her photo each layer came from (left, top, right, bottom, in its pixels), and
+    // "base" is the photo row where it touches the floor.
     {
-      const LOUNGE_W = narrow ? 3.3 : 4.14, LOUNGE_D = Dm - 5.5, REF = 736 / LOUNGE_W, L0 = Wm - LOUNGE_W;    // L0 = its left edge (m from the left wall)
-      const piece = (t, box, o) => {
-        const el = stand(add("nrp-painted nrp-lounge-photo", `<img src="${t.url}" alt="">`), { w: (box[2] - box[0]) / REF, h: (box[3] - box[1]) / REF, ...o });
-        return el;
+      const FOCAL = 688, HORIZON = 390, CAM_H = .888, CX = 368, DIST = y => FOCAL * CAM_H / (y - HORIZON);
+      const LS = narrow ? .9 : 1.15, ZN = narrow ? Dm - 6.9 : 7.4, ZC = ZN - LS * DIST(645), ZB = ZC + LS * DIST(552);
+      const X0 = Wm - .05 - LS * (726 - CX) * DIST(645) / FOCAL;          // the room x of the photo's centre line
+      const LZ = IMG + "post/lounge-";
+      const layer = (file, box, base, o = {}) => {
+        const d = DIST(base), k = LS * d / FOCAL;                         // k = metres per photo pixel, at that distance
+        const w = (box[2] - box[0]) * k, h = (box[3] - box[1]) * k, left = X0 + (box[0] - CX) * k;
+        const el = stand(add("nrp-painted nrp-lounge-photo", `<img src="${LZ}${file}" alt="">`),
+          { x: (left + w / 2) / Wm, z: (ZC + LS * d) / Dm, w, h, lift: -(box[3] - base) * k, ...o });
+        return { el, x: left + w / 2, z: ZC + LS * d, w, d };
       };
-      // 1 · the sofa, coffee table, pouf and rug (and the plant behind the sofa): the rug's front edge on the floor
-      piece(TILE.lounge, [0, 255, 736, 726], { x: (L0 + 368 / REF) / Wm, z: LOUNGE_D / Dm });
-      // 2 · the rattan pendant over the coffee table. PEND_LOW = how high its bottom hangs (m): a little lower than in
+      // 1 · THE RUG, flat on the floor: cut-lounge.py made it as seen from straight above, 2.32 m across (photo x
+      //     -1.55 .. 0.77 m from its centre line) and 2.13 m from its front edge (DIST 1.87) back under the sofa (4.0).
+      //     The floor is two slabs (see onFloor), so it is laid on both, at the same spot; each shows its own part.
+      const rx0 = X0 - LS * 1.55, rw = LS * 2.32, rz0 = ZC + LS * DIST(717), rz1 = ZC + LS * 4.0;
+      [[floor, Dm], [$("nrp-floor-near"), DN]].forEach(([slab, edge]) => {
+        const el = make("div", "nrp-onfloor nrp-lounge-rug", slab, `<img src="${LZ}rug.webp" alt="" style="display:block;width:100%;height:100%">`);
+        Object.assign(el.style, { left: rx0 * u + "px", top: (edge - rz1) * u + "px", width: rw * u + "px", height: (rz1 - rz0) * u + "px" });
+      });
+      // 2 · the sofa's long run, the coffee table, the short run, the pouf (back to front)
+      const sofa = layer("sofa.webp", [90, 230, 700, 553], 552);
+      const table = layer("table.webp", [170, 390, 460, 603], 601);
+      const run = layer("return.webp", [480, 400, 736, 650], 645);
+      const pouf = layer("pouf.webp", [18, 524, 218, 662], 660);
+      // soft shadows where each touches the floor (on the rug)
+      shadow(floor, { x: sofa.x / Wm, z: (sofa.z - .25) / Dm, w: sofa.w * .9, d: .6, a: .55 });
+      shadow(floor, { x: (Wm - .5) / Wm, z: (run.z + .5) / Dm, w: .9, d: 1.6, a: .5 });
+      shadow(floor, { x: table.x / Wm, z: table.z / Dm, w: table.w * .9, d: .7, a: .35 });
+      shadow(floor, { x: pouf.x / Wm, z: pouf.z / Dm, w: pouf.w * 1.1, d: .5, a: .55 });
+      // 3 · the rattan pendant over the coffee table. PEND_LOW = how high its bottom hangs (m): a little lower than in
       //     the photo, so from the door it hangs below the ceiling fan's blades, not across them. Its cord runs up to the roof.
-      const PEND_LOW = 2.0, pX = L0 + 367 / REF, pH = 234 / REF, pZ = (LOUNGE_D - .05) / Dm;
-      piece(TILE.loungePendant, [316, 0, 418, 234], { x: pX / Wm, z: pZ, lift: PEND_LOW });
+      const PEND_LOW = 2.0, pk = LS * table.d / FOCAL, pX = X0 + (367 - CX) * pk, pH = 234 * pk, pZ = table.z / Dm;
+      stand(add("nrp-painted nrp-lounge-photo", `<img src="${TILE.loungePendant.url}" alt="">`), { x: pX / Wm, z: pZ, w: 102 * pk, h: pH, lift: PEND_LOW });
       const cord = stand(add("nrp-lounge-cord nrp-lounge-photo", ""), { x: pX / Wm, z: pZ, w: .014, h: HM + roofH(pX) - PEND_LOW - pH + .05, lift: PEND_LOW + pH - .05 });
       cord.style.background = "#1b1a19";
+      const LOUNGE_D = run.z;                                            // (the plant and the bulbs below are placed from here)
       // 3 · THE PINK PLANT (Oct 31), at the open end of the L, against the black wall, a little in front of the sofa:
       //     its leaves hide the end of the sofa, where the photo runs out. (It replaces the small potted plant from the
       //     photo.) After Kathi's reference: pink heart-shaped leaves with green edges and rose veins, in a white pot
-      //     with thin gold lines. It's a 3D render (tools/render-monstera.py), photographed at MON.m metres per pixel,
+      //     with bold black lines. It's a 3D render (tools/render-monstera.py), photographed at MON.m metres per pixel,
       //     with its pot's middle MON.pot pixels in from its left edge. MON_K = how big it stands compared with the render
-      //     (1 = its true size, about 1.6 m tall); MON_X = how far its pot's middle is from the black wall (m): just far
+      //     (1 = its true size, about 1.6 m tall; 0.8 = about 1.3 m); MON_X = how far its pot's middle is from the black wall (m): just far
       //     enough that its widest leaf reaches the wall without poking through it (which would cut the leaf off).
-      const MON = TILE.monstera, MON_K = narrow ? .85 : 1, MON_X = MON.reach * MON_K + .05;
+      const MON = TILE.monstera, MON_K = narrow ? .68 : .8, MON_X = MON.reach * MON_K + .05;
       const mw = MON.pw * MON.m * MON_K, mh = MON.ph * MON.m * MON_K, mx = Wm - MON_X - MON.pot * MON.m * MON_K + mw / 2;
-      stand(add("nrp-painted nrp-lounge-photo", `<img src="${MON.url}" alt="">`), { x: mx / Wm, z: (LOUNGE_D - .8) / Dm, w: mw, h: mh });   // (0.8 m in front of the sofa: from the door its leaves then cover the end of the sofa)
+      stand(add("nrp-painted nrp-lounge-photo", `<img src="${MON.url}" alt="">`), { x: mx / Wm, z: (LOUNGE_D - .35) / Dm, w: mw, h: mh });   // (just in front of the short run's near end: from the door its leaves cover it)
       // THE EDISON BULBS hang over the sofa's corner, in front of the plain black brick (not the Gallery):
       // a cluster 0.8 m wide, 0.35 m in from the wall (clear of the pendant). Five bulbs at the same uneven heights as
       // the cluster left of NEBULA (the same drops, each 1.5 m longer, so they hang over the sofa below the fan's
       // blades): 1.7 to 3.1 m off the floor. (drops = metres below the ceiling)
       // Their glow is faded out before it reaches the wall (a glow that ran on past the wall was cut off by it in a hard
       // line), and a soft warm patch is laid on the wall itself, as if the bulbs light it.
-      const cl = bulbCluster("nrp-cl", (Wm - .75) / Wm, (LOUNGE_D - .1) / Dm, .8, [2.6, 3.5, 2.9, 4.0, 3.2].map(d => d + 1.5));
+      const cl = bulbCluster("nrp-cl", (Wm - .75) / Wm, (sofa.z - .9) / Dm, .8, [2.6, 3.5, 2.9, 4.0, 3.2].map(d => d + 1.5));   // (over the corner of the L)
       const glow = cl.querySelector("canvas");
       if (glow) glow.style.maskImage = glow.style.webkitMaskImage = "linear-gradient(to right, #000 71%, transparent 82%)";
-      onWall(make("div", "nrp-wallglow", $("nrp-right")), { x: Dm - LOUNGE_D - 1.4, y: .9, w: 2.8, h: 2.8 });
+      onWall(make("div", "nrp-wallglow", $("nrp-right")), { x: Dm - (sofa.z - .9) - 1.4, y: .9, w: 2.8, h: 2.8 });
     }
     wire();
   }
