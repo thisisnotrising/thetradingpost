@@ -153,14 +153,14 @@ body {
     repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 9px, rgba(60, 50, 40, .22) 9px 10px, rgba(255,255,255,.55) 10px 11px),
     radial-gradient(ellipse 80% 140% at 50% 40%, #fffdf6, #f3ecdc 70%, #e4dac4);
   border: 2px solid #050505;
-  filter: brightness(.42) saturate(.5);             /* switched off */
+  filter: brightness(.8) saturate(.15);             /* switched off: a soft light gray, so the black letters still read clearly */
   transition: filter .25s;
 }
 .nrns .tab .lt { display: inline-block; transform: translateY(var(--dy, 0)) rotate(var(--rot, 0deg)); }
-.nrns .tab:hover .tb { filter: brightness(.7) saturate(.7); }
+.nrns .tab:hover .tb { filter: brightness(.92) saturate(.4); }
 .nrns .tab[aria-selected="true"] .tb { filter: none; box-shadow: 0 0 22px rgba(255, 236, 200, .28); }   /* lit */
-.nrns .tab.upcoming .tb { filter: brightness(.3) saturate(.4); }
-.nrns .tab.upcoming:hover .tb { filter: brightness(.55) saturate(.6); }
+.nrns .tab.upcoming .tb { filter: brightness(.66) saturate(.1); }          /* not out yet: a step darker than the other off tabs, still readable */
+.nrns .tab.upcoming:hover .tb { filter: brightness(.8) saturate(.3); }
 .nrns .tab.memoirs { margin-left: auto; position: relative; }
 .nrns .tab.memoirs::before {             /* a small diamond sets it apart from the issue tabs */
   content: "\25C6"; position: absolute; left: -24px; bottom: 16px; font-size: 10px; color: #4a4a4a;
@@ -179,6 +179,15 @@ body {
 .nrns .lights { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: visible; }
 .nrns .lights svg { position: absolute; left: 0; top: 0; overflow: visible; }
 .nrns .lights .halo { mix-blend-mode: screen; }
+/* NOW SOARING bulbs: all of them breathe together, a slow soft dim and back,
+   like an old theatre marquee on a dimmer. The animation sits on the whole
+   ring of bulbs (one layer), so every bulb stays perfectly in step. */
+.nrns .sign .lights { animation: nr-marquee-blink 2.6s ease-in-out infinite; }
+@keyframes nr-marquee-blink {
+  0%, 55%, 100% { opacity: 1; }    /* on for most of the beat */
+  75%           { opacity: .45; }  /* a gentle dip, never fully dark */
+}
+@media (prefers-reduced-motion: reduce) { .nrns .sign .lights { animation: none; } }
 .nrns .pockets { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); row-gap: 38px; }
 @media (max-width: 900px) { .nrns .pockets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .nrns .pockets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nrns .rack { padding: 50px 44px 40px; } }
@@ -603,7 +612,9 @@ body {
 
 /* Way back out to the street (the newsstand is its own page now) */
 .nrns a.nrns-back { position: absolute; z-index: 6; top: 10px; left: max(16px, env(safe-area-inset-left, 0px));
-  font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  font: 700 12px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
   color: #2f2f2f; text-decoration: none; padding: 6px 0; }
 .nrns a.nrns-back:hover { color: #000; }
 .nrns a.nrns-back:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
+/* ...and its twin on the right: onward into THE POST. Same look, mirrored to the right edge */
+.nrns a.nrns-back.nrns-fwd { left: auto; right: max(16px, env(safe-area-inset-right, 0px)); }
