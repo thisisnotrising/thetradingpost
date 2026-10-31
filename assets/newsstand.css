@@ -100,7 +100,7 @@ body {
   /* A solid black frame (not glass): it holds the bulbs and the letter board */
   background: linear-gradient(#161616, #050505);
   border: 2px solid #000;
-  padding: clamp(30px, 3.8vw, 38px) clamp(30px, 3.8vw, 38px);
+  padding: clamp(46px, 5vw, 66px) clamp(36px, 4vw, 50px);      /* thick enough to hold the hanging bulbs */
   box-shadow: inset 0 1px 0 rgba(255,255,255,.12),                                     /* a faint highlight on the top edge */
               0 16px 34px rgba(0, 0, 0, .35), 0 0 60px rgba(255, 196, 120, .10);      /* shadow on the brick, warm bulb glow */
 }
@@ -173,7 +173,7 @@ body {
   /* glass, see recipe; plus a little warm light from the bulbs pooling at the top */
   background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 220, 160, .10), rgba(255, 220, 160, 0) 70%), var(--glass-sheen), var(--glass-tint);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px rgba(0,0,0,.25), 0 14px 30px rgba(0, 0, 0, .22);
-  padding: 76px 74px 64px;
+  padding: 100px 84px 64px;              /* room for the hanging bulbs along the top and sides */
 }
 .nrns .rack::before, .nrns .rack::after { content: none; }
 .nrns .lights { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: visible; }
@@ -181,7 +181,7 @@ body {
 .nrns .lights .halo { mix-blend-mode: screen; }
 .nrns .pockets { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); row-gap: 38px; }
 @media (max-width: 900px) { .nrns .pockets { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .nrns .pockets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nrns .rack { padding: 50px 44px 40px; } }
+@media (max-width: 640px) { .nrns .pockets { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nrns .rack { padding: 70px 56px 40px; } }
 .nrns .rack-note {                      /* placard for a tab with nothing on it yet */
   position: absolute; z-index: 3; left: 50%; top: 50%; transform: translate(-50%, -50%);
   background: #000; border: 1px solid var(--silver); box-shadow: 0 0 0 4px #000, 0 0 0 5px var(--silver-lo);
@@ -309,7 +309,7 @@ body {
     /* the board: brightest in the middle, dimmer toward the edges, like a lightbox */
     radial-gradient(ellipse 70% 120% at 50% 40%, #ffffff, #f3f1ea 60%, #dcdad5);
   color: #000;                           /* black letters */
-  border: 18px solid #0d0d0d;            /* the black marquee case (wide enough to hold the bulbs) */
+  border: 36px solid #0d0d0d;            /* the black marquee case (wide enough to hold the bulbs) */
   box-shadow:
     inset 0 0 30px rgba(0, 0, 0, .18),   /* shading inside the case */
     0 0 40px rgba(255, 236, 190, .45),   /* warm glow spilling off the board */
@@ -322,19 +322,21 @@ body {
 /* Bulbs all the way around the case.
    ::before = the top and bottom rows (full width, corners included)
    ::after  = the left and right columns (between the corners)
-   Each bulb is one glowing dot (--bulb), repeated every 28px. */
+   Each bulb is one small Edison bulb picture (--bulb, an SVG drawing written
+   right into the CSS), repeated every 40px, with a warm glow (drop-shadow). */
 .nrns .toast::before, .nrns .toast::after {
   content: ""; position: absolute; pointer-events: none;
-  --bulb: radial-gradient(circle, #fff8e0 0 2.5px, #ffcf6e 3.5px, rgba(255, 190, 90, .35) 5.5px, transparent 7.5px);
+  --bulb: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -1 20 28'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.5' cy='.58' r='.6'%3E%3Cstop offset='0' stop-color='%23ffdc94' stop-opacity='.95'/%3E%3Cstop offset='.55' stop-color='%23f7b552' stop-opacity='.7'/%3E%3Cstop offset='1' stop-color='%23d9893a' stop-opacity='.55'/%3E%3C/radialGradient%3E%3ClinearGradient id='b'%3E%3Cstop offset='0' stop-color='%235b3f18'/%3E%3Cstop offset='.45' stop-color='%23f3dc9c'/%3E%3Cstop offset='1' stop-color='%234e3412'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M -2.6 5.8 C -2.9 9.0 -8.4 10.8 -8.4 17.0 C -8.4 22.6 -4.6 26.2 0 26.2 C 4.6 26.2 8.4 22.6 8.4 17.0 C 8.4 10.8 2.9 9.0 2.6 5.8 Z' fill='url(%23g)' stroke='%23ffe2a6' stroke-width='.6'/%3E%3Cpath d='M -1.2 12.2 Q -3.1 17.3 -1.2 22.3 M -0.6 12.2 Q -1.6 17.3 -0.6 22.3 M 0.0 12.2 Q 0.0 17.3 0.0 22.3 M 0.6 12.2 Q 1.6 17.3 0.6 22.3 M 1.2 12.2 Q 3.1 17.3 1.2 22.3' fill='none' stroke='%23fff3c4' stroke-width='.6'/%3E%3Crect x='-3.0' y='0' width='6.0' height='6.2' rx='1' fill='url(%23b)'/%3E%3C/svg%3E");
+  filter: drop-shadow(0 0 5px rgba(255, 190, 90, .85));
   animation: mq-twinkle 2.4s ease-in-out infinite alternate;
 }
 .nrns .toast::before {
-  inset: -18px;
-  background: var(--bulb) top center / 28px 18px repeat-x, var(--bulb) bottom center / 28px 18px repeat-x;
+  inset: -36px;
+  background: var(--bulb) top center / 40px 36px repeat-x, var(--bulb) bottom center / 40px 36px repeat-x;
 }
 .nrns .toast::after {
-  top: 0; bottom: 0; left: -18px; right: -18px;
-  background: var(--bulb) left center / 18px 28px repeat-y, var(--bulb) right center / 18px 28px repeat-y;
+  top: 0; bottom: 0; left: -36px; right: -36px;
+  background: var(--bulb) left center / 36px 40px repeat-y, var(--bulb) right center / 36px 40px repeat-y;
   animation-delay: -1.2s;                /* sides twinkle out of step with the top and bottom */
 }
 
