@@ -688,7 +688,7 @@
         btn.innerHTML = item.cover
           ? `<img src="${thumb(item.cover)}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${src(item.cover)}'">`
           : `<div class="ph"><div class="ph-mast">NOT RISING</div><div class="ph-date">ISSUE ${two(n)} | ${esc(monthYear(item.date).toUpperCase())}</div><div class="ph-photo"><span class="ph-name">${esc(item.name)}</span></div></div>`;
-        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon));
+        btn.addEventListener("click", () => item.issue ? openIssue(item, btn) : toast(soon, item.read));   // item.read = the READ ONLINE link, if it has one
         const stack = document.createElement("div");
         stack.className = "stack";
         el.append(stack, btn);
@@ -733,11 +733,12 @@
       if (toastBack && document.contains(toastBack)) toastBack.focus({ preventScroll: true });   // keyboard users go back to the cover they were on
       toastBack = null;
     }
-    function toast(msg) {
-      // Builds the marquee board. Same message already up? Leave it alone (no rebuild, no twitch).
+    function toast(msg, read) {
+      // Builds the marquee board. Same message (and same link) already up? Leave it alone (no rebuild, no twitch).
       const t = document.getElementById("nrns-toast");
-      if (!t.hidden && t.dataset.msg === msg) return;
-      t.dataset.msg = msg;
+      const key = msg + "|" + (read || "");                      // two memoirs can share the words but not the link
+      if (!t.hidden && t.dataset.msg === key) return;
+      t.dataset.msg = key;
       t.innerHTML = "";                                         // clear the last message
       const add = (tag, cls, text) => { const el = document.createElement(tag); if (cls) el.className = cls; if (text != null) el.textContent = text; t.appendChild(el); return el; };
 
@@ -756,6 +757,13 @@
           row.appendChild(tile);                                 // letters sit straight and level
         });
       });
+
+      if (read) {                                                // a READ ONLINE button under the letters
+        const a = add("a", "mq-read", "Read online");
+        a.href = read;
+        a.target = "_blank";                                     // opens in a new tab, so the Newsstand stays put
+        a.rel = "noopener";
+      }
 
       const x = add("button", "mq-x", "\u00d7");            // \u00d7 = the x-shaped times sign
       x.type = "button";

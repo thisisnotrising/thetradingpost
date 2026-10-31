@@ -364,6 +364,15 @@ body {
 }
 .nrns .toast .mq-x:hover, .nrns .toast .mq-x:focus-visible { opacity: 1; }
 
+/* READ ONLINE button under the letters: a small black plate with white letters, like a ticket-booth sign */
+.nrns .toast .mq-read {
+  display: inline-block; margin-top: 14px; padding: 9px 18px;
+  background: #0d0d0d; color: #fff; text-decoration: none;
+  font: 600 clamp(13px, 1.8vw, 16px)/1 "Oswald", "Arimo", sans-serif; letter-spacing: .14em;
+  border: 1px solid #0d0d0d; transition: background .15s, color .15s;
+}
+.nrns .toast .mq-read:hover, .nrns .toast .mq-read:focus-visible { background: #fff; color: #0d0d0d; }
+
 /* Text for screen readers only (the tile letters are hidden from them) */
 .nrns .toast .mq-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 

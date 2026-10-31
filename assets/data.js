@@ -66,12 +66,14 @@ window.NR = {
   /* MEMOIRS: its own tab, set apart on the right of the menu, in reading order.
      "tag" is the little placard under each cover.
      No "issue" yet? Clicking the cover puts up the marquee with the "soon" text
-     (each \n starts a new line; keep lines short so they fit on a phone; the board shows it in capitals). */
+     (each \n starts a new line; keep lines short so they fit on a phone; the board shows it in capitals).
+     "read" = a web link; when it's there, the marquee gets a READ ONLINE button that opens it in a new tab.
+     (The Holiday Special, memoir02 / "tbh-holiday", is off the shelf until its teaser drops; its book
+     is still kept in ISSUES below, so putting it back is just adding its line here again.) */
   MEMOIRS: [
-    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", soon: "To Be Human: Season 1\nDigital Issue\nComing Soon" },
+    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", soon: "Available by request.", read: "https://chiefabsurdistofficer.substack.com/p/what-it-is-to-be-human" },
     { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2" },
-    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", soon: "To Be Human: Season 3\nDigital Issue\nComing Soon" },
-    { name: "To Be Human: Holiday Special · Kathi Eric Dalguntas", tag: "TBH · HOLIDAY", cover: "memoir02", issue: "tbh-holiday" }
+    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", soon: "Available by request.", read: "https://chiefabsurdistofficer.substack.com/p/s3-e1-shraddha" }
   ],
 
   /* The masthead, shared by every issue. x and y place each group
