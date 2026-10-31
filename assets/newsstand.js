@@ -919,19 +919,19 @@
 
     btnClose.addEventListener("click", closeReader);
 
-    /* "The Post →" (top right): onward into THE POST's inner room.
-       Until that room is published at /post/, the link shows a "coming soon"
-       marquee instead of a "page not found". It checks for the room on every
-       click, so the day /post/ goes live, the link just works. */
-    const postLink = document.getElementById("nrns-post");
-    if (postLink) postLink.addEventListener("click", async e => {
+    /* "Nebula Cafe →" (top right and bottom right): onward into THE POST's
+       inner room, where the Nebula Cafe is. Until that room is published at
+       /post/, the links show a "coming soon" marquee instead of a "page not
+       found". They check for the room on every click, so the day /post/ goes
+       live, the links just work. */
+    document.querySelectorAll(".nrns-cafe").forEach(cafeLink => cafeLink.addEventListener("click", async e => {
       e.preventDefault();
       try {
-        const r = await fetch(postLink.href, { method: "HEAD", cache: "no-store" });
-        if (r.ok) { location.href = postLink.href; return; }
+        const r = await fetch(cafeLink.href, { method: "HEAD", cache: "no-store" });
+        if (r.ok) { location.href = cafeLink.href; return; }
       } catch (err) {}
-      toast("The Post\nOpening soon");
-    });
+      toast("Nebula Cafe\nOpening soon");
+    }));
     btnPrev.addEventListener("click", () => book && book.flipPrev());
     btnNext.addEventListener("click", () => book && book.flipNext());
     document.addEventListener("keydown", e => {
