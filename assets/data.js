@@ -293,7 +293,7 @@ window.NRSF = {
 
   /* Where each door and window leads, as folders of this site. */
   LINKS: {
-    tradingPost: "newsstand/",      // right door, unit 9: opens onto the Newsstand (for now)
+    tradingPost: "post/index.html", // right door, unit 9: opens into THE POST (the room inside); its directory leads on to the Newsstand
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library"   // the A-frame floor sign (opens in a new tab)
@@ -339,3 +339,103 @@ window.NRSF = {
     }
   ]
 };
+
+
+/* ================= PART 3 · THE POST (the room inside) ================= */
+/* ============================================================
+   NOT RISING · THE POST — THE DATA FILE
+   The room you walk into through the right-hand door (unit 9).
+   The engine (post.js) reads this; the drawing of the room lives there.
+   ============================================================ */
+window.NRPOST = {
+
+  /* The white directory panel, top to bottom. "href" is where each one leads.
+     Leave href as "" while a room is still being built: visitors get a small
+     "opening soon" note instead. The arrow points the way from the door. */
+  ROOMS: [
+    { key: "newsstand",   label: "Newsstand",    arrow: "←", href: "../newsstand/index.html" },
+    { key: "wishingWall", label: "Wishing Wall", arrow: "↖", href: "" },
+    { key: "cafe",        label: "Cafe",         arrow: "↑", href: "https://buymeacoffee.com/thisisnotrising" },   // Nebula Cafe: Buy Me a Coffee (opens in a new tab)
+    { key: "gallery",     label: "Gallery",      arrow: "→", href: "" }
+  ],
+
+  /* NEBULA CAFE's neon, on the front of the stone bar: the words (one line each) and where it leads.
+     Leave "link" as "" for a sign that isn't clickable. */
+  NEON: {
+    lines: ["buy me a coffee"],
+    link: "https://buymeacoffee.com/thisisnotrising"
+  },
+
+  /* THE WISHING WALL. Every cover feature's answer to the question below, spray-painted on the white brick on
+     both sides of the cowboy. One line each, in their own words, signed "Name, Human".
+     side: "L" = between WISHING and the cowboy, "R" = between the cowboy and WALL. The wishes on each side are laid
+       in rows in this order, top to bottom, and sized up together until they fill the side (post.js, wishingWall()).
+     font: Permanent Marker, Sedgwick Ave Display, Rock Salt, Bebas Neue, Black Ops One or Reenie Beanie
+       (saved in assets/fonts/wall, so they always load).
+     size: how big, compared with the others (a capital is roughly this many metres tall before the wall is filled).
+     w: how wide the lines may run before wrapping, in metres.   rot: tilt in degrees (keep it small).
+     case: "up" = ALL CAPITALS, "low" = all lower case, leave it out = as written.
+     **word** = paint that word bigger.   outline: 1 = hollow letters.   ink: the paint colour (black to grey).
+     New issue? Copy a line, change the name and the words, and pick a side. */
+  QUESTION: "If you could manifest a brighter tomorrow, what would be different by 2030?",
+  WISHES: [
+    { side: "L", name: "Jennifer Hong",          wish: "I don’t wish people happiness, I wish them **wholeness.**", font: "Sedgwick Ave Display", size: .26, w: 2.6, rot: -3, ink: "#141414" },
+    { side: "L", name: "Paolo Nardi Fernandez",  wish: "Tech for good.", font: "Black Ops One", size: .42, w: 3.2, rot: 0, case: "up", outline: 1, ink: "#3a3a3a" },
+    { side: "R", name: "Rebecca Wicker",         wish: "Different doesn’t mean wrong.", font: "Permanent Marker", size: .3, w: 2.1, rot: -4, case: "up", ink: "#111" },
+    { side: "L", name: "Neela Singh",            wish: "I want the culture of burning people out in the name of growth to finally be called what it is: **exploitation.**", font: "Permanent Marker", size: .13, w: 2.2, rot: 2, ink: "#262626" },
+    { side: "L", name: "Jennifer Houle",         wish: "I would love to see the 5-day/40 hour/week thing abolished.", font: "Bebas Neue", size: .26, w: 2.0, rot: 0, case: "up", ink: "#1c1c1c" },
+    { side: "L", name: "Sam Illingworth",        wish: "People are freed up to be creators and humans.", font: "Rock Salt", size: .13, w: 1.9, rot: -3, ink: "#2c2c2c" },
+    { side: "L", name: "Rebecca Watson",         wish: "A world where people feel less alone.", font: "Reenie Beanie", size: .34, w: 2.2, rot: 3, ink: "#1a1a1a" },
+    { side: "L", name: "Andrew Barban",          wish: "A world where you can read the news and you don’t feel worse.", font: "Sedgwick Ave Display", size: .17, w: 1.9, rot: 2, ink: "#333" },
+    { side: "R", name: "Joel L.",                wish: "No more tying healthcare to employment.", font: "Permanent Marker", size: .17, w: 1.9, rot: -2, case: "low", ink: "#222" },
+    { side: "L", name: "Farida Khalaf",          wish: "I hope we manifest a deeper **empathy.**", font: "Rock Salt", size: .14, w: 1.6, rot: 3, ink: "#2a2a2a" },
+    { side: "R", name: "Pragya",                 wish: "More generosity in the world.", font: "Black Ops One", size: .17, w: 1.7, rot: 0, case: "up", ink: "#4a4a4a" },
+    { side: "R", name: "Constantinos Tachtsidis",wish: "I would like journalism to care more about meaning and less about content quantity.", font: "Bebas Neue", size: .2, w: 1.9, rot: -2, case: "up", ink: "#202020" },
+    { side: "R", name: "Marlana",                wish: "Questioning what we’re told life is supposed to look like.", font: "Reenie Beanie", size: .26, w: 1.8, rot: -3, ink: "#1d1d1d" },
+    { side: "R", name: "Ben Linford",            wish: "Understand what we’ll be giving up if we choose to regress.", font: "Sedgwick Ave Display", size: .15, w: 1.7, rot: 2, ink: "#303030" },
+    { side: "L", name: "Casey Keen",             wish: "Fewer insurance-driven constraints shaping what care is allowed to look like.", font: "Permanent Marker", size: .12, w: 1.8, rot: -3, ink: "#2b2b2b" },
+    { side: "R", name: "JustSomeMustard",        wish: "A society that actively works to everyone’s benefit.", font: "Bebas Neue", size: .22, w: 1.7, rot: 3, case: "up", outline: 1, ink: "#333" },
+    { side: "L", name: "Maria-Cristina Muntean", wish: "A world that values the time it takes to care about something.", font: "Reenie Beanie", size: .26, w: 1.9, rot: -2, ink: "#1b1b1b" },
+    { side: "R", name: "Anna Levitt",            wish: "Less hustle culture, more knowing who you are as a person.", font: "Rock Salt", size: .12, w: 1.9, rot: 4, case: "low", ink: "#262626" }
+  ],
+
+  /* THE GALLERY: black-and-white photos, each a framed canvas print, all the same size, in an even grid
+     along the black brick wall (top row first, from the far end toward the door).
+     Put the file in assets/img/post/gallery/life, then list it here.
+     The canvases on the wall are square, so each photo is trimmed to a square there.
+     "crop" (optional) says which part of the photo to keep, as "across down":
+       "50% 50%" = the middle (the default), "50% 100%" = keep the bottom, "50% 0%" = keep the top.
+     The viewer always shows the whole photo, untrimmed.
+     "ar" is the photo's real shape, width ÷ height (1 = square, 1.5 = landscape, 0.75 = portrait):
+     the viewer uses it to size the photo.
+     Clicking a frame opens the photo big, with a museum wall label beside it.
+     GALLERY_LABEL is the label every photo uses. To give one photo its own wording,
+     add the same field names to that photo's line, e.g.
+       { img: "...", ar: 1.5, alt: "...", title: "Juniper, Ogden Valley, 2026" }
+     and only that line changes; the rest of its label stays the same. */
+  GALLERY_LABEL: {
+    artist: "KATHI ERIC DALGUNTAS (b. 1986)",   // line 1, bold
+    title:  "LIFE Exhibit, 2026",               // line 2
+    medium: "Digital C-Print"                   // line 3, small
+  },
+  GALLERY: [
+    // LIFE Exhibit, 2026. Hung in this order: top row first (far end to door end), then the next row down.
+    { img: "post/gallery/life/01-main-street.webp",       ar: 1.35, alt: "A sunny small-town main street: shopfronts, SALE signs, and a marquee reading LOST DOG STREET BAND" },
+    { img: "post/gallery/life/02-straw-hat.webp",         ar: 0.76, alt: "A straw hat and a fly swatter hanging from hooks on a wooden wall" },
+    { img: "post/gallery/life/03-payphone.webp",          ar: 0.81, alt: "A pay phone glimpsed between two posts" },
+    { img: "post/gallery/life/04-dog-sofa.webp",          ar: 1.36, alt: "A small white dog resting on a tufted sofa beside a knit pillow" },
+    { img: "post/gallery/life/05-holding-hands.webp",     ar: 1.34, alt: "Two people holding hands on a hospital bed, paper bands on one wrist" },
+    { img: "post/gallery/life/06-commonwealth-room.webp", ar: 1.95, alt: "The Commonwealth Room marquee: Sept 15 Houndmouth, 27 Graham Nash" },
+    { img: "post/gallery/life/07-ivy-bench.webp",         ar: 0.68, crop: "50% 100%", alt: "An iron bench below a stone wall climbing with ivy" },
+    { img: "post/gallery/life/08-string-lights.webp",     ar: 1.52, alt: "A string of bulb lights, the rest of the strand melting into blur" },
+    { img: "post/gallery/life/09-open-sign.webp",         ar: 0.99, alt: "Neon OPEN signs over a door numbered 1108, one reflected backward" },
+    { img: "post/gallery/life/10-window-light.webp",      ar: 1.01, alt: "Sun through tall windows laying cross-shaped shadows down a hallway" },
+    { img: "post/gallery/life/11-window-blinds.webp",     ar: 1.03, alt: "A man in silhouette eating at a table in front of window blinds" },
+    { img: "post/gallery/life/12-state-room.webp",        ar: 1.11, alt: "The State Room marquee: Tonight, OK Go, Sold Out" },
+    { img: "post/gallery/life/13-dont-wait.webp",         ar: 0.81, alt: "A wrist tattoo reading DONT WAIT" },
+    { img: "post/gallery/life/14-guitar-case.webp",       ar: 0.68, alt: "A guitar case leaning against sheer curtains in soft light" },
+    { img: "post/gallery/life/15-towers.webp",            ar: 1.00, alt: "Looking straight up between glass towers into cloud" },
+    { img: "post/gallery/life/16-stencil-cowboy.webp",    ar: 0.75, crop: "50% 15%", alt: "Stencil graffiti of a cowboy with a rifle on a painted cinder-block wall" }
+  ]
+};
+

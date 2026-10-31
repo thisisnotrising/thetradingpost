@@ -1,0 +1,524 @@
+/* NOT RISING · THE POST — THE LOOK
+   ------------------------------------------------------------------
+   The numbers that size the room (--W, --H, --Wr, --D, --u, --P, --eye)
+   are set by post.js from the screen size:
+     --u   one metre, in pixels          --Wr  room width     --D  room depth
+     --P   camera distance (perspective) --eye eye level, as a % down the screen
+   The brick, floorboard and ceiling textures are painted by post.js
+   and set on each wall as a repeating background.
+   ------------------------------------------------------------------ */
+/* The page is two screens tall (--PH) and scrolls: you land under the ceiling and scroll down to the floor. */
+.nrp { position: relative; height: var(--PH); overflow: hidden; background: #e9e2d6; color: #1d1d1d; --warm: rgba(255,236,200,.12); --gold: #a98536; --gold2: #7d5a1f;
+  font-family: Arimo, "Helvetica Neue", Arial, sans-serif; }
+.nrp:not(.ready) .nrp-scene { opacity: 0; }
+.nrp.ready .nrp-scene { opacity: 1; transition: opacity .5s; }
+
+/* ---------- THE BOX ---------- */
+/* The scene is the camera: "perspective" is how far the eye is from the screen. */
+/* The camera: fixed to the screen. The page is still two screens tall (.nrp has height --PH), so there is
+   something to scroll; post.js slides the room up past the camera as you go (see eye() in post.js). */
+.nrp-scene { position: fixed; inset: 0; perspective: var(--P); perspective-origin: 50% 50%; }
+/* The room keeps its children in real 3D (preserve-3d) instead of flattening them. */
+.nrp-room { position: absolute; top: 0; left: calc((var(--W) - var(--Wr)) / 2); width: var(--Wr); height: var(--PH); transform-style: preserve-3d;
+  will-change: translate;   /* keep the room on the graphics chip, so moving it costs nothing */
+  pointer-events: none; }   /* the room itself ignores the mouse... */
+.nrp-hot { pointer-events: auto; }   /* ...only the places you can visit answer to it */
+.nrp-wall { position: absolute; overflow: hidden; }
+.nrp-wall > * { position: absolute; }
+
+/* Back wall: pushed straight back by the room's depth */
+.nrp-back-wall { left: 0; top: 0; width: var(--Wr); height: var(--PH); transform: translateZ(calc(var(--D) * -1));
+  background:   /* white lime plaster: soft mottling over a warm white */
+    radial-gradient(ellipse 30% 20% at 20% 30%, rgba(0,0,0,.035), transparent 70%),
+    radial-gradient(ellipse 25% 30% at 70% 60%, rgba(0,0,0,.03), transparent 70%),
+    radial-gradient(ellipse 40% 25% at 50% 90%, rgba(120,100,80,.05), transparent 70%),
+    #ece9e3; }
+/* Left wall: hinged on its left edge, swung 90° so it runs from the door to the windows */
+.nrp-left { left: 0; top: 0; width: var(--D); height: var(--PH); transform-origin: 0 50%; transform: rotateY(90deg); background: #e8e4dc; }
+/* Right wall: hinged on its right edge, swung the other way */
+.nrp-right { left: calc(var(--Wr) - var(--D)); top: 0; width: var(--D); height: var(--PH); transform-origin: 100% 50%; transform: rotateY(-90deg); background: #141414; }
+/* Floor: hinged on its front edge and tipped back flat */
+/* Floor: hinged on its front edge and tipped back flat. Two slabs (see onFloor in post.js):
+   the far slab stops DN short of the door and is pushed back by DN; the near slab fills the gap. */
+.nrp-floor { left: 0; top: calc(var(--PH) - var(--D)); width: var(--Wr); height: calc(var(--D) - var(--DN)); transform-origin: 50% 100%;
+  transform: translate3d(0, var(--DN), calc(var(--DN) * -1)) rotateX(90deg); background: #c9a87c; }
+.nrp-floor-near { left: 0; top: calc(var(--PH) - var(--DN)); width: var(--Wr); height: var(--DN); transform-origin: 50% 100%; transform: rotateX(90deg); background: #c9a87c; }
+.nrp-floor-near::after { content: ""; position: absolute; inset: 0; pointer-events: none;   /* the near floor is a little darker, out of the window light */
+  background: linear-gradient(90deg, rgba(40,28,16,.26), rgba(40,28,16,0) 9%, rgba(0,0,0,0) 91%, rgba(0,0,0,.3)), linear-gradient(0deg, rgba(40,28,16,.14), rgba(40,28,16,.1)); }
+/* Ceiling: hinged on its front edge and tipped up */
+.nrp-ceiling { left: 0; top: 0; width: var(--Wr); height: var(--D); transform-origin: 50% 0; transform: rotateX(-90deg); background: #ebe6dc; }
+.nrp-ceiling::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(60,45,30,.14), rgba(60,45,30,.24) 50%, rgba(60,45,30,.36)), linear-gradient(90deg, rgba(50,38,26,.25), transparent 15%, transparent 85%, rgba(0,0,0,.3)); }
+
+/* The light in the room: walls brighten toward the glass, darken in the corners and along the floor */
+.nrp-wallshade { pointer-events: none; background:
+  linear-gradient(0deg, rgba(40,28,16,.22), rgba(40,28,16,0) 12%, rgba(0,0,0,0) 85%, rgba(0,0,0,.16)),
+  linear-gradient(90deg, rgba(50,38,26,.22), rgba(50,38,26,.04) 30%, rgba(255,246,226,0) 70%, rgba(255,246,226,.3)); }
+.nrp-wallshade-r { background:
+  linear-gradient(0deg, rgba(0,0,0,.45), rgba(0,0,0,0) 14%, rgba(0,0,0,0) 85%, rgba(0,0,0,.35)),
+  linear-gradient(90deg, rgba(255,246,226,.16), rgba(255,246,226,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,.35)); }
+.nrp-floorshade { pointer-events: none; background:
+  linear-gradient(90deg, rgba(40,28,16,.26), rgba(40,28,16,0) 9%, rgba(0,0,0,0) 91%, rgba(0,0,0,.3)),
+  linear-gradient(0deg, rgba(255,248,230,.3), rgba(255,248,230,.08) 40%, rgba(40,28,16,.14)); }
+
+/* Things placed by post.js */
+.nrp-stand { position: absolute; }
+.nrp-stand > svg, .nrp-stand > img { display: block; width: 100%; height: 100%; }
+.nrp-stand > img { object-fit: fill; }
+.nrp-tree img, .nrp-sofa img, .nrp-table img, .nrp-plants img { filter: drop-shadow(0 calc(var(--u) * .04) calc(var(--u) * .06) rgba(0,0,0,.35)) saturate(.96) contrast(1.02); }
+.nrp-shadow { background: radial-gradient(ellipse at 50% 50%, rgba(20,12,6,.85), rgba(20,12,6,.6) 25%, rgba(20,12,6,.3) 48%, rgba(20,12,6,.1) 65%, rgba(20,12,6,0) 80%); pointer-events: none; }   /* soft by its gradient, not a live blur */
+
+/* ---------- THE BACK WALL: NEBULA CAFE ---------- */
+.nrp-back-wall::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;   /* fine plaster grain */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .38  0 0 0 0 .35  0 0 0 .18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"); }
+/* The arch: the bar photo seen through it, with the plaster's thickness shading the edge */
+.nrp-arch { display: block; overflow: hidden; background-color: #8d867c; box-shadow: inset 0 0 0 calc(var(--u) * .08) #d9d4cb, inset calc(var(--u) * .2) calc(var(--u) * .12) calc(var(--u) * .35) rgba(0,0,0,.35); }
+.nrp-arch-shade { position: absolute; inset: 0; pointer-events: none;   /* the café beyond the arch sits in shade, warm lamplight low down */
+  background: linear-gradient(180deg, rgba(40,32,24,.55), rgba(40,32,24,.38) 45%, rgba(40,32,24,.1) 72%, rgba(0,0,0,0)); }
+.nrp-arch::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
+  box-shadow: inset 0 0 0 calc(var(--u) * .07) #e6e2da, inset calc(var(--u) * .16) calc(var(--u) * .1) calc(var(--u) * .3) rgba(30,20,10,.35); }
+.nrp-mirror img { display: block; width: 100%; height: 100%; filter: drop-shadow(calc(var(--u) * .04) calc(var(--u) * .05) calc(var(--u) * .05) rgba(0,0,0,.3)); }
+/* The name in warm white neon, like the café in the reference */
+.nrp-neon { display: grid; justify-items: start; align-content: center; text-decoration: none; color: #fffaf0;
+  text-shadow: 0 0 2px #fff, 0 0 calc(var(--u) * .06) #ffe9c2, 0 0 calc(var(--u) * .18) rgba(255,214,150,.85), 0 0 calc(var(--u) * .45) rgba(255,200,120,.5); }
+.nrp-neon b { font: 400 min(calc(var(--u) * .62), calc(var(--nw) * .17)) / 1 Oswald, "Arial Narrow", sans-serif; letter-spacing: .22em; }
+.nrp-neon i { font: 400 min(calc(var(--u) * .5), calc(var(--nw) * .14)) / 1 Sacramento, cursive; font-style: normal; margin: .05em 0 0 .2em; }
+.nrp-plastershade { pointer-events: none; background: linear-gradient(0deg, rgba(60,45,30,.16), rgba(0,0,0,0) 22%, rgba(0,0,0,0) 70%, rgba(60,45,30,.12)),
+  linear-gradient(90deg, rgba(40,30,20,.14), rgba(0,0,0,0) 12%, rgba(0,0,0,0) 88%, rgba(40,30,20,.18)); }
+/* Rattan pendants on long cords from the skylight */
+.nrp-pendant i { position: absolute; left: 50%; top: calc(var(--up, 0px) * -1); height: calc(var(--drop) + var(--up, 0px)); border-left: 1.5px solid #2a2622; }
+.nrp-pendant img { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; }
+.nrp-pendant::after { content: ""; position: absolute; left: -50%; right: -50%; bottom: -25%; height: 90%; pointer-events: none; z-index: -1;   /* its warm glow */
+  background: radial-gradient(ellipse 50% 50% at 50% 60%, rgba(255,214,150,.45), rgba(255,214,150,0) 70%); }
+.nrp-fig img { display: block; width: 100%; height: 100%; }
+
+/* ---------- THE NEWSSTAND (left wall) ----------
+   The kiosk inside is styled by newsstand.css (the Newsstand page's own stylesheet).
+   These rules only place it: at the Newsstand's full width, shrunk from its top-left corner. */
+.nrp-news { display: block; text-decoration: none; }
+.nrp-kiosk.nrns.stand { position: absolute; left: 0; width: 1180px; max-width: none; margin: 0; padding: 0; transform-origin: 0 0; pointer-events: none; overflow: visible; }   /* visible: the marquee bulbs sit just outside its edge */
+/* newsstand.css switches to 4 or 2 columns on narrow SCREENS; this miniature always keeps the desktop rack: 5 across, 4 rows */
+.nrp-kiosk.nrns .pockets { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+.nrp-kiosk.nrns .rack { padding: 76px 74px 64px !important; }
+/* CRYSTAL-CLEAR GLASS. newsstand.css makes its panels smoked glass with these settings; here the tint
+   is taken out entirely, the frosting is gone, and the cut edges sparkle like crystal (a bright rim
+   with a faint rainbow where the light splits in the glass). */
+.nrp-kiosk.nrns {
+  --glass-tint: rgba(255, 255, 255, .03);
+  --glass-blur: 0px;
+  --glass-edge: rgba(255, 255, 255, .95);
+  --glass-sheen: linear-gradient(115deg, rgba(255,255,255,.32), rgba(255,255,255,0) 18%, rgba(255,255,255,0) 64%, rgba(255,255,255,.18) 74%, rgba(255,255,255,0) 84%);
+}
+.nrp-kiosk.nrns .rack, .nrp-kiosk.nrns .tab, .nrp-kiosk.nrns .empty {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.9), inset 0 0 0 3px rgba(190,225,255,.35), inset 2px 2px 0 3px rgba(255,200,230,.18),
+              0 0 18px rgba(255,255,255,.35), 0 14px 30px rgba(0,0,0,.12) !important; }
+.nrp-kiosk.nrns .glass {                 /* the shelves: water-clear, with a brilliant front edge */
+  background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.08) 55%, rgba(255,255,255,0)) !important;
+  border-top: 1px solid #fff !important; border-bottom: 2px solid rgba(200,235,255,.85) !important;
+  box-shadow: 0 0 10px rgba(255,255,255,.6), 0 1px 0 rgba(255,190,230,.5), 0 16px 20px -8px rgba(0,0,0,.35) !important; }
+
+/* ---------- THE GRAFFITI (left wall) ----------
+   The stencil sits right on the painted brick. Its paint is a touch see-through, so the brick's
+   light and shade show through it, the way spray paint takes on the wall under it. */
+.nrp-graffiti { pointer-events: none; }
+.nrp-graffiti img { display: block; width: 100%; height: 100%; opacity: .92; }
+
+/* ---------- THE GALLERY (right wall) ---------- */
+.nrp-life { display: grid; grid-template-rows: repeat(4, 1fr); justify-items: center; align-items: center; line-height: .9; color: #f4f1ea;
+  font: 600 calc(var(--u) * .62) / 1 Oswald, "Arial Narrow", sans-serif; text-shadow: 0 calc(var(--u) * .02) calc(var(--u) * .04) rgba(0,0,0,.6); }
+.nrp-track { background: #2b2b2b; box-shadow: 0 1px 0 #555, 0 calc(var(--u) * .03) calc(var(--u) * .06) rgba(0,0,0,.6); }
+.nrp-spot { background: radial-gradient(ellipse at 50% 0, #5a5a5a 0 30%, transparent 32%); }
+.nrp-spot::after { content: ""; position: absolute; left: 30%; right: 30%; top: 55%; bottom: 0; background: linear-gradient(#444, #222); border-radius: 0 0 40% 40%; }
+.nrp-beamlight { pointer-events: none; background: radial-gradient(ellipse 45% 85% at 50% 0, rgba(255,243,215,.3), rgba(255,243,215,.08) 55%, transparent 80%); }
+.nrp-photo { display: block; background: #fbfaf7; padding: calc(var(--u) * .14);
+  box-shadow: 0 0 0 calc(var(--u) * .035) #0a0a0a, 0 calc(var(--u) * .08) calc(var(--u) * .22) rgba(0,0,0,.7), inset 0 0 calc(var(--u) * .04) rgba(0,0,0,.15); }
+.nrp-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* A framed canvas print (the Gallery's look since Oct 2026): no white mat. A thin black float frame, a dark
+   shadow gap, then the canvas itself, edge to edge, with a faint weave and soft wrapped edges. */
+.nrp-photo.nrp-canvas { padding: calc(var(--u) * .045); background: #050505;
+  box-shadow: 0 0 0 calc(var(--u) * .035) #1d1d1d, 0 0 0 calc(var(--u) * .042) #444,
+    0 calc(var(--u) * .1) calc(var(--u) * .25) rgba(0,0,0,.75); }
+.nrp-photo.nrp-canvas::before { content: ""; position: absolute; inset: calc(var(--u) * .045); z-index: 1; pointer-events: none;   /* a whisper of canvas grain */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.55 .9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='180' height='180' filter='url(%23c)'/></svg>");
+  opacity: .1;   /* plain, faint (a blend mode here cost a redraw per photo, every frame) */
+  box-shadow: inset 0 0 calc(var(--u) * .05) rgba(0,0,0,.4); }
+.nrp-galword { display: grid; place-items: center; color: #f1ece2; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; letter-spacing: .16em; line-height: 1; opacity: .92; pointer-events: none;
+  text-shadow: 0 calc(var(--u) * .02) calc(var(--u) * .05) rgba(0,0,0,.7); }
+.nrp-wishword { color: #111; opacity: .9; text-shadow: 0 calc(var(--u) * .01) calc(var(--u) * .02) rgba(0,0,0,.25); white-space: nowrap; text-decoration: none; pointer-events: auto; }   /* WISHING / WALL: black on the white brick
+
+/* ---------- THE FLOOR ---------- */
+/* Sun through the glass: a bright wash, striped by the shadows of the mullions */
+.nrp-skyfloor { pointer-events: none; background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,252,240,.45), rgba(255,252,240,0) 70%); }
+
+/* ---------- THE CEILING: the atrium skylight ---------- */
+.nrp-greens { background-repeat: repeat-x; background-position: 0 100%; pointer-events: none; }
+
+/* ---------- CLICKABLE THINGS IN THE ROOM ---------- */
+/* (For smoothness, hovering no longer puts a filter on the thing itself: that made the browser redraw the whole
+   Newsstand or wall each time the mouse crossed it. The glow is a separate soft halo, ::before, on its own layer.) */
+.nrp-hot { cursor: pointer; }
+.nrp-hot:hover, .nrp-hot:focus-visible { outline: none; }
+.nrp-hot::before { content: ""; position: absolute; inset: calc(var(--u) * -.08); pointer-events: none; opacity: 0; transition: opacity .25s; will-change: opacity;
+  box-shadow: 0 0 calc(var(--u) * .14) calc(var(--u) * .03) rgba(255,236,170,.75), inset 0 0 calc(var(--u) * .1) rgba(255,236,170,.35); border-radius: inherit; }
+.nrp-hot:hover::before, .nrp-hot:focus-visible::before { opacity: 1; }
+.nrp-hot::after { content: attr(data-tip); position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); white-space: nowrap; pointer-events: none;
+  background: #111; color: #fff; font: 700 calc(var(--u) * .14) / 1 Arimo, Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase;
+  padding: .5em .8em; opacity: 0; transition: opacity .2s; will-change: opacity; }
+.nrp-hot:hover::after, .nrp-hot:focus-visible::after { opacity: 1; }
+
+/* ---------- THE AIR IN THE ROOM: sunbeams, haze, a touch of film grain ---------- */
+.nrp-sun { position: fixed; inset: 0; pointer-events: none;   /* plain soft light (it was a blend, which redrew the whole screen every frame) */
+  background:
+    radial-gradient(ellipse 46% 40% at 44% 30%, rgba(255,250,232,.2), transparent 70%),
+    linear-gradient(108deg, transparent 34%, rgba(255,247,226,.09) 38%, transparent 44%, transparent 50%, rgba(255,247,226,.06) 55%, transparent 61%, transparent 66%, rgba(255,247,226,.05) 70%, transparent 75%); }
+.nrp-air { position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(0,0,0,0) 60%, rgba(20,12,6,.22)), linear-gradient(var(--warm), var(--warm));   /* the vignette, and the warmth of the light */
+  opacity: .9; }
+/* (the film grain over the whole screen was taken out for smoothness: it blended with everything, every frame) */
+.nrp-air::after { content: none; position: absolute; inset: 0; opacity: .07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
+
+/* ---------- THE PAGE FURNITURE ---------- */
+.nrp-back { position: fixed; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  color: #2f2f2f; text-decoration: none; padding: 6px 8px; background: rgba(244,239,230,.8); }
+.nrp-back:hover { color: #000; }
+.nrp-back:focus-visible { outline: 2px solid #000; outline-offset: 3px; }
+.nrp-toast { position: fixed; z-index: 6; left: 50%; bottom: max(24px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: #111; color: #fff; font: 700 12px/1.3 Arimo, Arial, sans-serif; letter-spacing: .14em; text-transform: uppercase; padding: 12px 18px; }
+
+/* Walking in: the room starts a step further away and comes toward you */
+.nrp.walk-in .nrp-room { animation: nrp-walk 1.8s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes nrp-walk { from { transform: translateZ(var(--walk)); } to { transform: none; } }
+/* Leaving through a link: fade to white light */
+.nrp::after { content: ""; position: fixed; inset: 0; z-index: 10; background: #fff; opacity: 0; pointer-events: none; transition: opacity .6s ease-in; }
+.nrp.leaving::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .nrp.walk-in .nrp-room { animation: none; } .nrp::after { transition: none; } }
+
+/* A small cue on landing: you are up under the roof, the shop is below. Fades once you scroll. */
+.nrp-down { position: fixed; z-index: 5; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  display: grid; justify-items: center; gap: 4px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
+  font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
+.nrp-down::after { content: ""; width: 12px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); animation: nrp-bob 1.6s ease-in-out infinite; }
+.nrp-down.gone { opacity: 0; }
+@keyframes nrp-bob { 50% { transform: translateY(5px) rotate(45deg); } }
+@media (prefers-reduced-motion: reduce) { .nrp-down::after { animation: none; } }
+
+/* ---------- LUSH ---------- */
+.nrp-painted img { display: block; width: 100%; height: 100%; }
+.nrp-bulbs { pointer-events: none; }
+.nrp-bulbs svg { position: absolute; left: 0; top: 0; }
+
+/* The neon's hand-written tube lettering: Neonderthaw (free, SIL Open Font Licence), kept in assets/fonts
+   so it always loads, even when Google Fonts doesn't */
+@font-face { font-family: "Neonderthaw"; src: url(fonts/neonderthaw.woff2) format("woff2"); font-display: swap; }
+/* ---------- THE NEON (front of the café bar) ----------
+   Its colour matches the red of the ivy on the walls (Oct 2026; it was hot pink).
+   Each line is drawn three times on top of itself (the ::before and ::after copies come from data-t):
+     the glow:  thick, blurred, deep ivy red, spilling onto the concrete
+     the tube:  the red glass tube itself
+     the core:  a thin near-white line down the middle, where a lit tube is brightest */
+.nrp-pink { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; overflow: visible;
+  font-family: Neonderthaw, "Sacramento", cursive; font-size: var(--fs); line-height: 1.02; }
+.nrp-pink-wash { position: absolute; inset: -30% -12%; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(226, 34, 58, .42), rgba(226, 34, 58, .16) 45%, rgba(226, 34, 58, 0) 72%); }
+.nrp-pink-line { position: relative; white-space: nowrap; color: #ffd9dc;
+  text-shadow: 0 0 .015em #fff, 0 0 .04em #ff5a66, 0 0 .08em #f0324a, 0 0 .16em #dc1f3c, 0 0 .32em rgba(214, 26, 54, .9), 0 0 .7em rgba(196, 22, 48, .55); }
+.nrp-pink-line::before { content: attr(data-t); position: absolute; inset: 0; color: transparent; filter: blur(.1em);
+  -webkit-text-stroke: .1em rgba(226, 36, 60, .55); z-index: -1; }
+.nrp-pink-line::after { content: attr(data-t); position: absolute; inset: 0; color: #fff1f1; -webkit-text-stroke: 0;
+  -webkit-mask: linear-gradient(#000, #000); clip-path: inset(0); text-shadow: none; opacity: .9;
+  font-size: 1em; transform: translateY(-.01em); filter: blur(.006em); }
+.nrp-pink-line:nth-child(2) { margin-left: -.3em; }   /* the first line sits a touch right of the second, as in the photo */
+.nrp-pink-line:nth-child(3) { margin-left: .5em; }
+.nrp-pink:hover .nrp-pink-line, .nrp-pink:focus-visible .nrp-pink-line { color: #ff6f7a; }
+@media (prefers-reduced-motion: no-preference) {   /* a neon tube flickers on, once, then holds steady */
+  .nrp.ready .nrp-pink-line { animation: nrp-flicker 2.2s steps(1) .6s both; }
+  @keyframes nrp-flicker { 0% { opacity: .15 } 8% { opacity: 1 } 12% { opacity: .3 } 18% { opacity: 1 } 22% { opacity: .5 } 26%, 100% { opacity: 1 } }
+}
+
+
+/* ---------- THE GALLERY VIEWER (opens when you click a frame) ----------
+   .nrlb         the dark room the photo opens into (covers the whole screen)
+   .nrlb-piece   the photo and its label, side by side (stacked on a phone)
+   .nrlb-frame   the white mat and thin black frame, the same as on the wall
+   .nrlb-label   the museum wall label: a small white card, black type */
+html.nrlb-open, html.nrlb-open body { overflow: hidden; }
+.nrlb { position: fixed; inset: 0; z-index: 2147483000; display: grid; place-items: center;
+  padding: max(56px, env(safe-area-inset-top, 0px)) 72px max(40px, env(safe-area-inset-bottom, 0px));
+  /* the wall: black-painted brick (assets/img/post/black-brick.webp, made from the real stone texture in Kathi's
+     reference photo), lit by a warm gallery spotlight from above, falling off into the corners */
+  background:
+    radial-gradient(ellipse 58% 52% at 50% 40%, rgba(255,232,196,.13), rgba(255,232,196,.04) 55%, transparent 75%),
+    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 45%, rgba(0,0,0,.72)),
+    url(img/post/black-brick.webp) 50% 50% / 484px auto repeat, #111;
+  color: #f1ece2; font-family: Arimo, "Helvetica Neue", Arial, sans-serif; animation: nrlb-in .35s ease-out both; }
+.nrlb[hidden] { display: none !important; }
+@keyframes nrlb-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .nrlb { animation: none; } }
+
+.nrlb-piece { margin: 0; display: flex; align-items: flex-end; gap: 30px; max-width: 100%; max-height: 100%; }
+/* The photo as a framed canvas, the same as on the wall: a thin black float frame, a dark shadow gap, then the canvas */
+.nrlb-frame { position: relative; flex: 0 1 auto; min-width: 0; background: #070707; padding: 7px;
+  box-shadow: 0 0 0 6px #1c1c1c, 0 0 0 7px #3a3a3a, 0 22px 55px rgba(0,0,0,.7); }
+.nrlb-frame::before { content: ""; position: absolute; inset: 7px; z-index: 1; pointer-events: none;   /* a whisper of canvas texture + the canvas's wrapped edges */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.55 .9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .5 0'/></filter><rect width='180' height='180' filter='url(%23c)'/></svg>");
+  mix-blend-mode: soft-light; opacity: .55;
+  box-shadow: inset 0 0 10px rgba(0,0,0,.35); }
+.nrlb-frame img { display: block; height: auto; width: auto; object-fit: contain;
+  max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); max-width: calc(100vw - 144px - 330px); }
+
+/* THE LABEL, flush with the photo's outer edge (beside it at the bottom on a wide screen, under it at the right on a phone).
+   .nrlb-label  where it sits
+   .nrlb-glass  the clear acrylic panel: a faint edge, a cool sheen, and a diagonal reflection
+   .nrlb-card   the printed card behind the glass
+   .nrlb-screw  the four chrome standoffs holding the glass off the wall
+   The frame's black edge is drawn 7px outside the photo's box, so the label steps out 7px too (the -7px margin)
+   to line up with the frame's true outer edge. */
+.nrlb-label { position: relative; flex: 0 0 auto; padding: 0; margin: 0 0 -7px; }
+.nrlb-glass { position: relative; padding: 11px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05) 45%, rgba(220,235,255,.08));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 1px 0 rgba(255,255,255,.6), 0 8px 22px rgba(0,0,0,.55); }
+.nrlb-glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;   /* a reflection across the glass */
+  background: linear-gradient(115deg, transparent 18%, rgba(255,255,255,.28) 24%, rgba(255,255,255,.06) 31%, transparent 37%, transparent 64%, rgba(255,255,255,.12) 68%, transparent 73%); }
+.nrlb-card { background: #f7f5f0; color: #111; padding: 13px 18px 14px 16px; width: max-content; min-width: 200px; max-width: 290px; text-align: left; }
+.nrlb-card p { margin: 0; }
+.nrlb-artist { font-weight: 700; font-size: 12px; letter-spacing: .06em; line-height: 1.35; }
+.nrlb-title  { font-size: 13px; line-height: 1.35; margin-top: 6px !important; }
+.nrlb-medium { font-size: 11.5px; line-height: 1.35; color: #555; margin-top: 2px !important; }
+.nrlb-screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
+
+
+.nrlb-count { position: absolute; top: max(18px, env(safe-area-inset-top, 0px)); left: 20px; margin: 0;
+  font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .2em; color: #8d8a86; }
+.nrlb-btn { position: absolute; z-index: 1; border: 0; background: transparent; color: #f1ece2; cursor: pointer; padding: 0;
+  width: 48px; height: 48px; display: grid; place-items: center; font: 300 40px/1 "Helvetica Neue", Arial, sans-serif; opacity: .7; transition: opacity .2s; }
+.nrlb-btn:hover, .nrlb-btn:focus-visible { opacity: 1; outline: none; }
+.nrlb-btn:focus-visible { box-shadow: 0 0 0 2px #f1ece2; }
+.nrlb-close { top: max(6px, env(safe-area-inset-top, 0px)); right: 10px; font-size: 34px; }
+.nrlb-prev { left: 12px; top: 50%; transform: translateY(-50%); font-size: 56px; }
+.nrlb-next { right: 12px; top: 50%; transform: translateY(-50%); font-size: 56px; }
+
+/* A phone: the label sits under the photo, flush with its right edge; the arrows drop to the bottom corners; swipe works too */
+@media (max-width: 760px) {
+  .nrlb { padding: max(52px, env(safe-area-inset-top, 0px)) 16px max(76px, env(safe-area-inset-bottom, 0px)); background-size: auto, auto, 330px auto, auto; }
+  .nrlb-piece { flex-direction: column; align-items: flex-end; gap: 4px; }
+  .nrlb-frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 330px); max-height: calc(100dvh - 330px); }
+  .nrlb-label { margin: 6px -7px 0 0; }   /* -7px: the glass's right edge lands on the frame's right edge */
+  .nrlb-prev, .nrlb-next { top: auto; transform: none; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .nrlb-prev { left: 16px; } .nrlb-next { right: 16px; }
+}
+
+/* ---------- THE GLASS ROOF (painted in post-roof.js, put in place by post.js) ---------- */
+.nrp-roof, .nrp-gable { position: absolute; pointer-events: none; }
+.nrp-roof canvas, .nrp-gable canvas { display: block; width: 100%; height: 100%; }
+.nrp-gable { clip-path: polygon(0 100%, 50% 0, 100% 100%); }                 /* a triangle: the end of the pitched roof */
+
+/* ---------- THE CEILING FANS ----------
+   .nrp-fan         the whole fan (placed in the room by post.js); keeps its children in 3D
+   .nrp-fan-rod     the down-rod from the ridge
+   .nrp-fan-motor   the dark motor housing at the bottom of the rod
+   .nrp-fan-blades  a square lying flat (rotateX 90°), level with the floor, centred on the motor
+   .nrp-fan-spin    turns round and round inside it, carrying the three blades (<b>) */
+.nrp-fan { transform-style: preserve-3d; pointer-events: none; }
+.nrp-fan-rod { position: absolute; left: 50%; top: 0; bottom: calc(var(--u) * .16); width: calc(var(--u) * .03); margin-left: calc(var(--u) * -.015);
+  background: linear-gradient(90deg, #050505, #3a3a3a 45%, #0c0c0c); }
+/* the motor: a small dark drum with a cap underneath, like the fan in the photo */
+.nrp-fan-motor { position: absolute; left: 50%; bottom: 0; width: calc(var(--u) * .26); height: calc(var(--u) * .18); margin-left: calc(var(--u) * -.13);
+  border-radius: 18% 18% 45% 45% / 20% 20% 60% 60%; background: radial-gradient(ellipse at 38% 30%, #4a4a4a, #161616 45%, #040404);
+  box-shadow: 0 calc(var(--u) * .02) calc(var(--u) * .05) rgba(0,0,0,.4); }
+.nrp-fan-blades { position: absolute; transform: rotateX(90deg); transform-style: preserve-3d; }
+.nrp-fan-spin { position: absolute; inset: 0; animation: nrp-spin 7s linear infinite; }   /* big fans turn slowly */
+/* one blade: from the hub out to the rim, narrow at the root and widening to a long flat paddle with a squared tip */
+.nrp-fan-spin b { position: absolute; left: 50%; top: 48.2%; width: 49%; height: 3.6%; transform-origin: 0 50%;
+  clip-path: polygon(0 40%, 14% 30%, 30% 14%, 97% 0, 100% 12%, 100% 88%, 97% 100%, 30% 86%, 14% 70%, 0 60%);
+  background: linear-gradient(180deg, #3a3a3a, #121212 45%, #050505 70%, #1e1e1e); }
+.nrp-fan-spin b:nth-child(2) { transform: rotate(60deg); }
+.nrp-fan-spin b:nth-child(3) { transform: rotate(120deg); }
+.nrp-fan-spin b:nth-child(4) { transform: rotate(180deg); }
+.nrp-fan-spin b:nth-child(5) { transform: rotate(240deg); }
+.nrp-fan-spin b:nth-child(6) { transform: rotate(300deg); }
+@keyframes nrp-spin { to { transform: rotate(360deg); } }
+
+/* ---------- THE ROOM COMES ALIVE ----------
+   Everything here moves only "transform"/"rotate" or "opacity", the two things a browser can animate on the graphics
+   chip without repainting anything, so the room stays smooth even on a phone.
+   1. THE EDISON BULBS: each cluster warms up as you walk in (its glow rises), then breathes, a slow swell and ease
+      (--b, set in post.js, puts each cluster on its own rhythm).
+   2. THE DOOR BREEZE: as you come in, the potted palms, the bird of paradise and the pendant shades sway once, as if
+      the door let in a gust (--d = how long the gust takes to reach each one), then settle into the faintest sway.
+      .nrp-sway = sways from its base (a plant in a pot)   .nrp-hang = swings from the top (a lamp on a cord)
+   3. THE FANS turn slowly (above).
+   Anyone who has asked their device to reduce motion gets the room perfectly still. */
+.nrp-glow { will-change: opacity; }
+.nrp.ready .nrp-glow { animation: nrp-breathe 5s ease-in-out var(--b, 0s) infinite; }
+.nrp.walk-in .nrp-glow { animation: nrp-warm 2.8s ease-out both, nrp-breathe 5s ease-in-out calc(2.8s + var(--b, 0s)) infinite; }
+@keyframes nrp-warm { from { opacity: .35; } }
+@keyframes nrp-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .84; } }
+
+.nrp-sway { transform-origin: 50% 100%; --amp: 1; }
+.nrp-hang { transform-origin: 50% 0; --amp: 1.6; }
+.nrp.ready .nrp-sway { animation: nrp-idle 7s ease-in-out var(--d, 0s) infinite alternate; }
+.nrp.walk-in .nrp-sway { animation: nrp-breeze 4s cubic-bezier(.25,.6,.35,1) calc(.5s + var(--d, 0s)) both, nrp-idle 7s ease-in-out calc(4.5s + var(--d, 0s)) infinite alternate; }
+@keyframes nrp-breeze {
+  0% { rotate: 0deg; } 16% { rotate: calc(var(--amp) * 1.5deg); } 36% { rotate: calc(var(--amp) * -.9deg); }
+  56% { rotate: calc(var(--amp) * .45deg); } 76% { rotate: calc(var(--amp) * -.18deg); } 100% { rotate: calc(var(--amp) * -.25deg); } }
+@keyframes nrp-idle { from { rotate: calc(var(--amp) * -.25deg); } to { rotate: calc(var(--amp) * .25deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .nrp.ready .nrp-glow, .nrp.walk-in .nrp-glow, .nrp.ready .nrp-sway, .nrp.walk-in .nrp-sway, .nrp-fan-spin { animation: none; }
+}
+
+/* ---------- THE BENCHES (built by bench3d() in post.js) ----------
+   .nrp-bench3d  the bench: a little 3D object, turned to face you or to run along the room
+   .nrp-b-top    the seat's top (walnut grain from Kathi's photo), laid flat
+   .nrp-b-edge   the seat's long front and back edges (from the photo)
+   .nrp-b-end    the seat's two ends: plain walnut, a little darker (end grain)
+   .nrp-b-leg    a leg strip: walnut, lit on one side, narrowing toward the floor */
+.nrp-bench3d { position: absolute; transform-style: preserve-3d; pointer-events: none; }
+.nrp-bench3d i { position: absolute; display: block; backface-visibility: visible; }
+.nrp-b-top { transform: rotateX(90deg); background-repeat: no-repeat; }
+.nrp-b-edge { background-repeat: no-repeat; }
+.nrp-b-end { background: linear-gradient(180deg, #7a4c2c, #4e2e19); }
+.nrp-b-leg { transform-origin: 50% 0; background: linear-gradient(90deg, #3f2414, #8c5a35 40%, #6b4126 70%, #3a2112);
+  clip-path: polygon(0 0, 100% 0, 72% 100%, 28% 100%); }
+
+/* ---------- THE WISHING WALL (laid out by wishingWall() in post.js) ----------
+   The six spray-paint and marker fonts, kept in assets/fonts/wall (free fonts, trimmed to plain letters; see LICENSES.txt).
+   .nrp-wish   one wish, painted on the brick: "multiply" lets the brick's light and shadow show through the paint
+   b           a word painted bigger (written **like this** in data.js)
+   .by         the signature underneath: "— Name, Human"
+   .outline    hollow letters */
+@font-face { font-family: "Permanent Marker"; src: url(fonts/wall/permanent-marker.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Sedgwick Ave Display"; src: url(fonts/wall/sedgwick-ave-display.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Rock Salt"; src: url(fonts/wall/rock-salt.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Bebas Neue"; src: url(fonts/wall/bebas-neue.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Black Ops One"; src: url(fonts/wall/black-ops-one.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Reenie Beanie"; src: url(fonts/wall/reenie-beanie.woff2) format("woff2"); font-display: swap; }
+.nrp-wish { width: max-content; padding: .06em 0; color: var(--ink); opacity: .9; pointer-events: none; transform-origin: 50% 50%; }
+.nrp-wish b { font-weight: inherit; font-size: 1.6em; line-height: .95; }
+.nrp-wish .by { display: block; margin-top: .25em; font-size: var(--by); opacity: .82; white-space: nowrap; }
+.nrp-wish.outline { color: transparent; -webkit-text-stroke: calc(var(--u) * .012) var(--ink); }
+.nrp-wish.outline .by { color: var(--ink); -webkit-text-stroke: 0; }
+
+/* ---------- THE WISHING WALL, FULL SCREEN (openWall() in post.js) ----------
+   .nrwv         the dark room it opens into
+   .nrwv-scroll  scrolls sideways when the wall is wider than the screen (phones)
+   .nrwv-frame   the wall at its real size, shrunk to fit (transform: scale), from its top-left corner
+   .nrwv-wall    the copy of the painted wall inside it
+   .nrp-wallhot  the invisible click panel over the wishes in the room */
+.nrp-wallhot { display: block; }
+.nrp-wallhot::after { top: 50%; }
+.nrwv { position: fixed; inset: 0; z-index: 2147483000; background: #0d0d0c; animation: nrlb-in .35s ease-out both; }
+.nrwv[hidden] { display: none !important; }
+.nrwv-scroll { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; display: grid; place-items: center;
+  padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); -webkit-overflow-scrolling: touch; }
+.nrwv-scroll::before { content: ""; display: block; width: var(--fw); height: var(--fh); grid-area: 1 / 1; }   /* takes up the scaled wall's room */
+.nrwv-frame { grid-area: 1 / 1; place-self: start; position: relative; overflow: hidden; transform-origin: 0 0; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.nrwv-wall { position: absolute; overflow: hidden; transform: none !important; }
+.nrwv-wall > * { position: absolute; }
+.nrwv .nrlb-close { z-index: 2; position: fixed; top: max(10px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); border-radius: 50%; background: rgba(13,13,12,.85); opacity: 1; }
+
+/* ---------- THE LOUNGE (built by lounge3d() in post.js) ----------
+   .nrp-3d      an invisible holder that keeps its contents in 3D
+   .nrp-f       one flat face of a box (or a standing picture, .nrp-card)
+   Each face wears a picture painted by tools/bake-lounge.py. Faces can't
+   catch real light, so the light is set by hand: tops face the skylight
+   (brightest), fronts a little less, ends (.nrp-dim) less again. */
+.nrp-3d { position: absolute; width: 0; height: 0; transform-style: preserve-3d; pointer-events: none; }
+.nrp-f { position: absolute; display: block; backface-visibility: visible; background: center / 100% 100% no-repeat; }
+.nrp-rattan { background: url(img/post/lounge/rattan.webp) 0 0 / calc(var(--u) * .4) calc(var(--u) * .2) repeat;
+  box-shadow: inset 0 calc(var(--u) * .025) calc(var(--u) * .02) rgba(30,18,8,.45), inset 0 calc(var(--u) * -.02) calc(var(--u) * .02) rgba(30,18,8,.35); }
+.nrp-basetop { background: #6b4e30; }
+.nrp-seattop { background-image: url(img/post/lounge/seat-top.webp); border-radius: calc(var(--u) * .05); }
+.nrp-seatfront { background-image: url(img/post/lounge/seat-front.webp); border-radius: calc(var(--u) * .05); }
+.nrp-backcush { background-image: url(img/post/lounge/back-cushion.webp); border-radius: calc(var(--u) * .07); }
+.nrp-backtop { border-radius: calc(var(--u) * .09); }
+.nrp-dim { box-shadow: inset 0 0 0 100vmax rgba(20,12,6,.12); }   /* a shaded side: a plain dark wash, not a filter */
+.nrp-backcush.nrp-dim { border-radius: calc(var(--u) * .09); background-image: radial-gradient(ellipse at 50% 45%, #e4ddd0, #c9c1b3 75%, #b5ad9f); }
+.nrp-rattan.nrp-dim { box-shadow: inset 0 0 0 100vmax rgba(20,12,6,.2); }
+.nrp-pillow { }   /* (its shadow is baked into the picture) */
+.nrp-throwtop { background-image: url(img/post/lounge/throw-end.webp); }
+.nrp-throwfall { }
+.nrp-mag { background-size: cover; box-shadow: 0 0 0 calc(var(--u) * .004) rgba(0,0,0,.25); }
+.nrp-pouf img { }
+/* the warm light of the bulbs over the lounge: a soft amber pool on the floor and on the black brick */
+.nrp-loungeglow { background: radial-gradient(ellipse at 60% 45%, rgba(255,196,120,.16), rgba(255,190,110,.06) 45%, rgba(255,190,110,0) 70%); pointer-events: none; }
+.nrp-wallglow { background: radial-gradient(ellipse at 50% 30%, rgba(255,186,110,.16), rgba(255,170,90,.05) 50%, rgba(255,170,90,0) 72%); pointer-events: none; }
+
+/* THE NEWSSTAND MINIATURE: its marquee frame of bulbs covers the whole stand (built by kiosk() in post.js);
+   the letters on NOW SOARING sit straight and level (no hand-placed tilt), and the space between the two words
+   keeps its width (in a tight row a blank tile would otherwise squeeze down to nothing) */
+.nrp-kiosk.nrns .nrp-marquee { inset: auto -44px -40px; }    /* the stand's frame: just outside its sides and foot; its top is set in post.js (just above the tabs) */
+.nrp-kiosk.nrns .sign { padding: 54px 56px; }                 /* a wider black border round the board, to hold the sign's own bulbs */
+.nrp-kiosk.nrns .nrp-signlights { inset: 0; }
+.nrp-kiosk.nrns .tabs { margin-top: 84px; }                    /* a gap under the awning for the stand frame's top row of bulbs */
+.nrp-kiosk.nrns .sign h1 { font-size: 120px; }
+.nrp-kiosk.nrns .sign h1 .lt { transform: none; }
+.nrp-kiosk.nrns .lt.sp { flex: 0 0 .32em; }
+
+/* THE JUTE RUG (laid on the floor by lounge3d() in post.js): the woven picture, a touch dimmer at the far side
+   where the skylight falls off, like the floor around it */
+.nrp-rug { pointer-events: none; }
+.nrp-rug img { display: block; width: 100%; height: 100%; }
+
+/* THE ARCH WALL in black brick (post.js papers it with the Gallery's brick and adds .nrp-brickback):
+   no plaster grain on it, and the arch's edge becomes a dark brick reveal with light catching its rim */
+.nrp-back-wall.nrp-brickback { background-color: #141414; background-repeat: repeat; }
+.nrp-back-wall.nrp-brickback::after { content: none; }
+.nrp-brickback .nrp-arch { box-shadow: inset 0 0 0 calc(var(--u) * .08) #2b2724, inset calc(var(--u) * .2) calc(var(--u) * .12) calc(var(--u) * .35) rgba(0,0,0,.45); }
+.nrp-brickback .nrp-arch::before { box-shadow: inset 0 0 0 calc(var(--u) * .07) #26221f, inset 0 0 0 calc(var(--u) * .085) rgba(255,236,210,.18),
+  inset calc(var(--u) * .16) calc(var(--u) * .1) calc(var(--u) * .3) rgba(0,0,0,.45); }
+.nrp-brickback .nrp-plastershade { background: linear-gradient(0deg, rgba(0,0,0,.25), rgba(0,0,0,0) 25%, rgba(0,0,0,0) 72%, rgba(0,0,0,.2)),
+  linear-gradient(90deg, rgba(0,0,0,.22), rgba(0,0,0,0) 14%, rgba(0,0,0,0) 86%, rgba(0,0,0,.25)); }
+/* (the rug's contrast is baked into its picture: tools/weave-rug.py) */
+
+/* THE ARCH WALL, SMOOTH BLACK: a deep satin-black plaster. A soft pool of daylight falls on it from the glass roof
+   above, it darkens toward the floor and the corners, and a very fine grain keeps it from looking like flat paint. */
+.nrp-back-wall.nrp-blackback { background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255,250,240,.07), rgba(255,250,240,0) 70%),
+    linear-gradient(180deg, #1c1b1a 0%, #121211 45%, #0b0b0b 100%); }
+.nrp-back-wall.nrp-blackback::after { content: ""; opacity: .55; }
+
+/* THE OBSIDIAN COUNTER (placed by post.js over the counter front, painted by tools/polish-obsidian.py).
+   Its <i>s are the twinkles: tiny four-pointed stars that flare and fade, each at its own pace. */
+.nrp-obsidian { background: #050506 url(img/post/obsidian.webp) 0 100% repeat-x; pointer-events: none;
+  box-shadow: 0 calc(var(--u) * -.01) 0 rgba(255,255,255,.06), 0 calc(var(--u) * .02) calc(var(--u) * .06) rgba(0,0,0,.6); }
+.nrp-obsidian i { position: absolute; width: calc(var(--u) * .1 * var(--s)); height: calc(var(--u) * .1 * var(--s)); margin: calc(var(--u) * -.05 * var(--s));
+  background:
+    radial-gradient(circle, #fff 0 6%, rgba(255,255,255,.55) 12%, rgba(255,255,255,0) 30%),
+    linear-gradient(90deg, rgba(255,255,255,0) 0 47%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 53%) center / 100% 8% no-repeat,
+    linear-gradient(0deg, rgba(255,255,255,0) 0 47%, rgba(255,255,255,.85) 50%, rgba(255,255,255,0) 53%) center / 8% 100% no-repeat;
+  opacity: 0; animation: nrp-twinkle 4s ease-in-out infinite; }
+@keyframes nrp-twinkle { 0%, 70%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 82% { opacity: 1; transform: scale(1) rotate(20deg); } }
+@media (prefers-reduced-motion: reduce) { .nrp-obsidian i { animation: none; opacity: .5; transform: scale(.7); } }
+/* the red neon on the obsidian: a deeper, wider red glow, reflected in the polished stone */
+.nrp-pink-wash {
+  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(230, 30, 56, .55), rgba(214, 26, 50, .2) 45%, rgba(214, 26, 50, 0) 72%); }
+
+/* THE IVY ON THE ARCH WALL (placed by post.js): pictures grown by tools/grow-ivy.py */
+.nrp-archivy { pointer-events: none; background-repeat: no-repeat; }
+
+/* THE OBSIDIAN FLOOR: polished black stone doesn't turn grey in daylight, it gleams. So the skylight's pool of
+   light on the floor becomes a soft reflection (screened on, much fainter), and the stone stays deep black. */
+.nrp-skyfloor { background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,250,240,.13), rgba(255,250,240,.04) 45%, rgba(255,250,240,0) 70%); }
+/* on black stone the floor's shading only darkens (no warm light lifted off it), and the hairline where the floor's
+   two slabs meet is closed with a dark seam the colour of the stone */
+.nrp-floorshade { background:
+  linear-gradient(90deg, rgba(0,0,0,.35), rgba(0,0,0,0) 9%, rgba(0,0,0,0) 91%, rgba(0,0,0,.4)),
+  linear-gradient(0deg, rgba(255,248,235,.035), rgba(0,0,0,0) 40%, rgba(0,0,0,.18)); }
+.nrp-scene { background: #0d0d0e; }   /* the colour behind the room: black, so no light hairline shows where the floor's two slabs meet */
+
+/* THE NEWSSTAND MINIATURE, kept light: its bulbs' halos and flashes are plain light here, not blends */
+.nrp-kiosk.nrns .lights .halo, .nrp-kiosk.nrns .flashes { mix-blend-mode: normal; }
+
+/* the bulb clusters warm up once as you walk in, then hold steady (no endless breathing: see bulbCluster() in post.js) */
+.nrp.walk-in .nrp-warmup { animation: nrp-warm 2.8s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .nrp.walk-in .nrp-warmup { animation: none; } }
+
+/* PHONES, KEPT LIGHT: things that move all the time make a phone redraw the whole room every frame. So on phones the
+   counter's twinkles are off and the plants only sway in the breeze as you walk in, then rest. (The fan still turns.) */
+.nrp.nrp-narrow .nrp-obsidian i { display: none; }
+.nrp.nrp-narrow.ready .nrp-sway { animation: none; }
+.nrp.nrp-narrow.walk-in .nrp-sway { animation: nrp-breeze 4s cubic-bezier(.25,.6,.35,1) calc(.5s + var(--d, 0s)) both; }

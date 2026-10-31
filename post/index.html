@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE POST · 777 Daydream St.</title>
+<meta name="description" content="Inside the Trading Post: the Newsstand, the Wishing Wall, Nebula Cafe and the Gallery.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- The web fonts load without holding up the page (media="print" until loaded, then switched on); the room's own
+     lettering doesn't wait for them. Only the families THE POST uses are asked for. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&family=Sacramento&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&family=Sacramento&display=swap"></noscript>
+<!-- START THESE DOWNLOADS AT ONCE: the room can't be built until it has the Wishing Wall's six fonts (the wall is
+     measured in them) and the two photos the glass roof is painted from, so the browser fetches them right away,
+     side by side with everything else, instead of discovering them later. -->
+<link rel="preload" href="../assets/fonts/wall/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/wall/sedgwick-ave-display.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/wall/rock-salt.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/wall/bebas-neue.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/wall/black-ops-one.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/wall/reenie-beanie.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/img/post/sky.webp" as="image">
+<link rel="preload" href="../assets/img/post/roof-glass.webp" as="image">
+<style>
+  /* basic reset: no page margin, phone notches respected */
+  html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
+  body { margin: 0; background: #f4efe6; }
+  [hidden] { display: none !important; }
+</style>
+<!-- The Newsstand's own stylesheet: the kiosk on the left wall is a miniature of the real one -->
+<link rel="stylesheet" href="../assets/newsstand.css">
+<link rel="stylesheet" href="../assets/post.css">
+<!-- Came through the storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
+<style>
+html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
+@keyframes nr-from-light { to { opacity: 0; visibility: hidden; } }
+@media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
+</style>
+<script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
+</head>
+<body>
+<!-- NOT RISING · THE POST, the room inside 777 Daydream St.
+     The room is a real 3D box made of flat panels (walls, floor, ceiling),
+     tilted into place with CSS. post.js fills each panel with its drawings
+     and reads the words, wishes and photos from data.js (PART 3). -->
+<div class="nrp" id="nrp" lang="en">
+  <a class="nrp-back" href="../index.html">← 777 Daydream St.</a>
+
+  <div class="nrp-scene" id="nrp-scene">
+    <div class="nrp-room" id="nrp-room">
+      <!-- The sides of the box. post.js draws into each one. -->
+      <div class="nrp-wall nrp-back-wall" id="nrp-back"></div>    <!-- the windows, Nebula Cafe, the EXIT hallway -->
+      <div class="nrp-wall nrp-left"  id="nrp-left"></div>         <!-- white brick: the Newsstand, the graffiti -->
+      <div class="nrp-wall nrp-right" id="nrp-right"></div>        <!-- black brick: the Gallery -->
+      <div class="nrp-wall nrp-floor" id="nrp-floor"></div>        <!-- stone floor (the far slab), daylight -->
+      <div class="nrp-wall nrp-floor-near" id="nrp-floor-near"></div>  <!-- stone floor (the near slab, inside the door) -->
+      <div class="nrp-wall nrp-ceiling" id="nrp-ceiling"></div>
+      <!-- The skylight, the planters, the café, the plants and the rattan lounge stand inside the room.
+           post.js adds them here. -->
+    </div>
+  </div>
+
+  <!-- Sunlight streaming in through the glass, then the air of the room (a soft vignette and a little grain) -->
+  <div class="nrp-sun" aria-hidden="true"></div>
+  <div class="nrp-air" aria-hidden="true"></div>
+
+  <!-- You land up under the roof; this nudges you to scroll down to the shop floor -->
+  <div class="nrp-down" id="nrp-down" aria-hidden="true">Scroll down</div>
+  <div class="nrp-toast" id="nrp-toast" role="status" hidden></div>
+</div>
+
+<!-- Where the pictures live, then the data, then the engine, then the full-screen button -->
+<script>window.NRNS_BASE = "../assets/img/";</script>
+<script src="../assets/data.js"></script>
+<!-- (post-paint.js is not loaded: its paintings are baked into assets/img/post/baked; it stays as the recipe) -->
+<script src="../assets/post-roof.js"></script>    <!-- paints the glass roof and the leaves lying on it -->
+<script src="../assets/post.js"></script>
+<script src="../assets/fullscreen.js"></script>
+</body>
+</html>
