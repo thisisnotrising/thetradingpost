@@ -221,7 +221,9 @@ dialog.pop-gallery { overflow-y: auto;
 .card p { margin: 0; }
 .v-artist { font-weight: 700; font-size: 12px; letter-spacing: .06em; line-height: 1.35; }
 .v-title  { font-size: 13px; line-height: 1.35; margin-top: 6px !important; }
-.v-medium { font-size: 11.5px; line-height: 1.35; color: #555; margin-top: 2px !important; }
+.v-medium { font-size: 12px; line-height: 1.35; color: #333; margin-top: 2px !important; }
+.v-credit { font-size: 10.5px; line-height: 1.4; color: #666; margin-top: 9px !important; }   /* line 4: whose collection it's in */
+.card em { font-style: italic; }
 .screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
 /* on a phone: the label goes under the photo (flush with its right edge) and the arrows drop to the bottom corners */
@@ -312,7 +314,7 @@ body.leaving::before { opacity: 1; }
 </dialog>
 
 <!-- 4 · THE GALLERY: first the whole exhibit on one wall (the hang), then one photo at a time (the viewer) -->
-<dialog class="pop pop-gallery" id="pop-gallery" aria-label="Gallery: LIFE Exhibit">
+<dialog class="pop pop-gallery" id="pop-gallery" aria-label="Gallery: Life Exhibit">
   <button class="close crystal" type="button" aria-label="Close">×</button>
 
   <section class="hang" id="hang" data-empty>
@@ -336,6 +338,7 @@ body.leaving::before { opacity: 1; }
             <p class="v-artist" id="v-artist"></p>
             <p class="v-title" id="v-title"></p>
             <p class="v-medium" id="v-medium"></p>
+            <p class="v-credit" id="v-credit"></p>
           </div>
           <i class="screw" style="left:6px;top:6px"></i><i class="screw" style="right:6px;top:6px"></i>
           <i class="screw" style="left:6px;bottom:6px"></i><i class="screw" style="right:6px;bottom:6px"></i>
@@ -551,15 +554,30 @@ body.leaving::before { opacity: 1; }
   const G = DATA.GALLERY || [], LABEL = DATA.GALLERY_LABEL || {};
   const hang = $("hang"), viewer = $("viewer");
   let at = 0;
-  $("g-title").textContent = (LABEL.title || "LIFE").split(" ")[0];          // "LIFE"
-  $("g-sub").textContent = [LABEL.title, LABEL.artist].filter(Boolean).join(" · ");
+  const plain = t => String(t || "").replace(/\*/g, "");                     // the words without the *italics* stars
+  // A label line, with any *starred* words set in italics (every odd piece between the stars is italic).
+  // Words in (brackets) stay together on one line, so "(Filipino-American, b. 1986)" never splits at its hyphen.
+  function setLine(el, text) {
+    el.textContent = "";
+    String(text || "").split("*").forEach((part, i) => {
+      if (!part) return;
+      const box = i % 2 ? el.appendChild(document.createElement("em")) : el;
+      part.split(/(\([^)]*\))/).forEach(bit => {
+        if (!bit) return;
+        if (bit[0] === "(") { const keep = document.createElement("span"); keep.style.whiteSpace = "nowrap"; keep.textContent = bit; box.appendChild(keep); }
+        else box.appendChild(document.createTextNode(bit));
+      });
+    });
+  }
+  $("g-title").textContent = plain(LABEL.title || "LIFE").split(" ")[0];   // "Life" (shown in capitals)
+  $("g-sub").textContent = [plain(LABEL.title), LABEL.artist].filter(Boolean).join(" · ");
   G.forEach((p, i) => {
     const print = document.createElement("button");
     print.className = "print"; print.type = "button";
     print.setAttribute("aria-label", "Photo " + (i + 1) + ": " + (p.alt || ""));
     const img = document.createElement("img");
     img.alt = "";
-    img.dataset.src = IMG + (p.thumb || p.img.replace("/life/", "/life/wall/"));   // the small copy; the big one loads in the viewer
+    img.dataset.src = IMG + (p.thumb || p.img.replace(/[^/]+$/, "wall/$&"));   // the small copy (same name, in wall/); the big one loads in the viewer
     if (p.crop) img.style.objectPosition = p.crop;                               // which part of the photo the square keeps
     print.appendChild(img);
     print.addEventListener("click", () => show(i));
@@ -574,9 +592,10 @@ body.leaving::before { opacity: 1; }
     const p = G[at], L = Object.assign({}, LABEL, p);                // the shared label, with this photo's own words on top
     const img = $("v-img");
     img.src = IMG + p.img; img.alt = p.alt || ""; img.style.aspectRatio = String(p.ar || 1);
-    $("v-artist").textContent = L.artist || "";
-    $("v-title").textContent = L.title || "";
-    $("v-medium").textContent = L.medium || "";
+    setLine($("v-artist"), L.artist);
+    setLine($("v-title"), L.title);
+    setLine($("v-medium"), L.medium);
+    setLine($("v-credit"), L.credit);
     $("v-count").textContent = String(at + 1).padStart(2, "0") + " / " + String(G.length).padStart(2, "0");
     if (viewer.hidden) { hang.hidden = true; viewer.hidden = false; $("v-next").focus({ preventScroll: true }); }
     [at + 1, at - 1].forEach(j => { new Image().src = IMG + G[(j + G.length) % G.length].img; });   // fetch the neighbours early
