@@ -94,6 +94,8 @@ const r4 = v => +v.toFixed(4);
     await page.goto(SITE + '/post/recipe.html', { waitUntil: 'networkidle' });
     await page.waitForSelector('.nrp.ready', { timeout: 20000 });
     await page.evaluate(() => document.fonts.ready);
+    // the Wishing Wall is laid out after the room is built (it takes a few seconds): wait until it's painted on
+    await page.waitForSelector('.nrp-wishwall.on', { timeout: 120000 }).catch(() => console.log('  (the Wishing Wall never appeared!)'));
     await page.waitForTimeout(2500);
 
     // THE ROOM'S SIZE, in metres
