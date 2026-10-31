@@ -898,12 +898,10 @@
     const marquee = document.getElementById("nrns-marquee");
     if (marquee) marquee.innerHTML = tiles(marquee.textContent.trim());
 
-    /* Edison bulbs: clear pear-shaped glass hanging from a brass cap, with a glowing
-       filament inside. Drawn by the script so they space evenly at any width, and
-       redrawn on resize. Every measurement is a multiple of r (the bulb's size),
-       so the same drawing works for the big rack bulbs and the smaller marquee bulbs. */
-    /* Draw a ring of Edison bulbs inside an element. sides = which edges get bulbs. */
-    function drawGlobes(el, { sides = ["top", "left", "right"], big = 32, edgeBig = 52, gapBig = 120 } = {}) {
+    /* Vanity bulbs: big frosted globes around the rack, like a dressing-room mirror.
+       Drawn by the script so they space evenly at any width, and redrawn on resize. */
+    /* Draw a ring of vanity globes inside an element. sides = which edges get bulbs. */
+    function drawGlobes(el, { sides = ["top", "left", "right"], big = 16, edgeBig = 28, gapBig = 92 } = {}) {
       if (!el) return;
       const W = el.clientWidth, H = el.clientHeight;
       if (!W || !H) return;
@@ -917,41 +915,24 @@
       if (sides.includes("left")) col(edge);
       if (sides.includes("right")) col(W - edge);
       const seen = new Set(), uniq = pts.filter(p => { const id = p.map(v => Math.round(v)).join(","); return !seen.has(id) && seen.add(id); });
-      const n = v => (v * r).toFixed(1);                                  // n(.5) = half of r, as text for the SVG
-      // The glass outline: a short neck under the cap, swelling into a round amber belly
-      const glass = `M ${n(-.22)} ${n(.48)} C ${n(-.24)} ${n(.75)} ${n(-.7)} ${n(.9)} ${n(-.7)} ${n(1.42)} C ${n(-.7)} ${n(1.88)} ${n(-.38)} ${n(2.18)} 0 ${n(2.18)} C ${n(.38)} ${n(2.18)} ${n(.7)} ${n(1.88)} ${n(.7)} ${n(1.42)} C ${n(.7)} ${n(.9)} ${n(.24)} ${n(.75)} ${n(.22)} ${n(.48)} Z`;
-      // The filament: a "squirrel cage" of glowing wires, bowing out like a little lantern,
-      // hung on a thin glass stem from the neck
-      const coil = [-.18, -.09, 0, .09, .18].map(c => `M ${n(c * .55)} ${n(1.02)} Q ${n(c * 1.45)} ${n(1.44)} ${n(c * .55)} ${n(1.86)}`).join(" ");
-      const wires = `M 0 ${n(.5)} L 0 ${n(1.02)}`;
-      const thin = Math.max(.6, r * .025).toFixed(2);
-      // One bulb, back to front. The point (x, y) is the middle of the bulb; the drawing
-      // starts 1.1r higher, at the top of the cap, so the bulb hangs from there.
-      const globe = ([x, y]) => `<g transform="translate(${x.toFixed(1)} ${(y - 1.1 * r).toFixed(1)})">
-        <circle class="halo" cy="${n(1.44)}" r="${n(2.7)}" fill="url(#nrns-halo)"/>
-        <path d="${glass}" fill="url(#nrns-glass)" stroke="#ffe2a6" stroke-opacity=".75" stroke-width="1"/>
-        <circle cy="${n(1.44)}" r="${n(.62)}" fill="url(#nrns-warm)"/>
-        <path d="${wires}" fill="none" stroke="#ffe6b8" stroke-opacity=".6" stroke-width="${thin}"/>
-        <path d="${coil}" fill="none" stroke="#ff9a2a" stroke-width="${n(.12)}" filter="url(#nrns-fglow)"/>
-        <path d="${coil}" fill="none" stroke="#fff3c4" stroke-width="${Math.max(.8, r * .032).toFixed(2)}"/>
-        <path d="M ${n(-.5)} ${n(1.12)} Q ${n(-.62)} ${n(1.5)} ${n(-.44)} ${n(1.84)}" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="${n(.07)}" stroke-linecap="round"/>
-        <rect x="${n(-.25)}" y="0" width="${n(.5)}" height="${n(.52)}" rx="${n(.07)}" fill="url(#nrns-brass)"/>
-        <path d="M ${n(-.25)} ${n(.15)} H ${n(.25)} M ${n(-.25)} ${n(.27)} H ${n(.25)} M ${n(-.25)} ${n(.39)} H ${n(.25)}" stroke="#3a2508" stroke-opacity=".5" stroke-width="${thin}"/></g>`;
+      // One vanity globe: a soft halo, a frosted glass ball, a small highlight
+      const globe = ([x, y]) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})">
+        <circle class="halo" r="${r * 3.4}" fill="url(#nrns-halo)"/>
+        <circle r="${r}" fill="url(#nrns-globe)"/>
+        <circle r="${r}" fill="none" stroke="#fff6dc" stroke-opacity=".5" stroke-width="1"/>
+        <ellipse cx="${-r * .32}" cy="${-r * .38}" rx="${r * .32}" ry="${r * .2}" fill="#fff" opacity=".7"/></g>`;
       el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
         <defs>
-          <radialGradient id="nrns-glass" cx=".5" cy=".58" r=".6"><stop offset="0" stop-color="#ffdc94" stop-opacity=".85"/><stop offset=".55" stop-color="#f7b552" stop-opacity=".55"/><stop offset="1" stop-color="#d9893a" stop-opacity=".4"/></radialGradient>
-          <radialGradient id="nrns-warm"><stop offset="0" stop-color="#ffe2a0" stop-opacity=".9"/><stop offset="1" stop-color="#ffa040" stop-opacity="0"/></radialGradient>
-          <radialGradient id="nrns-halo"><stop offset="0" stop-color="#ffd590" stop-opacity=".7"/><stop offset=".35" stop-color="#ffbe68" stop-opacity=".28"/><stop offset="1" stop-color="#ffa848" stop-opacity="0"/></radialGradient>
-          <linearGradient id="nrns-brass"><stop offset="0" stop-color="#5b3f18"/><stop offset=".3" stop-color="#c99a4b"/><stop offset=".45" stop-color="#f3dc9c"/><stop offset=".7" stop-color="#b98a3f"/><stop offset="1" stop-color="#4e3412"/></linearGradient>
-          <filter id="nrns-fglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="${n(.09)}"/></filter>
+          <radialGradient id="nrns-globe" cx=".45" cy=".42" r=".62"><stop offset="0" stop-color="#fffef8"/><stop offset=".55" stop-color="#fff0c8"/><stop offset=".85" stop-color="#ffd98a"/><stop offset="1" stop-color="#e9b25a"/></radialGradient>
+          <radialGradient id="nrns-halo"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".55"/><stop offset=".35" stop-color="#ffc874" stop-opacity=".2"/><stop offset="1" stop-color="#ffb050" stop-opacity="0"/></radialGradient>
         </defs>
         ${uniq.map(globe).join("")}</svg>`;
     }
     const lightsEl = document.getElementById("nrns-lights");            // the rack: top and both sides
-    const signLights = document.getElementById("nrns-sign-lights");     // the marquee: all four sides, smaller bulbs
+    const signLights = document.getElementById("nrns-sign-lights");     // the marquee: all four sides, smaller globes
     const drawAll = () => {
       drawGlobes(lightsEl);
-      drawGlobes(signLights, { sides: ["top", "bottom", "left", "right"], big: 20, edgeBig: 30, gapBig: 70 });
+      drawGlobes(signLights, { sides: ["top", "bottom", "left", "right"], big: 10, edgeBig: 18, gapBig: 56 });
     };
     drawAll();
     if ("ResizeObserver" in window) { const ro = new ResizeObserver(drawAll); [lightsEl, signLights].forEach(e => e && ro.observe(e)); }
