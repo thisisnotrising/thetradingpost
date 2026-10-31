@@ -374,8 +374,12 @@
       return [...keys].filter(k => IMAGES[k]);
     }
 
-    async function buildIssue(f) {
-      if (cache[f.issue]) return cache[f.issue];
+    /* Each issue is built once. cache holds the promise of the finished build, so if the
+       visitor taps a cover while it is still being built in the background, both wait for
+       the same build instead of starting a second one in the same measuring room. */
+    const buildIssue = f => cache[f.issue] || (cache[f.issue] = makeIssue(f));
+
+    async function makeIssue(f) {
       const is = ISSUES[f.issue];
 
       // A finished book: cover, black inside cover, the printed pages, black inside cover, back cover
@@ -390,7 +394,7 @@
         if (back) html.push(inside(back));
         html.push(imgPage(src(is.back), `${is.title}: back cover`, { dark: true, hard: true }));
         if (html.length % 2) console.warn(`${is.title}: odd page count (${html.length}); add or remove an inside cover`);
-        return (cache[f.issue] = { html, goto: {} });
+        return { html, goto: {} };
       }
 
       await Promise.all([
@@ -627,7 +631,7 @@
       pages.forEach((p, i) => { const fo = p.querySelector(".folio"); if (fo) fo.textContent = two(i + 1); });
       const built = { html: pages.map(p => p.outerHTML), goto };
       room.innerHTML = "";
-      return (cache[f.issue] = built);
+      return built;
     }
 
     /* ============================================================
@@ -803,7 +807,7 @@
     const btnNext = document.getElementById("nrns-next");
     const btnClose = document.getElementById("nrns-close");
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let book = null, built = null, openBtn = null;
+    let book = null, built = null, openBtn = null, mounted = "";
 
     function pageSize() {                                       // how big can one page be here?
       const r = stage.getBoundingClientRect();
@@ -821,6 +825,7 @@
       sizer.appendChild(el);
       el.innerHTML = built.html.join("");
       const { w, h, spread } = pageSize();
+      mounted = w + "x" + h + (spread ? "s" : "");              // remembered, so a resize that changes nothing is ignored
       sizer.style.width = (spread ? w * 2 : w) + "px";
       book = new St.PageFlip(el, {
         width: w, height: h, size: "fixed", showCover: true, usePortrait: !spread,
@@ -838,7 +843,14 @@
       btnNext.disabled = i >= n - 1;
     }
 
+    let opening = false;                                        // a magazine is on its way: ignore a second tap
     async function openIssue(f, btn) {
+      if (opening || !reader.hidden) return;
+      opening = true;
+      try { await showIssue(f, btn); } finally { opening = false; }
+    }
+
+    async function showIssue(f, btn) {
       openBtn = btn;
       const is = ISSUES[f.issue];
       document.getElementById("nrns-reader-title").textContent = is.title || `Issue ${two(is.number)} · ${is.name}`;
@@ -863,6 +875,7 @@
       flyer.src = src(f.cover);
       Object.assign(flyer.style, { left: from.left + "px", top: from.top + "px", width: from.width + "px", height: from.height + "px" });
       document.body.appendChild(flyer);
+      if (flyer.decode) await Promise.race([flyer.decode().catch(() => {}), new Promise(r => setTimeout(r, 150))]);   // picture ready before it moves (never wait more than 0.15 s)
       const dx = to.left - from.left, dy = to.top - from.top, s = to.width / from.width;
       reader.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 450, delay: 250, fill: "forwards", easing: "ease-out" });
       await flyer.animate([
@@ -873,30 +886,6 @@
       reader.style.opacity = "1";
       flyer.remove();
       btnClose.focus();
-      peek();
-    }
-
-    /* Phones show one page at a time, so the cover alone can look like a still picture.
-       peek() keeps the cover where it landed, in the middle of the screen, and nudges:
-       its bottom-right corner peels up a little and settles back, twice, like a page
-       asking to be turned. The peel is a small drawn corner (.peel in newsstand.css)
-       laid over the cover, so it never moves the magazine itself. It goes away the
-       moment the reader touches the magazine or closes it. Wider screens (two-page
-       spreads) are left as they are, and so are devices set to reduce motion. */
-    function peek() {
-      if (pageSize().spread || !book || reduceMotion) return;
-      const page = [...sizer.querySelectorAll(".stf__item")].find(p => p.style.display !== "none");
-      if (!page) return;
-      const r = page.getBoundingClientRect(), s = stage.getBoundingClientRect();
-      const peel = document.createElement("span");
-      peel.className = "peel";
-      peel.setAttribute("aria-hidden", "true");
-      peel.style.left = (r.right - s.left) + "px";            // pinned to the cover's bottom-right corner
-      peel.style.top = (r.bottom - s.top) + "px";
-      stage.appendChild(peel);
-      const gone = () => peel.remove();
-      peel.addEventListener("animationend", gone);
-      stage.addEventListener("pointerdown", gone, { once: true });   // they touched it: stop nudging
     }
 
     function closeReader() {
@@ -906,7 +895,6 @@
         document.documentElement.style.overflow = "";
         if (book) { book.destroy(); book = null; }
         sizer.innerHTML = "";
-        stage.querySelectorAll(".peel").forEach(p => p.remove());   // a nudge still showing? take it away too
         if (openBtn) {
           openBtn.classList.remove("lifted");
           if (!reduceMotion) openBtn.animate([{ transform: "perspective(900px) translateY(-30px)" }, { transform: "perspective(900px) rotateX(6deg)" }], { duration: 420, easing: "cubic-bezier(.3,1.4,.5,1)" });
@@ -1030,8 +1018,23 @@
     addEventListener("resize", () => {
       if (reader.hidden || !book) return;
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => mountBook(book.getCurrentPageIndex()), 200);
+      resizeTimer = setTimeout(() => {
+        if (!book) return;
+        /* Phones fire "resize" when the address bar slides in or out. Rebuilding the
+           book then would make it jump, so only rebuild when the page size changes. */
+        const { w, h, spread } = pageSize();
+        if (w + "x" + h + (spread ? "s" : "") !== mounted) mountBook(book.getCurrentPageIndex());
+      }, 200);
     });
+
+    /* Pre-build: once the page has loaded and the browser has a quiet moment, lay out
+       every interview issue on the rack in the hidden measuring room. The work is the
+       same as before, only done ahead of time, so tapping a cover opens it at once. */
+    const preBuild = () => FEATURES.filter(f => f.issue && ISSUES[f.issue] && ISSUES[f.issue].kind !== "pages")
+      .forEach(f => buildIssue(f).catch(() => { delete cache[f.issue]; }));   // if it fails, a tap simply tries again
+    const whenQuiet = fn => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 3000 }) : setTimeout(fn, 1200));
+    if (document.readyState === "complete") whenQuiet(preBuild);
+    else addEventListener("load", () => whenQuiet(preBuild), { once: true });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
