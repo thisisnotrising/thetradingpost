@@ -12,6 +12,18 @@ Live address once it's on GitHub: **https://thisisnotrising.github.io/thetrading
 index.html              the street: the Trading Post storefront (the front door)
 newsstand/index.html    the Newsstand (through the magazine window)
 speakeasy/index.html    THE SPEAK, opening soon (behind door 9¾)
+post/index.html         THE POST, the room inside, as a STAGE SET: the same 3D box and camera as the original
+                        room, but every wall, the floor, the roof and everything standing in the room is one
+                        finished photo. Four clickable spots on the walls open four popups. (Its look, bones
+                        and behaviour are all in this one file.)
+post/recipe.html        the live room THE POST is photographed from (post.js, post.css, post-roof.js build it).
+                        Visitors never see it. To change the room: change the recipe, then re-photograph:
+                          node tools/bake-stage.js   the room, piece by piece -> assets/img/post/stage/ + assets/post-stage.js
+                          node tools/bake-post.js    the Nebula Cafe popup picture -> assets/img/post/room/cafe.webp
+post/preview.html       points to post/index.html (it was the preview while THE POST was being rebuilt)
+assets/post-stage.js    the stage set's list: every photo and where it stands, in metres (written by bake-stage.js)
+tools/                  the recipes for the pictures: cut-lounge.py (the lounge, cut from Kathi's photo),
+                        render-monstera.py (the pink plant, a 3D render), bake-stage.js, bake-post.js, and others
 
 assets/data.js          ← THE ONE FILE YOU EDIT
 assets/storefront.js    the storefront's engine
