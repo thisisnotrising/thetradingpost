@@ -18,7 +18,9 @@
 
    HOW TO RUN IT (needs Python with Pillow and NumPy):
      python3 tools/tone-gallery.py <folder of originals> assets/img/post/gallery/life-exhibit
-   The originals are named in PHOTOS below, in hanging order.
+   The originals are named in PHOTOS below, in hanging order. Any that aren't in
+   the folder are skipped, so to add or swap ONE photo, put just that original
+   in the folder and run it: only that print is made.
    ------------------------------------------------------------------ """
 import sys, os
 import numpy as np
@@ -47,7 +49,7 @@ PHOTOS = [
     ("payphone.jpg",       "13-payphone",           None),
     ("plant-window.jpg",   "14-plant-window",       (0, 2, 1020, 771)),      # a light line along the top
     ("mca-denver.jpg",     "15-mca-denver",         None),
-    ("window-blinds.jpg",  "16-window-blinds",      None),
+    ("speakeasy.jpg",      "16-speakeasy",          (0, 0, 1700, 1283)),     # (Nov 1: replaced the window-blinds photo) a black line down the right edge
 ]
 
 def tone(img):
@@ -69,6 +71,8 @@ def fit(img, longest):
 def main(src, dst):
     os.makedirs(os.path.join(dst, "wall"), exist_ok=True)
     for file, name, crop in PHOTOS:
+        if not os.path.exists(os.path.join(src, file)):
+            continue                                            # (not in the folder: left as it is)
         img = Image.open(os.path.join(src, file))
         if crop: img = img.crop(crop)                           # 1. trim
         print_ = tone(img)
