@@ -105,8 +105,12 @@ html.locked, html.locked body { overflow: hidden; }
 .stage.ready .scene { opacity: 1; transition: opacity .5s; } /* ...then it fades in */
 /* (Oct 31) The camera's height is the screen's TALLEST height (100lvh: a phone's screen with its address bar tucked
    away), so it never changes size as the bar slides in and out while you scroll; that resize used to make the room
-   jump and the picture blank for a moment. On a computer it's simply the window's height. */
-.scene { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; overflow: hidden; perspective: var(--P); perspective-origin: 50% 50%; }
+   jump and the picture blank for a moment. On a computer it's simply the window's height.
+   (Nov 1, for Brave) Some phone browsers (Brave) don't keep 100lvh steady: their top AND bottom bars slide away
+   together and the screen really changes size. So PART 3 (step 1) reads this height once, writes it down in pixels,
+   and from then on only ever lets the camera grow taller at the bottom. --mid is the middle the camera looks at,
+   also set once, so when the camera grows nothing in the picture moves. */
+.scene { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; overflow: hidden; perspective: var(--P); perspective-origin: 50% var(--mid, 50%); }
 .room { position: absolute; top: 0; left: calc((var(--W) - var(--Wr)) / 2); width: var(--Wr); height: var(--PH);
   transform-style: preserve-3d; will-change: translate; pointer-events: none; }
 /* walking in: the room starts a step further away and comes toward you */
@@ -323,9 +327,14 @@ dialog.pop-gallery { overflow-y: auto;
 .frame { position: relative; flex: 0 1 auto; min-width: 0; background: #070707; padding: 7px;
   box-shadow: 0 0 0 6px #1c1c1c, 0 0 0 7px #3a3a3a, 0 22px 55px rgba(0,0,0,.7); }
 .frame img { display: block; width: auto; height: auto; object-fit: contain;
-  max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); max-width: calc(100vw - 144px - 330px); }
-/* the label: a printed card behind clear glass, held off the wall by four chrome standoffs */
-.label { position: relative; flex: 0 0 auto; margin: 0 0 -7px; }
+  max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); max-width: calc(100vw - 144px - 190px); }
+/* the label: a printed card behind clear glass, held off the wall by four chrome standoffs.
+   (Nov 1) TINY next to the photo, the way a museum's wall label is: the same card, shrunk to half size (zoom), so the
+   lettering, line breaks, glass and screws all stay the same, only smaller. --k is that size; change it in one place
+   (phones have their own, below). zoom shrinks the label's own margin too, so the margin is divided by --k to still
+   land 7px down, flush with the frame's bottom edge. The photo gets the room the smaller label frees up (190px is
+   kept for the label and the gap beside it; it was 330px). */
+.label { --k: .5; zoom: var(--k); position: relative; flex: 0 0 auto; margin: 0 0 calc(-7px / var(--k)); }
 .glass { position: relative; padding: 11px; border-radius: 3px;
   background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05) 45%, rgba(220,235,255,.08));
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 1px 0 rgba(255,255,255,.6), 0 8px 22px rgba(0,0,0,.55); }
@@ -340,13 +349,13 @@ dialog.pop-gallery { overflow-y: auto;
 .card em { font-style: italic; }
 .screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
-/* on a phone (Oct 31): the gallery's words come in at 3/4 size, so they sit beside the photos in the same proportion
+/* on a phone (Oct 31; label made 2x smaller Nov 1): the gallery's words come in at 3/4 size, so they sit beside the photos in the same proportion
    as on a computer instead of crowding them.
      - the line under LIFE: 9px instead of 12px, its two parts stacked (the title, then the artist), one to a line
-     - the label goes under the photo (flush with its right edge) and is the very same card, shrunk to 3/4 (zoom):
+     - the label goes under the photo (flush with its right edge) and is the very same card, shrunk to 3/8 (zoom):
        same lettering, same line breaks, same glass and screws, only smaller. --k is that size; change it in one place.
        (zoom shrinks the label's own margin too, so the margin is divided by --k to land at 6px down and 7px out.)
-     - the photo gets the room the smaller label frees up: the screen's height minus 290px (it was 330px)
+     - the photo gets the room the smaller label frees up: the screen's height minus 230px (it was 290px, and 330px before that)
      - the arrows drop to the bottom corners */
 @media (max-width: 760px) {
   .hang header p { font-size: 9px; letter-spacing: .12em; line-height: 1.6; }
@@ -354,8 +363,8 @@ dialog.pop-gallery { overflow-y: auto;
   .hang header p .g-dot { display: none; }
   .viewer { padding: max(52px, env(safe-area-inset-top, 0px)) 16px max(76px, env(safe-area-inset-bottom, 0px)); }
   .piece { flex-direction: column; align-items: flex-end; gap: 4px; }
-  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 290px); max-height: calc(100dvh - 290px); }
-  .label { --k: .75; zoom: var(--k); margin: calc(6px / var(--k)) calc(-7px / var(--k)) 0 0; }
+  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); }
+  .label { --k: .375; zoom: var(--k); margin: calc(6px / var(--k)) calc(-7px / var(--k)) 0 0; }
   .v-prev, .v-next { top: auto; transform: none; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
   .v-prev { left: 16px; } .v-next { right: 16px; }
 }
@@ -486,7 +495,10 @@ body.leaving::before { opacity: 1; }
 <!-- The words and photo lists (data.js), the stage set (post-stage.js), the final stage (post-final.js), then PART 3 -->
 <script src="../assets/data.js"></script>
 <script src="../assets/post-stage.js"></script>
-<script src="../assets/post-final.js"></script>
+<!-- (?v= is the engine's version stamp. This page and the engine talk to each other, so they must always match: a
+     browser that still has an older engine saved would otherwise use it with this page. Change the stamp whenever
+     post-final.js changes, and every browser fetches the new one.) -->
+<script src="../assets/post-final.js?v=2026-11-01"></script>
 <script>
 /* ================================================================
    PART 3 · THE BEHAVIOUR
@@ -495,7 +507,7 @@ body.leaving::before { opacity: 1; }
   const $ = id => document.getElementById(id);
   const DATA = window.NRPOST || {};
   const IMG = "../assets/img/";
-  const room = $("room"), stage = $("stage"), cue = $("cue"), tag = $("tag");
+  const room = $("room"), stage = $("stage"), cue = $("cue"), tag = $("tag"), scene = document.querySelector(".scene");
   const STAGE = window.NRSTAGE, SET_BASE = IMG + "post/stage/";
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let S = null, setName = "", SIZE = {};   // SIZE: this screen's room, in pixels
@@ -508,7 +520,7 @@ body.leaving::before { opacity: 1; }
      ?final=0 to the address to see it. */
   const ask = location.search;
   const wantFinal = !/[?&]final=0/.test(ask);
-  const FINAL = wantFinal && window.NRFINAL && NRFINAL.supported() ? NRFINAL.create($("final"), document.querySelector(".scene")) : null;
+  const FINAL = wantFinal && window.NRFINAL && NRFINAL.supported() ? NRFINAL.create($("final")) : null;
   if (FINAL) { $("final").hidden = false; stage.classList.add("final"); }
   let finalReady = Promise.resolve(), posterLook = null;
 
@@ -520,21 +532,35 @@ body.leaving::before { opacity: 1; }
        P  = how far the camera is from the screen: 0.9 x its width (on a phone, a little further back)
      Nothing is ever wider than the screen: the room's sides run off its edges, the way they did in the original. */
   function measure() {
-    // (H is the camera's own height, not the window's: on a phone the camera is as tall as the screen with the
-    //  address bar tucked away, so it doesn't change size, and the room doesn't jump, as the bar slides in and out)
-    const W = innerWidth, H = document.querySelector(".scene").clientHeight || innerHeight;
+    // H is the camera's own height, not the window's: on a phone the camera is as tall as the screen with the
+    // address bar tucked away, so it doesn't change size, and the room doesn't jump, as the bar slides in and out.
+    // (Nov 1) It's read from the CSS (100lvh) or the window, whichever is taller, then written down in pixels, so a
+    // browser that lets 100lvh wander (Brave) can't move it. growCamera() below is the only thing that changes it after this.
+    scene.style.height = "";                                    // (back to the CSS height for a moment, to read it)
+    const W = innerWidth, H = Math.max(scene.clientHeight, innerHeight);
+    scene.style.height = H + "px";
     setName = W / H < .9 ? "narrow" : "wide";
     S = STAGE[setName];
     const R = S.room, narrow = setName === "narrow";
     const u = narrow ? 2.2 * H / R.HM : Math.max(2 * H / R.HM, W / R.Wm);
     const P = narrow ? Math.max(W * 1.9, H * .95) : W * .9;
-    SIZE = { W, H, u, P, D: R.Dm * u, PH: R.HM * u };
+    SIZE = { W, H, u, P, D: R.Dm * u, PH: R.HM * u, CW: scene.clientWidth };   // (CW: the camera's own width, which leaves out a computer's scrollbar)
     const css = stage.style;
     css.setProperty("--u", u + "px");          css.setProperty("--W", W + "px");
     css.setProperty("--Wr", R.Wm * u + "px");  css.setProperty("--D", SIZE.D + "px");
     css.setProperty("--PH", SIZE.PH + "px");      css.setProperty("--DN", R.DNm * u + "px");
     css.setProperty("--P", P + "px");          css.setProperty("--walk", -1.6 * u + "px");
-    if (FINAL) FINAL.setCamera(P);
+    css.setProperty("--mid", H / 2 + "px");    // the middle the camera looks at
+    if (FINAL) FINAL.frame(SIZE.CW, H, P, H / 2);
+  }
+  /* A phone's toolbars slid away and the screen got taller (only the height changed). The room stays exactly as it
+     is; the camera just grows at the bottom, to fill the new space. It never shrinks back: when the bars return they
+     simply cover its bottom edge, the way they do in Safari. */
+  function growCamera() {
+    if (innerHeight <= scene.offsetHeight) return;
+    scene.style.height = innerHeight + "px";
+    if (FINAL) FINAL.frame(SIZE.CW, innerHeight, SIZE.P, SIZE.H / 2);
+    eye();
   }
 
   /* STEP 2 · PUT UP THE SET
@@ -545,13 +571,16 @@ body.leaving::before { opacity: 1; }
        live    the ceiling fan and the benches (little 3D objects with their own look)
      m(1.5) is "1.5 metres" written for CSS: calc(var(--u) * 1.5). */
   const m = v => `calc(var(--u) * ${v})`;
-  function picture(b, cls) {
+  // ONE way to put a picture up, used by everything on the set (the walls' pictures, the roof, what stands in the
+  // room, the floor's tiles): its address, where it goes (x, y) and how big (w, h), all in metres
+  function pic(src, x, y, w, h, cls) {
     const i = new Image(); i.alt = ""; i.decoding = "async"; i.draggable = false; if (cls) i.className = cls;
-    if (FINAL) i.dataset.gl = SET_BASE + b.img;          // (the final stage: just the box; post-final.js draws the picture)
-    else i.src = SET_BASE + b.img;
-    Object.assign(i.style, { left: m(b.x), top: m(b.y), width: m(b.w), height: m(b.h) });
+    if (FINAL) i.dataset.gl = src;                       // (the final stage: just the box; post-final.js draws the picture)
+    else i.src = src;
+    Object.assign(i.style, { left: m(x), top: m(y), width: m(w), height: m(h) });
     return i;
   }
+  const picture = (b, cls) => pic(SET_BASE + b.img, b.x, b.y, b.w, b.h, cls);   // a picture from the stage set's list
   function button(h) {
     const b = document.createElement("button");
     b.type = "button"; b.className = "spot"; b.dataset.pop = h.pop; b.dataset.label = h.label;
@@ -569,12 +598,7 @@ body.leaving::before { opacity: 1; }
   function laySparkle(el, t, name) {
     const R = S.room, w = R.Wm, h = name === "floor-near" ? R.DNm : R.Dm - R.DNm;   // the slab, in metres
     const s = t.size, x0 = t.x - Math.ceil(t.x / s) * s, y0 = t.y - Math.ceil(t.y / s) * s;
-    for (let y = y0; y < h; y += s) for (let x = x0; x < w; x += s) {
-      const i = new Image(); i.alt = ""; i.decoding = "async"; i.draggable = false; i.className = "tile";
-      if (FINAL) i.dataset.gl = IMG + t.img; else i.src = IMG + t.img;
-      Object.assign(i.style, { left: m(x), top: m(y), width: m(s + .01), height: m(s + .01) });
-      el.appendChild(i);
-    }
+    for (let y = y0; y < h; y += s) for (let x = x0; x < w; x += s) el.appendChild(pic(IMG + t.img, x, y, s + .01, s + .01, "tile"));
   }
   let liveCss = null;
   function putUpTheSet() {
@@ -645,8 +669,6 @@ body.leaving::before { opacity: 1; }
     //   2.5 m tall, repeating, started 2.3 m in on this wall). ivy-wall-fringe.webp is just its lower part, the long
     //   strands from 1.2 m to 2.5 m down from the top of the wall (a small download). It shows over the poster's top
     //   margin, then fades out (the mask) just above the words. (So keep the poster's top at 6.0 m or lower.)
-    const ivy = document.createElement("span");
-    ivy.className = "poster-ivy";
     const words = .05 + (h - .1) * 55 / 1102;                         // where the lettering starts, down from the poster's top (m)
     const [gx, gy] = BULB_GLOW[setName] || [0, 0], gw = 2.9, gh = 4;  // the bulbs' warm light: centre, and how far it spreads (m)
     // all of it as numbers, in metres: the final stage paints the poster from these (assets/post-final.js, part 3)
@@ -656,6 +678,8 @@ body.leaving::before { opacity: 1; }
       light: { Dm, HM, glow: [gx, gy, gw, gh] } };
     if (FINAL) { wall.appendChild(el); return; }                    // (the final stage: just the button; the poster is drawn)
     const img = new Image(); img.decoding = "async"; img.draggable = false; img.alt = ""; img.src = src;
+    const ivy = document.createElement("span");
+    ivy.className = "poster-ivy";
     const fade = `linear-gradient(#000 ${m(words * .45)}, transparent ${m(words * .9)})`;
     Object.assign(ivy.style, { backgroundImage: `url(${IMG}post/ivy-wall-fringe.webp)`, backgroundRepeat: "repeat-x",
       backgroundSize: `${m(6.4)} ${m(1.3)}`, backgroundPosition: `${m(-2.3 - x)} ${m(1.2 - y)}`, maskImage: fade, webkitMaskImage: fade });
@@ -681,10 +705,11 @@ body.leaving::before { opacity: 1; }
      distance scrolled, which is what a camera being lowered sees. Only one thing changes ("translate"), and the
      browser does that on the graphics chip without repainting anything, so it stays smooth. */
   function eye() {
-    // (kept between the top and the bottom of the room: a phone's bounce past either end doesn't drag the room along)
-    const y = Math.min(Math.max(scrollY, 0), Math.max(0, document.documentElement.scrollHeight - innerHeight));
-    room.style.translate = `0 ${-y}px 0`;
-    if (FINAL) FINAL.draw();                                   // (the final stage: draw the pictures in their new places)
+    // (kept between the top and the bottom of the room: a phone's bounce past either end doesn't drag the room along.
+    //  The page is exactly as tall as the room, SIZE.PH, so that's the bottom; nothing has to be measured to know it.)
+    const y = Math.min(Math.max(scrollY, 0), Math.max(0, SIZE.PH - innerHeight));
+    room.style.translate = `0 ${-y}px 0`;                     // the buttons on the walls...
+    if (FINAL) FINAL.look(y);                                 // ...and the picture of the room, moved by the very same y
     if (Math.abs(scrollY - landedAt) > 40) cue.classList.add("gone");   // the cue goes once you start looking around
   }
   let eyeQueued = false;
@@ -721,15 +746,29 @@ body.leaving::before { opacity: 1; }
     });
   }
   start();
+
+  /* RE-SIZING THE ROOM: ONE WAY ONLY (Nov 1)
+     Whenever the room has to be sized again (a phone turned on its side, a computer's window resized), it goes the
+     same way every time: size it, put the whole set up again, and keep you the same way down the room (halfway
+     down stays halfway down). Putting the set up again matters: the picture of the room is laid out in pixels, so a
+     room re-sized without it would show the old picture under the new buttons. (Before, a change in height alone
+     only re-sized; that's the jump Brave's sliding toolbars set off.) The pictures are already downloaded and
+     handed to the graphics chip, so nothing downloads again. */
+  function rebuild() {
+    const down = scrollY / Math.max(1, SIZE.PH - innerHeight);   // how far down you are: 0 = the top, 1 = the floor
+    measure(); putUpTheSet();
+    scrollTo(0, Math.round(down * Math.max(0, SIZE.PH - innerHeight)));
+    standingAt = scrollY; eye();
+  }
   if (FINAL) FINAL.onRestore(() => { putUpTheSet(); eye(); });   // (if the phone ever takes the graphics chip away and gives it back)
-  // a new screen shape (a phone turned on its side, a window resized) puts the set up again; a phone's address bar
-  // sliding away (a small change in height only) doesn't
-  let lastW = innerWidth, lastH = innerHeight, again;
+  // Which changes count: a new WIDTH always does (a phone turned, a window resized). A new height alone only does
+  // on a computer (a window dragged taller or shorter). On a phone or tablet a new height alone is its toolbars
+  // sliding in and out as you scroll: the room holds perfectly still, and the camera only grows to fill the screen.
+  const mouse = matchMedia("(hover: hover) and (pointer: fine)");
+  let lastW = innerWidth, again;
   addEventListener("resize", () => {
-    if (FINAL) FINAL.redraw();
-    if (innerWidth === lastW && Math.abs(innerHeight - lastH) < lastH * .15) return;
-    lastW = innerWidth; lastH = innerHeight; clearTimeout(again);
-    again = setTimeout(() => { const before = setName; measure(); if (setName !== before) putUpTheSet(); eye(); }, 150);
+    if (innerWidth === lastW && !mouse.matches) { growCamera(); return; }
+    lastW = innerWidth; clearTimeout(again); again = setTimeout(rebuild, 150);
   });
 
   /* STEP 5 · THE BUTTONS' NAME TAG: follows the mouse over a button; for keyboard visitors it sits on the button */
@@ -742,22 +781,33 @@ body.leaving::before { opacity: 1; }
   room.addEventListener("focusin", e => { const b = e.target.closest(".spot, .poster"); if (!b) return; const r = b.getBoundingClientRect(); showTag(b.dataset.label, r.left + r.width / 2, r.top + r.height / 2); });
   room.addEventListener("focusout", () => (tag.hidden = true));
 
-  /* STEP 6 · OPEN AND CLOSE THE POPUPS
-     Every button with data-pop="name" opens the <dialog> with id "pop-name". The first time a popup opens,
-     its held-back pictures (data-src) are switched on, which is when they download. While it's open the page
-     underneath stays put (.locked). */
+  /* STEP 6 · OPEN AND CLOSE THE POPUPS: ONE DOOR IN, ONE DOOR OUT
+     Every way into a place goes through the same door: the spot on the wall, the phone directory and the poster are
+     all buttons with data-pop="name", and ONE listener sends every one of them to openPop(name), which opens the
+     <dialog> with id "pop-name". So whether you reach the Gallery from the café, from the door or from the
+     directory, you take exactly the same path and arrive at exactly the same place: the top of the exhibit.
+     The first time a popup opens, its held-back pictures (data-src) are switched on, which is when they download.
+     While it's open the page underneath stays put (.locked), and every way out (the x, Escape, a click on the dark)
+     comes back through the same door: you're returned to the very spot in the room you were standing on. */
+  let standingAt = 0;                                       // where you were in the room when you stepped into a popup
   function openPop(name) {
     const pop = $("pop-" + name);
     pop.querySelectorAll("[data-src]").forEach(el => { el.src = el.dataset.src; el.removeAttribute("data-src"); });
     if (name === "gallery") showHang();
     tag.hidden = true;
+    standingAt = scrollY;
     document.documentElement.classList.add("locked");
     pop.showModal();
-  }
+    pop.scrollTop = 0;                                      // every popup opens at its beginning, however you left it last time
+  }                                                         // (after it's open: a closed popup has nothing to scroll)
   // (one listener for the whole page: it catches a click on any button with data-pop, in the room or the directory)
   document.addEventListener("click", e => { const b = e.target.closest("[data-pop]"); if (b) openPop(b.dataset.pop); });
   document.querySelectorAll("dialog.pop").forEach(pop => {
-    pop.addEventListener("close", () => document.documentElement.classList.remove("locked"));
+    pop.addEventListener("close", () => {
+      document.documentElement.classList.remove("locked");
+      if (scrollY !== standingAt) scrollTo(0, standingAt);  // (back where you stood, even if the browser moved the page meanwhile)
+      eye();
+    });
     pop.querySelector(".close").addEventListener("click", () => pop.close());
     // a click on the dark around the picture closes the popup too (data-empty marks those dark areas);
     // in the gallery's viewer it steps back to the whole exhibit first
@@ -836,9 +886,12 @@ body.leaving::before { opacity: 1; }
     print.addEventListener("click", () => show(i));
     $("grid").appendChild(print);
   });
+  // Back to the whole exhibit. Coming back from the viewer (All photos, Escape, a click on the dark) you land on the
+  // print you were just looking at, scrolled into view, however you got there.
   function showHang() {
     viewer.hidden = true; hang.hidden = false;
-    const print = $("grid").children[at]; if (print && $("pop-gallery").open) print.focus({ preventScroll: true });
+    const print = $("grid").children[at];
+    if (print && $("pop-gallery").open) { print.scrollIntoView({ block: "nearest" }); print.focus({ preventScroll: true }); }
   }
   function show(i) {
     at = (i + G.length) % G.length;                                  // wrap around: after the last comes the first
@@ -873,7 +926,7 @@ body.leaving::before { opacity: 1; }
 
   /* STEP 9 · LEAVING: back out to Daydream St. through white light (the storefront fades in from it) */
   document.querySelector(".back").addEventListener("click", e => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reduceMotion) return;
     e.preventDefault();
     const href = e.currentTarget.href;
     document.body.classList.add("leaving");
