@@ -21,6 +21,23 @@
      up the page (media="print" until it arrives, then switched on). -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" media="print" onload="this.media='all'">
+<!-- START THE BIG DOWNLOADS AT ONCE (Oct 31): the room's heaviest pictures, fetched while the page itself is still
+     arriving, instead of waiting for the scripts at the bottom to ask for them. Each screen shape fetches only its own
+     set: "wide" for screens wider than they are tall (and anything up to 9 : 10), "narrow" for phones held upright.
+     (These names come from assets/post-stage.js; if a re-bake renames a picture, update it here.) -->
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/left-3.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/left-0.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/left-7.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/back.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/right-0.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/wide/right-3.webp" media="(min-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/narrow/left-3.5.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/narrow/left-8.5.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/narrow/right-3.5.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/narrow/right-8.5.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/stage/narrow/back.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/obsidian-floor.webp">
+<link rel="preload" as="image" href="../assets/img/post/poster-best-storyteller-wall.webp">
 <!--
   NOT RISING · THE POST, the room inside 777 Daydream St.
   ------------------------------------------------------------------
@@ -49,10 +66,11 @@
       poster-best-storyteller*.webp (the pictures, made by tools/render-poster.js). It's hung live (PART 3, step 2B),
       not baked, so a re-bake doesn't touch it. Click it and it opens up close with a BUY IT button (popup 5), the
       same as the poster in the storefront window; the book, author and shop link come from POSTERS in data.js.
-    THE FINAL STAGE (phones and tablets, Oct 31): assets/post-final.js. The same room and camera, but its pictures are
-      drawn by the phone's graphics chip on one flat canvas behind the room, instead of being held up in 3D (which
-      made phones crash). The room in front keeps its buttons, the fan and the benches. Add ?final=0 or ?final=1 to
-      the address to see either version on any screen.
+    THE FINAL STAGE (every screen, Oct 31): assets/post-final.js. The same room and camera, but the whole room (fan and
+      benches too) is drawn by the graphics chip as one flat picture on one canvas, redrawn in 3D as you scroll,
+      instead of ~60 pictures held up in 3D by the browser (which made phones crash, and made computers flicker, blank
+      out and stutter). The room in front keeps only its invisible buttons. Add ?final=0 to the address to see the
+      old held-up-in-3D version (it's also the backup for a browser that can't draw on the graphics chip).
   ------------------------------------------------------------------
 -->
 <style>
@@ -64,6 +82,11 @@
    scrolls is how far the camera comes down through the room. While a popup is open it stays put (.locked). --- */
 html { box-sizing: border-box; overflow-x: hidden; } *, *::before, *::after { box-sizing: inherit; }
 html, body { margin: 0; background: #0d0d0e; }
+/* (Oct 31) No rubber-band bounce past the top or bottom (it showed black above the roof and below the floor) */
+html, body { overscroll-behavior: none; }
+/* (Oct 31) The ceiling fan holds still. Spinning right in front of the camera it swept big black blades across the
+   view, and it made the browser re-sort the whole room every frame, which is what stuttered. */
+.nrp-fan-spin { animation: none !important; }
 html.locked, html.locked body { overflow: hidden; }
 [hidden] { display: none !important; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read aloud by screen readers, not shown */
@@ -80,7 +103,10 @@ html.locked, html.locked body { overflow: hidden; }
 .stage { position: relative; height: var(--PH, 200vh); }
 .stage:not(.ready) .scene { opacity: 0; }                    /* hidden until its pictures have arrived... */
 .stage.ready .scene { opacity: 1; transition: opacity .5s; } /* ...then it fades in */
-.scene { position: fixed; inset: 0; overflow: hidden; perspective: var(--P); perspective-origin: 50% 50%; }
+/* (Oct 31) The camera's height is the screen's TALLEST height (100lvh: a phone's screen with its address bar tucked
+   away), so it never changes size as the bar slides in and out while you scroll; that resize used to make the room
+   jump and the picture blank for a moment. On a computer it's simply the window's height. */
+.scene { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100lvh; overflow: hidden; perspective: var(--P); perspective-origin: 50% 50%; }
 .room { position: absolute; top: 0; left: calc((var(--W) - var(--Wr)) / 2); width: var(--Wr); height: var(--PH);
   transform-style: preserve-3d; will-change: translate; pointer-events: none; }
 /* walking in: the room starts a step further away and comes toward you */
@@ -93,9 +119,9 @@ html.locked, html.locked body { overflow: hidden; }
    each hinged on its front edge and tipped back flat. Each side holds its picture(s) (the <img>s inside it). */
 .wall, .panel { position: absolute; overflow: hidden; }
 .wall > img, .panel > img, .piece { position: absolute; display: block; max-width: none; }
-/* THE FINAL STAGE (phones and tablets: assets/post-final.js). The canvas fills the camera's view, behind the room, and
-   the pictures are drawn on it. The room in front keeps only what has to stay live: the buttons (invisible, each on its
-   own layer so nothing is painted), the poster's button, the fan and the benches. */
+/* THE FINAL STAGE (every screen: assets/post-final.js). The canvas fills the camera's view, behind the room, and
+   everything in the room is drawn on it. The room in front keeps only what has to answer to a click: the buttons
+   (invisible, each on its own layer so nothing is painted) and the poster's button. */
 .final-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .final .wall > .spot, .final .wall > .poster { transform: translateZ(0); }
 .final .poster { background: none; box-shadow: none; }
@@ -465,11 +491,13 @@ body.leaving::before { opacity: 1; }
   let S = null, setName = "", SIZE = {};   // SIZE: this screen's room, in pixels
 
   /* THE FINAL STAGE OR THE STAGE SET?
-     Touch screens (phones, tablets) get the final stage (assets/post-final.js): the pictures drawn on one flat canvas.
-     Computers keep the stage set, the pictures held up in 3D. ?final=1 or ?final=0 in the address picks one by hand.
-     If the phone has no graphics chip to draw with (very rare), it gets the stage set too. */
+     Every screen gets the final stage (assets/post-final.js): the whole room, fan and benches included, drawn as one
+     flat picture on one canvas, redrawn in 3D as you scroll. (Oct 31: computers used to get the stage set, ~60
+     pictures held up in 3D by the browser, and scrolling it flickered, blanked out parts and stuttered in Chrome.)
+     The stage set stays as the backup, for a browser with no graphics chip to draw with (very rare), or add
+     ?final=0 to the address to see it. */
   const ask = location.search;
-  const wantFinal = /[?&]final=1/.test(ask) || (!/[?&]final=0/.test(ask) && matchMedia("(pointer: coarse)").matches);
+  const wantFinal = !/[?&]final=0/.test(ask);
   const FINAL = wantFinal && window.NRFINAL && NRFINAL.supported() ? NRFINAL.create($("final"), document.querySelector(".scene")) : null;
   if (FINAL) { $("final").hidden = false; stage.classList.add("final"); }
   let finalReady = Promise.resolve(), posterLook = null;
@@ -482,7 +510,9 @@ body.leaving::before { opacity: 1; }
        P  = how far the camera is from the screen: 0.9 x its width (on a phone, a little further back)
      Nothing is ever wider than the screen: the room's sides run off its edges, the way they did in the original. */
   function measure() {
-    const W = innerWidth, H = innerHeight;
+    // (H is the camera's own height, not the window's: on a phone the camera is as tall as the screen with the
+    //  address bar tucked away, so it doesn't change size, and the room doesn't jump, as the bar slides in and out)
+    const W = innerWidth, H = document.querySelector(".scene").clientHeight || innerHeight;
     setName = W / H < .9 ? "narrow" : "wide";
     S = STAGE[setName];
     const R = S.room, narrow = setName === "narrow";
@@ -593,9 +623,11 @@ body.leaving::before { opacity: 1; }
     el.type = "button"; el.className = "poster"; el.dataset.pop = "poster"; el.dataset.label = BEST ? BEST.book : "Best Storyteller";
     el.setAttribute("aria-label", (P.alt || "The Best Storyteller poster") + " Open it up close");
     Object.assign(el.style, { left: m(x), top: m(y), width: m(w), height: m(h) });
-    const src = IMG + (setName === "narrow" && P.phone ? P.phone : P.img);
-    // popup 5 shows this same picture, big, with the BUY IT button under it (held back until the popup opens)
-    const lb = $("lb-poster"); if (!lb.src) lb.dataset.src = src; lb.alt = P.alt || "";
+    // (Oct 31) The wall shows a copy sized for the wall (P.wall, 49 KB); the popup shows the big copy (P.closeup),
+    // downloaded only when it's opened. (The backup 3D version keeps the big pictures on the wall.)
+    const src = IMG + (FINAL && P.wall ? P.wall : (setName === "narrow" && P.phone ? P.phone : P.img));
+    // popup 5 shows the poster big, with the BUY IT button under it (held back until the popup opens)
+    const lb = $("lb-poster"); if (!lb.src) lb.dataset.src = IMG + (P.closeup || (setName === "narrow" && P.phone ? P.phone : P.img)); lb.alt = P.alt || "";
     // Over the poster, from the bottom up (the same order as on the wall in post.js): the ivy, then the room's light.
     // Each is sized to what it covers on the wall and slid back by the poster's own position, so it lines up
     // exactly with the wall around the poster.
@@ -639,7 +671,9 @@ body.leaving::before { opacity: 1; }
      distance scrolled, which is what a camera being lowered sees. Only one thing changes ("translate"), and the
      browser does that on the graphics chip without repainting anything, so it stays smooth. */
   function eye() {
-    room.style.translate = `0 ${-scrollY}px 0`;
+    // (kept between the top and the bottom of the room: a phone's bounce past either end doesn't drag the room along)
+    const y = Math.min(Math.max(scrollY, 0), Math.max(0, document.documentElement.scrollHeight - innerHeight));
+    room.style.translate = `0 ${-y}px 0`;
     if (FINAL) FINAL.draw();                                   // (the final stage: draw the pictures in their new places)
     if (Math.abs(scrollY - landedAt) > 40) cue.classList.add("gone");   // the cue goes once you start looking around
   }
