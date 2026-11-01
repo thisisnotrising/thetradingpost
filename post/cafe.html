@@ -678,7 +678,10 @@ body.leaving::before { opacity: 1; }
     if (Math.abs(scrollY - landedAt) > 40) cue.classList.add("gone");   // the cue goes once you start looking around
   }
   let eyeQueued = false;
-  addEventListener("scroll", () => { if (eyeQueued) return; eyeQueued = true; requestAnimationFrame(() => { eyeQueued = false; eye(); }); }, { passive: true });
+  addEventListener("scroll", () => {
+    if (!tag.hidden) tag.hidden = true;   // (Oct 31: the mouse's name tag goes while the room moves under it, instead of hanging on stale)
+    if (eyeQueued) return; eyeQueued = true; requestAnimationFrame(() => { eyeQueued = false; eye(); });
+  }, { passive: true });
 
   /* STEP 4 · WHERE YOU LAND
      A wide screen lands at the very top, up under the glass roof, like the original. A phone lands centred on Nebula
