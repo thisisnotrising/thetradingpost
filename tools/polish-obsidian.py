@@ -132,7 +132,7 @@ if FLOOR:
     rgb += gloss[..., None] * np.array([.95, .96, 1])
     glint = (np.random.default_rng(27).random((H, W)) > .9997) * 1.0                # fine sharp glints
     rgb += gaussian_filter(glint, .8, mode="wrap")[..., None] * 1.2
-    img = Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8)); img.save(OUT, "WEBP", quality=90, method=6)
+    img = Image.fromarray((np.clip(rgb, 0, 1) * 255).astype(np.uint8)); img.save(OUT, "WEBP", quality=80, method=6)   # (Oct 31: 80 not 90, a quarter lighter, no visible change)
     print("polished", os.path.basename(OUT), img.size); sys.exit()
 
 # ---- 4. the top, the edge, the toe-kick (the counter only) ----
