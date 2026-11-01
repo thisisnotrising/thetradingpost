@@ -48,18 +48,22 @@
      so far points (big negative z) crowd toward the middle, near points spread out.
      The graphics chip wants that written with a 4th number, w = (P - z) / P: it divides by w itself.
      u_shift is where the room is right now: its left edge on the screen, how far it has slid up
-     (the scroll), and how far it has been pushed back (the walk-in). */
+     (the scroll), and how far it has been pushed back (the walk-in).
+     u_mid is the "middle" the camera looks at (Nov 1). It's set once, when the room is sized, and never follows the
+     screen's height after that: when a phone's toolbars slide away and the screen gets taller, the picture just
+     carries on further down, instead of everything jumping to a new middle. */
   const VERT = `#version 300 es
 in vec3 a_pos;
 in vec2 a_uv;
 uniform vec2 u_screen;
+uniform vec2 u_mid;
 uniform vec3 u_shift;
 uniform float u_P;
 out vec2 v_uv;
 void main() {
   vec3 p = a_pos + u_shift;
   float w = 1.0 - p.z / u_P;
-  vec2 mid = u_screen * 0.5;
+  vec2 mid = u_mid;
   vec2 s = mid * w + (p.xy - mid);
   gl_Position = vec4(s.x * 2.0 / u_screen.x - w, w - s.y * 2.0 / u_screen.y, 0.0, w);
   v_uv = a_uv;
@@ -78,7 +82,7 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
     try { return !!document.createElement("canvas").getContext("webgl2"); } catch (e) { return false; }
   }
 
-  function create(canvas, scene) {
+  function create(canvas) {
     // (antialias off: at the phone's full sharpness, edges are already fine, and it would cost 4 extra copies of the screen)
     const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: true, powerPreference: "low-power" });
     if (!gl) return null;
@@ -92,7 +96,7 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
       gl.linkProgram(prog);
       loc = { pos: gl.getAttribLocation(prog, "a_pos"), uv: gl.getAttribLocation(prog, "a_uv"),
-              screen: gl.getUniformLocation(prog, "u_screen"), shift: gl.getUniformLocation(prog, "u_shift"),
+              screen: gl.getUniformLocation(prog, "u_screen"), mid: gl.getUniformLocation(prog, "u_mid"), shift: gl.getUniformLocation(prog, "u_shift"),
               P: gl.getUniformLocation(prog, "u_P"), tex: gl.getUniformLocation(prog, "u_tex") };
     }
     compile();
@@ -331,6 +335,7 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
     const roleOf = el => (el.className.match(/nrp-(?:b|fan)-(leg|end|edge|top|rod|motor)/) || [])[1] || (el.tagName === "B" ? "blade" : "part");
     function build(theRoom, posterLook) {
       room = theRoom;
+      left = parseFloat(getComputedStyle(room).left) || 0;  // the room's left edge on the screen (it only changes when the room is re-sized, which re-builds)
       const faces = [], standing = [];
       for (const face of room.querySelectorAll(":scope > .wall, :scope > .panel")) {
         const M = toRoom(face, room), [w, h] = size(face);
@@ -382,23 +387,25 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
 
     /* 5 · DRAWING
        Called whenever the camera moves (a scroll), while the room walks in, and when a picture arrives.
-       It reads where the room is right now: its left edge, the scroll, and the walk-in push (the room's own
-       transform, which the browser is animating), then draws every picture in order. */
-    let P = 1000, queued = false;
+       Everything it needs is handed to it ahead of time, so drawing never has to stop and ask the page anything
+       (Nov 1: asking, every frame, is what made some phones stutter as you scrolled):
+         W, H, mid, P  the camera: its size, the middle it looks at, how far back it stands (frame(), when the room is sized)
+         left          the room's left edge (build())
+         camY          how far down the room the camera is (look(), on every scroll; post/cafe.html keeps it inside the room)
+         push          the walk-in: only read from the page while the room is walking in (follow()) */
+    let P = 1000, W = 1, H = 1, mid = 0, left = 0, camY = 0, push = 0, following = false, queued = false;
     function draw() {
       queued = false;
       if (!room || gl.isContextLost()) return;
-      const W = scene.clientWidth, H = scene.clientHeight;
       const cw = Math.round(W * PIXELS), ch = Math.round(H * PIXELS);
-      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }   // (only when the camera changes size)
       gl.viewport(0, 0, cw, ch);
       gl.clearColor(13 / 255, 13 / 255, 14 / 255, 1); gl.clear(gl.COLOR_BUFFER_BIT);
-      const cs = getComputedStyle(room);
-      const push = cs.transform && cs.transform !== "none" ? new DOMMatrix(cs.transform).m43 : 0;
+      if (following) { const t = getComputedStyle(room).transform; push = t && t !== "none" ? new DOMMatrix(t).m43 : 0; }
       gl.useProgram(prog);
       gl.uniform2f(loc.screen, W, H);
-      // (the scroll, kept inside the room: a phone's bounce at the top or bottom would otherwise pull the room off screen)
-      const left = parseFloat(cs.left) || 0, sy = scrolled();
+      gl.uniform2f(loc.mid, W / 2, mid || H / 2);
+      const sy = camY;
       gl.uniform3f(loc.shift, left, -sy, push);
       gl.uniform1f(loc.P, P);
       gl.uniform1i(loc.tex, 0); gl.activeTexture(gl.TEXTURE0);
@@ -408,8 +415,8 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       const one = i => { const q = list[i]; if (!q.t.ok) return; gl.bindTexture(gl.TEXTURE_2D, q.t.tex); gl.drawArrays(gl.TRIANGLE_STRIP, i * 4, 4); };
       for (let i = 0; i < nFaces; i++) one(i);             // the walls, floor and roof
-      // where the camera is, in the room: the middle of the screen, as far down as you've scrolled, P in front
-      const cam = [W / 2 - left, H / 2 + sy, P - push];
+      // where the camera is, in the room: the middle it looks at, as far down as you've scrolled, P in front
+      const cam = [W / 2 - left, (mid || H / 2) + sy, P - push];
       const far = c => Math.hypot(c[0] - cam[0], c[1] - cam[1], c[2] - cam[2]);
       for (const it of items) {
         if (!it.parts) { one(it.i); continue; }
@@ -424,14 +431,14 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
         it.parts.map(p => [rank[p.role] || 0, -far(p.c), p.i]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).forEach(p => one(p[2]));
       }
     }
-    // how far the page is scrolled, kept between the top and the bottom of the room
-    function scrolled() { return Math.min(Math.max(window.scrollY, 0), Math.max(0, document.documentElement.scrollHeight - window.innerHeight)); }
     const redraw = () => { if (!queued) { queued = true; requestAnimationFrame(draw); } };
     onChange = redraw;
-    // keep drawing for a while (the walk-in: the browser moves the room, the canvas follows it frame by frame)
+    // keep drawing for a while (the walk-in: the browser moves the room, the canvas follows it frame by frame);
+    // when it's over the room is back in place (push 0) and the page isn't asked again
     function follow(ms) {
       const end = performance.now() + ms;
-      const step = () => { draw(); if (performance.now() < end) requestAnimationFrame(step); };
+      following = true;
+      const step = () => { draw(); if (performance.now() < end) requestAnimationFrame(step); else { following = false; push = 0; draw(); } };
       requestAnimationFrame(step);
     }
     // If the phone takes the graphics chip away (it can, when the page is in the background), start again when it's back
@@ -440,8 +447,11 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
     canvas.addEventListener("webglcontextrestored", () => { textures.clear(); buffer = gl.createBuffer(); compile(); rebuild(); });
 
     return window.NRFINAL.current = {
-      build, draw, redraw, follow, scrolled,
-      setCamera(p) { P = p; },
+      build, draw, redraw, follow,
+      // the camera: its size on the screen (w, h), how far back it stands (p) and the middle it looks at (m, down from the top)
+      frame(w, h, p, m) { W = w; H = h; P = p; mid = m; },
+      // the camera moves to y (how far down the room), and the room is drawn there, right away
+      look(y) { camY = y; draw(); },
       onRestore(fn) { rebuild = fn; },
       // how much the pictures take on the graphics chip, in MB (to check the weight)
       weight() { let b = 0; textures.forEach(t => (b += t.bytes)); return +(b / 1e6).toFixed(1); }

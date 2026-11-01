@@ -449,7 +449,9 @@ window.NRPOST = {
     { img: "post/gallery/life-exhibit/13-payphone.webp",           ar: 0.81, alt: "A pay phone glimpsed between two posts" },
     { img: "post/gallery/life-exhibit/14-plant-window.webp",       ar: 1.33, alt: "A man in a hoodie at a café table by a sunny window, surrounded by tall leafy plants" },
     { img: "post/gallery/life-exhibit/15-mca-denver.webp",         ar: 1.34, crop: "100% 50%", alt: "Museum of Contemporary Art Denver, in white letters on a dark wooden wall beside a long ramp" },
-    { img: "post/gallery/life-exhibit/16-window-blinds.webp",      ar: 1.03, alt: "A man in silhouette eating at a table in front of window blinds" }
+    // (Nov 1) photo 16 is the speakeasy sign (it replaced the window blinds). crop "70% 50%" keeps the whole sign,
+    // wooden frame and all, in the square: the sign is wider than the photo is tall, so the square sits toward the right.
+    { img: "post/gallery/life-exhibit/16-speakeasy.webp",          ar: 1.33, crop: "70% 50%", alt: "A hand-painted SPEAKEASY sign in a wooden frame, its tail curling into an arrow, above a wooden bench between two planters of flowers" }
   ],
 
   /* THE POSTER ON THE BLACK WALL (Oct 31, 2026)
