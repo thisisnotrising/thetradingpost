@@ -232,7 +232,8 @@ button.poster:focus-visible { outline: calc(var(--u) * .03) solid rgba(255,255,2
   .directory { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; position: fixed; z-index: 5; padding: 5px; border-radius: 6px;
     left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
   .directory button { border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left; white-space: nowrap;
-    font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+    font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase;
+    font-variant-emoji: text; }   /* (Nov 1) arrows stay plain white text, never emoji (backs up the &#xFE0E; in the HTML) */
   .directory button:active { background-color: rgba(255,255,255,.3); }
 }
 
@@ -404,11 +405,16 @@ body.leaving::before { opacity: 1; }
 <div class="tag crystal" id="tag" hidden></div>
 <p class="cue" id="cue" aria-hidden="true">Scroll down</p>
 
-<!-- The directory by the door (shows on phones only): the same four places as buttons -->
+<!-- The directory by the door (shows on phones only): the same four places as buttons.
+     (Nov 1) The 2 x 2 grid fills left to right, top to bottom, so the order of the buttons here IS the order on
+     screen:   WISHING WALL | CAFE
+               NEWSSTAND    | GALLERY
+     The arrows still point to where each place is in the room. "&#xFE0E;" after the ↖ is an invisible marker that
+     says "draw this as a plain text arrow": without it, iPhones draw ↖ as a blue emoji tile. -->
 <nav class="directory crystal" aria-label="Directory">
-  <button class="crystal" type="button" data-pop="newsstand">← Newsstand</button>
-  <button class="crystal" type="button" data-pop="wall">↖ Wishing Wall</button>
+  <button class="crystal" type="button" data-pop="wall">↖&#xFE0E; Wishing Wall</button>
   <button class="crystal" type="button" data-pop="cafe">↑ Cafe</button>
+  <button class="crystal" type="button" data-pop="newsstand">← Newsstand</button>
   <button class="crystal" type="button" data-pop="gallery">Gallery →</button>
 </nav>
 
