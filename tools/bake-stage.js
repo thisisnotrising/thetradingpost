@@ -201,7 +201,7 @@ const r4 = v => +v.toFixed(4);
         const { png, box } = await shoot(p.i, { floor: true });
         const file = `${set}/${wall}.webp`; kb += await encode(png, path.join(OUT, file), null, FLOOR_RES / u); n++;
         // (Oct 31) the sparkle is noted as TILES, not as the slab's background: which picture, how big one tile is, and
-        // where the pattern starts (metres; read from the room's own floor style). post/index.html lays it as a grid of
+        // where the pattern starts (metres; read from the room's own floor style). post/cafe.html lays it as a grid of
         // separate pictures, because a background would make a phone paint the whole tilted slab into memory.
         const num = re => +((p.style.match(re) || [, 0])[1]) / u;
         const url = (p.style.match(/url\("?([^")]+)"?\)/) || [])[1];
@@ -231,7 +231,7 @@ const r4 = v => +v.toFixed(4);
   fs.writeFileSync(path.join(ROOT, 'assets', 'post-stage.js'),
 `/* NOT RISING · THE POST — THE STAGE SET (written by tools/bake-stage.js: don't edit by hand, re-bake instead)
    Two sets: "wide" (computers, tablets on their side) and "narrow" (phones).
-   Every size and position is in METRES; post/index.html multiplies by --u (pixels per metre) to fit the screen.
+   Every size and position is in METRES; post/cafe.html multiplies by --u (pixels per metre) to fit the screen.
    room    the box: Wm wide, Dm deep, HM tall; the floor is laid in two slabs, the near one DNm deep
    walls   back, left, right, floor, floor-near: each one or more pictures (bands) laid on that surface, and its clickable spots (hot);
            the floor slabs also have their sparkle (tile): one small picture, size metres square, repeating from x, y

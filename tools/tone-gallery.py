@@ -38,7 +38,7 @@ PHOTOS = [
     ("state-room.jpg",     "04-state-room",         None),
     ("guitar-case.jpg",    "05-guitar-case",        None),
     ("holding-hands.jpg",  "06-holding-hands",      (0, 0, 1284, 958)),      # a dark line along the bottom
-    ("fireplace.jpg",      "07-fireplace",          (201, 17, 1081, 1246)),  # the white screenshot border
+    ("evil-eye-cuff.jpg",  "07-evil-eye",           None),                   # (Oct 31: replaced the fireplace photo)
     ("mural-alley.jpg",    "08-mural-alley",        None),
     ("stencil-cowboy.jpg", "09-stencil-cowboy",     None),
     ("towers.jpg",         "10-towers",             (0, 7, 1284, 1285)),     # a dark bar along the top
