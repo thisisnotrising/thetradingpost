@@ -82,6 +82,19 @@
   text-shadow: 0 0 2px #fff, 0 0 calc(var(--u) * .06) #ffe9c2, 0 0 calc(var(--u) * .18) rgba(255,214,150,.85), 0 0 calc(var(--u) * .45) rgba(255,200,120,.5); }
 .nrp-neon b { font: 400 min(calc(var(--u) * .62), calc(var(--nw) * .17)) / 1 Oswald, "Arial Narrow", sans-serif; letter-spacing: .22em; }
 .nrp-neon i { font: 400 min(calc(var(--u) * .5), calc(var(--nw) * .14)) / 1 Sacramento, cursive; font-style: normal; margin: .05em 0 0 .2em; }
+/* THE EVIL EYE (Oct 31), above the word NEBULA (post.js puts it inside the word's <b>, so 1em = the letters' size).
+   Size: 1.65em across (about 1 m on a computer). Place: centred on the arch (Oct 31, Kathi's call; it was centred over
+   the letters, which sit left of centre). The word starts at the left edge of the neon sign's box, and that box is
+   centred on the arch, so the arch's middle is half the box's width (--nw / 2) in from where the word starts. Its
+   bottom edge is 1.17em above the word. Light: the top of the café wall is in shade, so the photo is dimmed to match
+   the brick there, with a faint warm glow on its lower edge from the neon just below, and a soft shadow under it
+   where it stands off the wall. */
+.nrp-neon b { position: relative; }
+.nrp-eye { position: absolute; left: calc(var(--nw) / 2); bottom: calc(100% + 1.17em); width: 1.65em; height: 1.65em; margin-left: -.825em;
+  border-radius: 50%; pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 50% 112%, rgba(255,214,160,.2), rgba(255,214,160,0) 70%),
+    url(img/post/evil-eye.webp) center / 100% 100% no-repeat;
+  filter: brightness(.74) drop-shadow(0 calc(var(--u) * .035) calc(var(--u) * .045) rgba(0,0,0,.5)); }
 .nrp-plastershade { pointer-events: none; background: linear-gradient(0deg, rgba(60,45,30,.16), rgba(0,0,0,0) 22%, rgba(0,0,0,0) 70%, rgba(60,45,30,.12)),
   linear-gradient(90deg, rgba(40,30,20,.14), rgba(0,0,0,0) 12%, rgba(0,0,0,0) 88%, rgba(40,30,20,.18)); }
 /* Rattan pendants on long cords from the skylight */

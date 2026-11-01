@@ -635,8 +635,12 @@
       const c = onWall(make("div", "nrp-archivy", back), { x: cx, y: HM - cH, w: cW, h: cH });
       Object.assign(c.style, { backgroundImage: `url(${IMG}post/ivy-arch-corner.webp)`, backgroundSize: "100% 100%", transform: flip ? "scaleX(-1)" : "" });
     });
-    // The name in warm white neon on the café's brick, above the shelves
-    const nw = Math.min(aW * 0.7, 4.2), neon = onWall(make("a", "nrp-neon nrp-hot", back, `<b>NEBULA</b><i>cafe</i>`), { x: (Wm - nw) / 2, y: barH + 0.7, w: nw, h: 1.3 });
+    // The name in warm white neon on the café's brick, above the shelves.
+    // THE EVIL EYE (Oct 31): Kathi's blue glass evil eye in its round stamped-brass disc (cut from her cuff photo by
+    // tools/cut-eye.py) hangs on the brick at the top, above the word NEBULA, centred on the arch. It sits inside the
+    // word's own box (the <span> in the <b>), so it keeps its height above the word whatever size the word is drawn;
+    // post.css (.nrp-eye) sizes it, centres it on the arch, lifts it above the word and dims it to the light on that wall.
+    const nw = Math.min(aW * 0.7, 4.2), neon = onWall(make("a", "nrp-neon nrp-hot", back, `<b>NEBULA<span class="nrp-eye" aria-hidden="true"></span></b><i>cafe</i>`), { x: (Wm - nw) / 2, y: barH + 0.7, w: nw, h: 1.3 });
     neon.dataset.room = "cafe"; neon.dataset.tip = "Nebula Cafe"; neon.setAttribute("aria-label", "Nebula Cafe");
     neon.style.setProperty("--nw", (nw * u) + "px");
     onWall(make("div", "nrp-plastershade", back), { x: 0, y: 0, w: Wm, h: HM });

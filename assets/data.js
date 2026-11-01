@@ -471,8 +471,12 @@ window.NRPOST = {
      (It fills the full height under the ivy. It can't also fill the full length: the wall is wider than the poster's
      shape allows, so it sits toward LIFE, the end you see best from the door; the far corner is hidden by the bulbs.) */
   WALL_POSTER: {
-    img:   "post/poster-best-storyteller.webp",        // computers (3456 x 4408)
-    phone: "post/poster-best-storyteller-phone.webp",  // phones (1728 x 2204)
+    img:   "post/poster-best-storyteller.webp",        // computers (3456 x 4408) (now only for the backup 3D version)
+    phone: "post/poster-best-storyteller-phone.webp",  // phones (1728 x 2204), and the popup up close on every screen
+    // (Oct 31) what the wall itself shows: 864 x 1102, made from the big one by tools/shrink-poster.py. The wall is only
+    // ever seen at ~160 pixels a metre, so this is all it needs: 49 KB instead of 267 KB, and no 15-megapixel unpacking.
+    wall:  "post/poster-best-storyteller-wall.webp",
+    closeup: "post/poster-best-storyteller-phone.webp",
     shape: 864 / 1102,                                  // width : height
     alt: "A towering poster: #1 NOT RISING Magazine, Best Storyteller. New book by Joel Lymneos, Poetic Drift.",
     wide:   { from: 1.9, to: 6.35, bottom: 0.25, top: 5.8 },

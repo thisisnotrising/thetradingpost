@@ -1,5 +1,10 @@
-/* NOT RISING · THE POST — THE FINAL STAGE (phones and tablets)
+/* NOT RISING · THE POST — THE FINAL STAGE (every screen, since Oct 31)
    ------------------------------------------------------------------
+   (Oct 31, later: computers use it too. Holding ~60 pictures up in 3D made Chrome flicker, blank out parts of the
+   room, black out a wedge of the glass roof and stutter as you scrolled, and the fan and benches, left live in front
+   of the canvas, drifted against the floor. Now EVERYTHING in the room is drawn here, on one canvas: the whole
+   room is one flat picture, redrawn in 3D as the camera moves. Only the invisible buttons stay in the page.)
+
    THE BIG IDEA
    The stage set (post/index.html) holds every picture of the room up in 3D and lets the browser
    arrange them. On a computer that's fine. On a phone it's too heavy: Safari keeps a fully
@@ -191,6 +196,93 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       return t;
     }
 
+    /* 3B · THE FAN AND THE BENCHES (Oct 31)
+       These two are little 3D objects built from flat parts: the fan's rod, motor and six blades; each bench's top,
+       sides, ends and legs. They used to stay in the room as live 3D, in front of the canvas, and that's what made
+       them drift against the floor and walls while you scrolled. Now each part is painted once into a small picture,
+       here, from its own look in the page's CSS (its colours, its picture, its cut-out shape), and drawn on the canvas
+       with everything else.
+       What it can read: a background picture (url), straight and round colour fades (linear- and radial-gradient),
+       a plain colour, a cut-out shape (clip-path: polygon) and rounded corners. That's everything the parts use. */
+    // split "a(b, c), d" at the commas that aren't inside brackets
+    const splitTop = s => { const out = []; let depth = 0, cur = ""; for (const ch of s) { if (ch === "(") depth++; if (ch === ")") depth--; if (ch === "," && !depth) { out.push(cur.trim()); cur = ""; } else cur += ch; } if (cur.trim()) out.push(cur.trim()); return out; };
+    // "40%" or "12.5px" -> pixels, given what 100% is
+    const len = (v, full) => /%$/.test(v) ? parseFloat(v) / 100 * full : parseFloat(v) || 0;
+    // the colour stops of a fade: "rgb(1, 2, 3) 45%" -> [colour, where (0 to 1, or null = spread evenly)]
+    function stops(parts, L) {
+      const s = parts.map(p => { const m = p.match(/^(.*\))\s*([-\d.]+(?:%|px))?$/) || [null, p, null]; return [m[1], m[2] == null ? null : len(m[2], L) / L]; });
+      if (s[0][1] == null) s[0][1] = 0; if (s[s.length - 1][1] == null) s[s.length - 1][1] = 1;
+      for (let i = 1; i < s.length - 1; i++) if (s[i][1] == null) {
+        let j = i; while (s[j][1] == null) j++;
+        for (let k = i; k < j; k++) s[k][1] = s[i - 1][1] + (s[j][1] - s[i - 1][1]) * (k - i + 1) / (j - i + 1);
+      }
+      return s.map(([c, p], i) => [c, Math.max(0, Math.min(1, Math.max(p, i ? s[i - 1][1] : 0)))]);
+    }
+    function paintLayer(g, layer, w, h, cs, imgs) {
+      let m;
+      if ((m = layer.match(/^linear-gradient\((.*)\)$/))) {
+        const args = splitTop(m[1]);
+        let a = Math.PI;                                    // (no angle given: top to bottom)
+        if (/deg$/.test(args[0])) a = parseFloat(args.shift()) * Math.PI / 180;
+        else if (/^to /.test(args[0])) { const t = args.shift(); a = /right/.test(t) ? Math.PI / 2 : /left/.test(t) ? -Math.PI / 2 : /top/.test(t) ? 0 : Math.PI; }
+        const L = Math.abs(w * Math.sin(a)) + Math.abs(h * Math.cos(a)), dx = Math.sin(a) * L / 2, dy = -Math.cos(a) * L / 2;
+        const grad = g.createLinearGradient(w / 2 - dx, h / 2 - dy, w / 2 + dx, h / 2 + dy);
+        stops(args, L).forEach(([c, p]) => grad.addColorStop(p, c));
+        g.fillStyle = grad; g.fillRect(0, 0, w, h);
+      } else if ((m = layer.match(/^radial-gradient\((.*)\)$/))) {
+        const args = splitTop(m[1]);
+        let cx = w / 2, cy = h / 2;
+        const at = /(^|\s)at\s/.test(args[0]) ? args.shift() : "";
+        const pos = at.match(/at\s+(\S+)\s+(\S+)/); if (pos) { cx = len(pos[1], w); cy = len(pos[2], h); }
+        const rx = Math.max(cx, w - cx) * Math.SQRT2, ry = Math.max(cy, h - cy) * Math.SQRT2;   // (an oval out to the farthest corner)
+        const grad = g.createRadialGradient(0, 0, 0, 0, 0, rx);
+        stops(args, rx).forEach(([c, p]) => grad.addColorStop(p, c));
+        g.save(); g.translate(cx, cy); g.scale(1, ry / rx); g.fillStyle = grad; g.fillRect(-cx, -cy * rx / ry, w, h * rx / ry); g.restore();
+      } else if ((m = layer.match(/^url\("?(.*?)"?\)$/)) && imgs[m[1]]) {
+        const i = imgs[m[1]], [sw0, sh0 = "auto"] = cs.backgroundSize.split(",")[0].trim().split(/\s+/);
+        let sw = sw0 === "auto" ? i.naturalWidth : len(sw0, w), sh = sh0 === "auto" ? sw * i.naturalHeight / i.naturalWidth : len(sh0, h);
+        if (sw0 === "auto" && sh0 !== "auto") sw = sh * i.naturalWidth / i.naturalHeight;
+        const [px, py = "50%"] = cs.backgroundPosition.split(",")[0].trim().split(/\s+/);
+        const x = /%$/.test(px) ? (w - sw) * parseFloat(px) / 100 : parseFloat(px) || 0, y = /%$/.test(py) ? (h - sh) * parseFloat(py) / 100 : parseFloat(py) || 0;
+        g.drawImage(i, x, y, sw, sh);
+      }
+    }
+    function partPicture(el) {
+      // (its look is copied out now: the part is taken out of the page before its picture is painted, and a part
+      //  that's no longer in the page has no look left to read)
+      const live = getComputedStyle(el), cs = {};
+      ["width", "height", "backgroundImage", "backgroundSize", "backgroundPosition", "backgroundColor", "clipPath"].forEach(k => (cs[k] = live[k]));
+      const w = parseFloat(cs.width), h = parseFloat(cs.height);
+      const corners = ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"].map(k => live[k]);
+      const key = ["part", cs.backgroundImage, cs.backgroundSize, cs.backgroundPosition, cs.backgroundColor, cs.clipPath, corners.join(" "), w.toFixed(1), h.toFixed(1)].join("|");
+      if (textures.has(key)) return textures.get(key);
+      const t = { tex: gl.createTexture(), ok: false, bytes: 0 };
+      textures.set(key, t);
+      const layers = cs.backgroundImage === "none" ? [] : splitTop(cs.backgroundImage);
+      const urls = layers.map(l => (l.match(/^url\("?(.*?)"?\)$/) || [])[1]).filter(Boolean);
+      const imgs = {};
+      t.ready = Promise.all(urls.map(u => { const i = new Image(); i.decoding = "async"; i.src = u; return i.decode().then(() => (imgs[u] = i)).catch(() => {}); })).then(() => {
+        // painted at up to 2 pixels for each of the page's pixels (sharp up close), never more than 1024 across
+        const k = Math.max(.05, Math.min(2, 1024 / Math.max(w, h, 1)));
+        const c = document.createElement("canvas"); c.width = Math.max(2, Math.ceil(w * k)); c.height = Math.max(2, Math.ceil(h * k));
+        const g = c.getContext("2d"); g.scale(c.width / w, c.height / h);
+        // the cut-out shape: a polygon, or rounded corners
+        const poly = cs.clipPath.match(/^polygon\((.*)\)$/);
+        if (poly) {
+          g.beginPath();
+          splitTop(poly[1]).forEach((pt, i) => { const [x, y] = pt.trim().split(/\s+/); g[i ? "lineTo" : "moveTo"](len(x, w), len(y, h)); });
+          g.closePath(); g.clip();
+        } else if (corners.some(r => parseFloat(r)) && g.roundRect) {
+          const radii = corners.map(r => { const [x, y = x] = r.split(/\s+/); return { x: len(x, w), y: len(y, h) }; });
+          g.beginPath(); g.roundRect(0, 0, w, h, radii); g.clip();
+        }
+        if (cs.backgroundColor && !/rgba\(.*,\s*0\)$|transparent/.test(cs.backgroundColor)) { g.fillStyle = cs.backgroundColor; g.fillRect(0, 0, w, h); }
+        for (let i = layers.length - 1; i >= 0; i--) paintLayer(g, layers[i], w, h, cs, imgs);   // (the first one listed goes on top)
+        upload(t, c); c.width = c.height = 0; onChange();
+      });
+      return t;
+    }
+
     /* 4 · THE CORNERS
        Where a box inside the room really is: the browser has placed it (left, top, its size) inside its wall, and
        tilted the wall into place (transform, around its transform-origin). Doing the same sums here, from the inside
@@ -199,7 +291,8 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       let M = new DOMMatrix();
       for (let e = el; e && e !== room; e = e.parentElement) {
         const cs = getComputedStyle(e);
-        let step = new DOMMatrix().translate(parseFloat(cs.left) || 0, parseFloat(cs.top) || 0);
+        // (its margins count too: the fan's rod and motor are centred with a negative margin)
+        let step = new DOMMatrix().translate((parseFloat(cs.left) || 0) + (parseFloat(cs.marginLeft) || 0), (parseFloat(cs.top) || 0) + (parseFloat(cs.marginTop) || 0));
         if (cs.transform && cs.transform !== "none") {
           const [ox, oy, oz] = cs.transformOrigin.split(" ").map(parseFloat);
           step = step.translate(ox, oy, oz || 0).multiply(new DOMMatrix(cs.transform)).translate(-ox, -oy, -(oz || 0));
@@ -225,11 +318,17 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       return { t, pts: [[...at(x0, y0), u0, v0], [...at(x1, y0), u1, v0], [...at(x0, y1), u0, v1], [...at(x1, y1), u1, v1]] };
     }
 
-    let list = [], buffer = gl.createBuffer(), room = null;
+    let list = [], buffer = gl.createBuffer(), room = null, nFaces = 0, items = [];
     /* Gather everything to draw, in drawing order:
          the walls, the floor slabs and the roof slopes (the inside of a box: they never overlap on the screen, so
          any order works), each with its own colour first, then its pictures in the order they were laid;
-         then everything standing in the room, the farthest first, so nearer things are painted over farther ones. */
+         then everything standing in the room, the farthest first, so nearer things are painted over farther ones.
+         The fan and the benches count as "standing" too, each as a group of parts (3B); the order of the parts
+         inside a group is worked out as the camera moves (see 5 · DRAWING).
+       list  = every picture with its 4 corners (the walls' first: nFaces of them)
+       items = what stands in the room, farthest first: { i } one picture, or { kind, parts: [{ i, role, c }] } a group */
+    const centre = q => [0, 1, 2].map(k => q.pts.reduce((s, p) => s + p[k], 0) / 4);
+    const roleOf = el => (el.className.match(/nrp-(?:b|fan)-(leg|end|edge|top|rod|motor)/) || [])[1] || (el.tagName === "B" ? "blade" : "part");
     function build(theRoom, posterLook) {
       room = theRoom;
       const faces = [], standing = [];
@@ -249,17 +348,31 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
           }
         }
       }
+      list = faces.filter(Boolean); nFaces = list.length;
       for (const el of room.querySelectorAll(":scope > [data-gl]")) {
-        const [w, h] = size(el);
-        standing.push({ z: +el.dataset.z || 0, q: quad(picture(el.dataset.gl, false), toRoom(el, room), [0, 0, w, h], null) });
+        const [w, h] = size(el), q = quad(picture(el.dataset.gl, false), toRoom(el, room), [0, 0, w, h], null);
+        standing.push({ z: q.pts[0][2], i: list.push(q) - 1 });
       }
-      standing.sort((a, b) => b.z - a.z);                   // the farthest back first
-      list = faces.concat(standing.map(s => s.q)).filter(Boolean);
+      // the fan and the benches: every part that has a look of its own (a colour, a fade or a picture) becomes a picture
+      for (const obj of room.querySelectorAll(":scope > .nrp-fan, :scope > .nrp-bench3d")) {
+        const parts = [];
+        for (const el of obj.querySelectorAll("*")) {
+          if (el.children.length) continue;
+          const cs = getComputedStyle(el);
+          if (cs.display === "none" || (cs.backgroundImage === "none" && /rgba\(.*,\s*0\)$|transparent/.test(cs.backgroundColor))) continue;
+          const [w, h] = size(el); if (!(w > 0 && h > 0)) continue;
+          const q = quad(partPicture(el), toRoom(el, room), [0, 0, w, h], null);
+          parts.push({ i: list.push(q) - 1, role: roleOf(el), c: centre(q) });
+        }
+        if (parts.length) standing.push({ z: parts.reduce((s, p) => s + p.c[2], 0) / parts.length, kind: obj.classList.contains("nrp-fan") ? "fan" : "bench", parts });
+      }
+      standing.sort((a, b) => a.z - b.z);                   // the farthest back first (z: how far back, as a negative number)
+      items = standing;
       // pictures from before (the other set, after the phone was turned) are let go of
       const used = new Set(list.map(q => q.t));
       textures.forEach((t, key) => { if (!used.has(t)) { t.dead = true; gl.deleteTexture(t.tex); textures.delete(key); } });
-      // the empty boxes have done their job: out of the room they go
-      room.querySelectorAll("[data-gl]").forEach(el => el.remove());
+      // the empty boxes, the fan and the benches have done their job: out of the room they go
+      room.querySelectorAll("[data-gl], :scope > .nrp-fan, :scope > .nrp-bench3d").forEach(el => el.remove());
       // every corner, one after another, in one list for the graphics chip: x, y, z, then which spot of the picture
       const data = new Float32Array(list.length * 4 * 5);
       list.forEach((q, i) => q.pts.forEach((p, k) => data.set(p, (i * 4 + k) * 5)));
@@ -284,15 +397,35 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
       const push = cs.transform && cs.transform !== "none" ? new DOMMatrix(cs.transform).m43 : 0;
       gl.useProgram(prog);
       gl.uniform2f(loc.screen, W, H);
-      gl.uniform3f(loc.shift, parseFloat(cs.left) || 0, -window.scrollY, push);
+      // (the scroll, kept inside the room: a phone's bounce at the top or bottom would otherwise pull the room off screen)
+      const left = parseFloat(cs.left) || 0, sy = scrolled();
+      gl.uniform3f(loc.shift, left, -sy, push);
       gl.uniform1f(loc.P, P);
       gl.uniform1i(loc.tex, 0); gl.activeTexture(gl.TEXTURE0);
       gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
       gl.enableVertexAttribArray(loc.pos); gl.vertexAttribPointer(loc.pos, 3, gl.FLOAT, false, 20, 0);
       gl.enableVertexAttribArray(loc.uv); gl.vertexAttribPointer(loc.uv, 2, gl.FLOAT, false, 20, 12);
       gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-      list.forEach((q, i) => { if (!q.t.ok) return; gl.bindTexture(gl.TEXTURE_2D, q.t.tex); gl.drawArrays(gl.TRIANGLE_STRIP, i * 4, 4); });
+      const one = i => { const q = list[i]; if (!q.t.ok) return; gl.bindTexture(gl.TEXTURE_2D, q.t.tex); gl.drawArrays(gl.TRIANGLE_STRIP, i * 4, 4); };
+      for (let i = 0; i < nFaces; i++) one(i);             // the walls, floor and roof
+      // where the camera is, in the room: the middle of the screen, as far down as you've scrolled, P in front
+      const cam = [W / 2 - left, H / 2 + sy, P - push];
+      const far = c => Math.hypot(c[0] - cam[0], c[1] - cam[1], c[2] - cam[2]);
+      for (const it of items) {
+        if (!it.parts) { one(it.i); continue; }
+        // A group's parts, back to front for where the camera is right now. The camera is always above a bench, so:
+        // legs, then ends, then sides, then the top. The fan depends on which side of its blades you're on: from above,
+        // blades, then motor, then the rod coming down to them; from below, the rod (hidden above), blades, motor.
+        let rank;
+        if (it.kind === "fan") {
+          const blades = it.parts.filter(p => p.role === "blade"), bladeY = blades.reduce((s, p) => s + p.c[1], 0) / (blades.length || 1);
+          rank = cam[1] < bladeY ? { blade: 0, part: 0, motor: 1, rod: 2 } : { rod: 0, blade: 1, part: 1, motor: 2 };
+        } else rank = { leg: 0, end: 1, part: 1, edge: 2, top: 3 };
+        it.parts.map(p => [rank[p.role] || 0, -far(p.c), p.i]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).forEach(p => one(p[2]));
+      }
     }
+    // how far the page is scrolled, kept between the top and the bottom of the room
+    function scrolled() { return Math.min(Math.max(window.scrollY, 0), Math.max(0, document.documentElement.scrollHeight - window.innerHeight)); }
     const redraw = () => { if (!queued) { queued = true; requestAnimationFrame(draw); } };
     onChange = redraw;
     // keep drawing for a while (the walk-in: the browser moves the room, the canvas follows it frame by frame)
@@ -307,7 +440,7 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
     canvas.addEventListener("webglcontextrestored", () => { textures.clear(); buffer = gl.createBuffer(); compile(); rebuild(); });
 
     return window.NRFINAL.current = {
-      build, draw, redraw, follow,
+      build, draw, redraw, follow, scrolled,
       setCamera(p) { P = p; },
       onRestore(fn) { rebuild = fn; },
       // how much the pictures take on the graphics chip, in MB (to check the weight)
