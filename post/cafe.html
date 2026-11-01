@@ -340,12 +340,22 @@ dialog.pop-gallery { overflow-y: auto;
 .card em { font-style: italic; }
 .screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
-/* on a phone: the label goes under the photo (flush with its right edge) and the arrows drop to the bottom corners */
+/* on a phone (Oct 31): the gallery's words come in at 3/4 size, so they sit beside the photos in the same proportion
+   as on a computer instead of crowding them.
+     - the line under LIFE: 9px instead of 12px, its two parts stacked (the title, then the artist), one to a line
+     - the label goes under the photo (flush with its right edge) and is the very same card, shrunk to 3/4 (zoom):
+       same lettering, same line breaks, same glass and screws, only smaller. --k is that size; change it in one place.
+       (zoom shrinks the label's own margin too, so the margin is divided by --k to land at 6px down and 7px out.)
+     - the photo gets the room the smaller label frees up: the screen's height minus 290px (it was 330px)
+     - the arrows drop to the bottom corners */
 @media (max-width: 760px) {
+  .hang header p { font-size: 9px; letter-spacing: .12em; line-height: 1.6; }
+  .hang header p span { display: block; }
+  .hang header p .g-dot { display: none; }
   .viewer { padding: max(52px, env(safe-area-inset-top, 0px)) 16px max(76px, env(safe-area-inset-bottom, 0px)); }
   .piece { flex-direction: column; align-items: flex-end; gap: 4px; }
-  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 330px); max-height: calc(100dvh - 330px); }
-  .label { margin: 6px -7px 0 0; }
+  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 290px); max-height: calc(100dvh - 290px); }
+  .label { --k: .75; zoom: var(--k); margin: calc(6px / var(--k)) calc(-7px / var(--k)) 0 0; }
   .v-prev, .v-next { top: auto; transform: none; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
   .v-prev { left: 16px; } .v-next { right: 16px; }
 }
@@ -808,7 +818,12 @@ body.leaving::before { opacity: 1; }
     });
   }
   $("g-title").textContent = plain(LABEL.title || "LIFE").split(" ")[0];   // "Life" (shown in capitals)
-  $("g-sub").textContent = [plain(LABEL.title), LABEL.artist].filter(Boolean).join(" · ");
+  // The line under LIFE: the title, a dot, the artist ("Life Exhibit, 2026 · KATHI ERIC DALGUNTAS (…)"). Each part is
+  // its own <span>, so on a phone they can stack one to a line, with the dot hidden (see the phone rules in PART 1).
+  [plain(LABEL.title), plain(LABEL.artist)].filter(Boolean).forEach((t, i) => {
+    if (i) { const dot = document.createElement("span"); dot.className = "g-dot"; dot.textContent = " · "; $("g-sub").appendChild(dot); }
+    const part = document.createElement("span"); part.textContent = t; $("g-sub").appendChild(part);
+  });
   G.forEach((p, i) => {
     const print = document.createElement("button");
     print.className = "print"; print.type = "button";
