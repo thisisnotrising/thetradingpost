@@ -444,10 +444,13 @@ body.leaving::before { opacity: 1; }
 <dialog class="pop pop-cafe" id="pop-cafe" aria-label="Nebula Cafe">
   <button class="close crystal" type="button" aria-label="Close">×</button>
   <figure class="cafe">
+    <!-- two sizes: the browser picks cafe.webp (1400 px) on phones and laptops, cafe-2100.webp on big sharp screens -->
     <img data-src="../assets/img/post/room/cafe.webp" width="1400" height="1577"
-         alt="Nebula Cafe: NEBULA cafe in warm white neon on white brick under an ivy-hung arch, a pink neon sign below it that reads buy me a cosmo, shelves of jars and bottles, Edison bulbs, and a glittering black counter.">
+         data-srcset="../assets/img/post/room/cafe.webp 1400w, ../assets/img/post/room/cafe-2100.webp 2100w"
+         sizes="(max-aspect-ratio: 1/1) calc(100vw - 32px), calc((100vh - 110px) * .888)"
+         alt="Nebula Cafe: NEBULA cafe in amber neon that glows like the Edison bulbs, on white brick under an ivy-hung arch, below it a pink neon tube sign in italic script on clear acrylic that reads buy me a cosmo, its pink light on the brick, shelves of jars and bottles, Edison bulbs, and a glittering black counter.">
     <a class="neon" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener"
-       style="left:32.8%; top:58.1%; width:34.4%; height:7.2%">Buy me a cosmo (opens in a new tab)</a>
+       style="left:32.8%; top:58.9%; width:34.4%; height:7.5%">Buy me a cosmo (opens in a new tab)</a>
   </figure>
   <p class="cafe-hint"><a href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener">Buy Me a Cosmo ↗</a></p>
 </dialog>
@@ -798,7 +801,10 @@ body.leaving::before { opacity: 1; }
   let standingAt = 0;                                       // where you were in the room when you stepped into a popup
   function openPop(name) {
     const pop = $("pop-" + name);
-    pop.querySelectorAll("[data-src]").forEach(el => { el.src = el.dataset.src; el.removeAttribute("data-src"); });
+    pop.querySelectorAll("[data-src]").forEach(el => {
+      if (el.dataset.srcset) { el.srcset = el.dataset.srcset; el.removeAttribute("data-srcset"); }   // (a picture with two sizes: set the choice first)
+      el.src = el.dataset.src; el.removeAttribute("data-src");
+    });
     if (name === "gallery") showHang();
     tag.hidden = true;
     standingAt = scrollY;
