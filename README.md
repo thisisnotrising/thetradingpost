@@ -2,7 +2,7 @@
 
 The NOT RISING Trading Post, Newsstand and Speakeasy, built as a small website of its own. WordPress isn't involved.
 
-Live address once it's on GitHub: **https://thisisnotrising.github.io/thetradingpost/**
+Live address: **https://nebularising.media/thetradingpost/**
 
 ---
 
@@ -12,15 +12,16 @@ Live address once it's on GitHub: **https://thisisnotrising.github.io/thetrading
 index.html              the street: the Trading Post storefront (the front door)
 newsstand/index.html    the Newsstand (through the magazine window)
 speakeasy/index.html    THE SPEAK, opening soon (behind door 9¾)
-post/index.html         THE POST, the room inside, as a STAGE SET: the same 3D box and camera as the original
+post/cafe.html          THE POST, the room inside, as a STAGE SET: the same 3D box and camera as the original
                         room, but every wall, the floor, the roof and everything standing in the room is one
                         finished photo. Four clickable spots on the walls open four popups. (Its look, bones
-                        and behaviour are all in this one file.)
+                        and behaviour are all in this one file.) Its address is .../post/cafe
 post/recipe.html        the live room THE POST is photographed from (post.js, post.css, post-roof.js build it).
                         Visitors never see it. To change the room: change the recipe, then re-photograph:
                           node tools/bake-stage.js   the room, piece by piece -> assets/img/post/stage/ + assets/post-stage.js
                           node tools/bake-post.js    the Nebula Cafe popup picture -> assets/img/post/room/cafe.webp
-post/preview.html       points to post/index.html (it was the preview while THE POST was being rebuilt)
+post/index.html         points to post/cafe.html (THE POST's old address, .../post/, so old links still land in the room)
+post/preview.html       points to post/cafe.html (it was the preview while THE POST was being rebuilt)
 assets/post-stage.js    the stage set's list: every photo and where it stands, in metres (written by bake-stage.js)
 tools/                  the recipes for the pictures: cut-lounge.py (the lounge, cut from Kathi's photo),
                         render-monstera.py (the pink plant, a 3D render), bake-stage.js, bake-post.js, and others
@@ -79,6 +80,13 @@ The issue appears on the rack and in the storefront window together, and the "Co
 
 **WebP or JPG?** Either works: just write the real file name in `IMAGES`. WebP files are smaller. https://squoosh.app converts and resizes for free in your browser.
 
+### Swap a photo in THE POST's Gallery
+
+1. **Make the print.** Add the photo to `PHOTOS` in `tools/tone-gallery.py` and run it. It turns the photo black and white in the Wishing Wall's two tones (like every print in the exhibit), saves the print and a small copy for the wall, and prints the photo's `ar` (its shape).
+2. **Upload** the print to `assets/img/post/gallery/life-exhibit/` and the small copy, with the *same file name*, to `assets/img/post/gallery/life-exhibit/wall/`.
+3. **Change its line** in `data.js` under `GALLERY`: the file name, `ar`, `crop` (which part shows in the square on the wall) and `alt` (what's in the photo, for screen readers). The Gallery popup updates by itself.
+4. **Re-photograph the wall.** The room's black brick wall is a baked picture, so the old photo stays on it until the stage is re-baked (`node tools/bake-stage.js`, see above). Only the right-wall pictures that hold that photo change; upload just those to `assets/img/post/stage/wide/` and `.../narrow/`.
+
 ### Other switches in `data.js`
 
 | What | Where | Example |
@@ -94,13 +102,9 @@ The issue appears on the rack and in the storefront window together, and the "Co
 
 ---
 
-## Moving to your own subdomain later
+## Where it's hosted
 
-If you later want `post.thisisnotrising.org`, nothing in the site changes. Every link is written relative to the page it's on.
-
-1. In the repo, go to **Settings → Pages → Custom domain**, type the subdomain, and save.
-2. Where your domain's DNS is managed, add a **CNAME** record: name `post`, value `thisisnotrising.github.io`.
-3. Once GitHub shows a green check, tick **Enforce HTTPS**.
+The site lives at **nebularising.media/thetradingpost**. The account's own site repo, `thisisnotrising.github.io`, has the custom domain `nebularising.media` (four A records at GoDaddy point it to GitHub), and every other Pages repo on the account, this one included, is served under that domain by its repo name. Nothing in the site had to change for the move: every link is written relative to the page it's on.
 
 ---
 
