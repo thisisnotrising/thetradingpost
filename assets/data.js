@@ -346,9 +346,9 @@ window.NRSF = {
    NOT RISING · THE POST — THE DATA FILE
    The room you walk into through the right-hand door (unit 10).
    The engine (post.js) reads this; the drawing of the room lives there.
-   THE POST itself (post/index.html) is a stage set photographed from that room (post/recipe.html), so a change
+   THE POST itself (post/cafe.html) is a stage set photographed from that room (post/recipe.html), so a change
    here that shows in the room appears there after re-photographing with tools/bake-stage.js. The gallery's photos
-   and label, and the wishes as words (for screen readers), are read live by post/index.html.
+   and label, and the wishes as words (for screen readers), are read live by post/cafe.html.
    ============================================================ */
 window.NRPOST = {
 
@@ -440,7 +440,7 @@ window.NRPOST = {
     { img: "post/gallery/life-exhibit/04-state-room.webp",         ar: 1.11, alt: "The State Room marquee: Tonight, OK Go, Sold Out" },
     { img: "post/gallery/life-exhibit/05-guitar-case.webp",        ar: 0.68, alt: "A guitar case leaning against sheer curtains in soft light" },
     { img: "post/gallery/life-exhibit/06-holding-hands.webp",      ar: 1.34, alt: "Two people holding hands on a hospital bed, paper bands on one wrist" },
-    { img: "post/gallery/life-exhibit/07-fireplace.webp",          ar: 0.72, crop: "50% 30%", alt: "A fire behind a mesh screen, a book resting on a fur rug in front of it" },
+    { img: "post/gallery/life-exhibit/07-evil-eye.webp",           ar: 0.75, crop: "50% 35%", alt: "A glass evil eye set in a round stamped-brass cuff on a wrist with a leaf tattoo, a weathered wooden railing behind" },
     { img: "post/gallery/life-exhibit/08-mural-alley.webp",        ar: 0.75, alt: "A narrow alley between graffiti-painted brick walls, set with café tables and chairs under string lights" },
     { img: "post/gallery/life-exhibit/09-stencil-cowboy.webp",     ar: 0.75, crop: "50% 15%", alt: "Stencil graffiti of a cowboy with a rifle on a painted cinder-block wall" },
     { img: "post/gallery/life-exhibit/10-towers.webp",             ar: 1.00, alt: "Looking straight up between glass towers into cloud" },
@@ -459,7 +459,7 @@ window.NRPOST = {
      The pictures are the storefront poster itself, redrawn 4 times bigger (3456 x 4408 pixels) with its book cover
      sharpened by an AI upscaler (tools/render-poster.js), so it stays crisp however big it's seen. Phones get a copy
      half that size (still twice the original), which is plenty for a phone and easier on its memory.
-     It is hung live by post/index.html, on top of the wall's picture (not baked into it), so it keeps every pixel.
+     It is hung live by post/cafe.html, on top of the wall's picture (not baked into it), so it keeps every pixel.
      WHERE IT HANGS, in metres, for each room shape (wide = computers and tablets on their side, narrow = phones):
        from, to      the stretch of black wall it fills, measured from the back corner toward the door.
                      LIFE starts 6.63 m from the corner on wide screens (7.14 m on phones), so "to" stops 0.28 m

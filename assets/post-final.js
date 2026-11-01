@@ -6,7 +6,7 @@
    room is one flat picture, redrawn in 3D as the camera moves. Only the invisible buttons stay in the page.)
 
    THE BIG IDEA
-   The stage set (post/index.html) holds every picture of the room up in 3D and lets the browser
+   The stage set (post/cafe.html) holds every picture of the room up in 3D and lets the browser
    arrange them. On a computer that's fine. On a phone it's too heavy: Safari keeps a fully
    painted copy of every tilted surface (both long walls, the floor, the roof slopes) at 3 pixels
    per point, which for this room is hundreds of megabytes, and the page crashes.
@@ -17,7 +17,7 @@
    new places. The memory it needs is the pictures themselves, and nothing more.
 
    HOW IT FITS IN
-   post/index.html still puts up the room exactly as before: the walls, the four buttons, the
+   post/cafe.html still puts up the room exactly as before: the walls, the four buttons, the
    poster's button, the fan and the benches. On a phone it builds the pictures as empty boxes
    (with data-gl = which picture), and this file:
      1. measures where each box's four corners are in the room (the browser has already worked
@@ -141,7 +141,7 @@ void main() { colour = texture(u_tex, v_uv, -0.4); }`;
     /* 3 · THE POSTER
        On the stage set the poster is live: a black frame with a fine grey edge and a soft shadow, the poster in
        it, the wall's ivy draping over its top (fading out above the lettering), and the room's light over it all
-       (post/index.html, step 2B, works out those numbers: "look", all in metres). Here the same things are painted,
+       (post/cafe.html, step 2B, works out those numbers: "look", all in metres). Here the same things are painted,
        in the same order, onto one picture, 160 pixels to the metre, with room around it for the shadow. */
     const K = 160, MARGIN = .25;
     function posterPicture(look) {

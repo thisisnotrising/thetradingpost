@@ -3,7 +3,7 @@
    Draws the room you enter through the right-hand door at 777 Daydream St.
 
    HOW THE ROOM WORKS (the big idea)
-   The room is a real 3D box. post/index.html has five flat panels:
+   The room is a real 3D box. post/recipe.html has five flat panels:
    back wall, left wall, right wall, floor and ceiling. post.css tilts
    each one into place (the left wall swings 90° to face right, the
    floor tips back to lie flat, and so on). The browser then draws the
@@ -468,7 +468,7 @@
   /* ---- THE NEWSSTAND KIOSK ----
      This is the Newsstand page itself, in miniature: the same HTML classes (sign, board, awning,
      tabs, rack, pockets, glass shelves, tags), styled by the Newsstand's own stylesheet
-     (newsstand.css, loaded in post/index.html), so it matches the real one exactly. It is built at
+     (newsstand.css, loaded in post/recipe.html), so it matches the real one exactly. It is built at
      the Newsstand's full width (1180 px) and then shrunk to fit the wall. The bulbs are drawn with
      the same recipe as drawGlobes() in newsstand.js: Edison bulbs. */
   const tiles = (word, seed = 0) => [...word].map((ch, i) => {                // letter tiles, each a hair crooked (same as newsstand.js)
