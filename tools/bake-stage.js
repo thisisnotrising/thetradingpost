@@ -47,7 +47,10 @@ const BANDS = {
   wide:   [[0, 3, 280], [3, 7, 180], [7, 99, 120]],
   narrow: [[0, 3.5, 100], [3.5, 8.5, 250], [8.5, 99, 140]],
 };
-const FLAT_RES = 150;      // the back wall and the glass triangle above it: always far away
+const FLAT_RES = 150;      // the glass triangle above the back wall: always far away
+// THE BACK WALL (Nov 1): Nebula Cafe, with its pink neon, is what the room leads your eye to, so it's saved sharper than
+// the rest of the far end: on a big computer screen it is seen at up to ~250 pixels a metre, on a phone ~150-200.
+const BACK_RES = { wide: 260, narrow: 200 };
 const FLOOR_RES = 120;     // the floor's light, shadows and the rug (the floor's own sparkle is a repeating tile; Oct 31: was 40, sharp enough now for the rug)
 const QUALITY = .72;       // WebP quality (0 to 1)
 
@@ -194,7 +197,7 @@ const r4 = v => +v.toFixed(4);
         else S.walls[wall] = entry;
       } else if (wall === 'back-wall') {
         const { png, box } = await shoot(p.i);
-        const file = `${set}/back.webp`; kb += await encode(png, path.join(OUT, file), null, FLAT_RES / u); n++;
+        const file = `${set}/back.webp`; kb += await encode(png, path.join(OUT, file), null, Math.min(u, BACK_RES[set]) / u); n++;
         S.walls.back = { bands: [{ img: file, x: 0, y: 0, w: r4(box.w / u), h: r4(box.h / u) }], hot: hot.back };
       } else if (wall === 'floor' || wall === 'floor-near') {
         // THE FLOOR: its sparkle is a small picture that repeats (post/obsidian-floor.webp); only its light and shadows are photographed

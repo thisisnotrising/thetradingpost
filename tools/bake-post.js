@@ -4,7 +4,7 @@
    (the live room that the stage set is photographed from):
 
      assets/img/post/room/wall.webp   the Wishing Wall, flat and straight on (only with WALL=1)
-     assets/img/post/room/cafe.webp   Nebula Cafe, from standing height, straight on
+     assets/img/post/room/cafe.webp   Nebula Cafe, from standing height, straight on (and cafe-2100.webp, a bigger copy)
 
    (The room itself is photographed piece by piece by tools/bake-stage.js.)
    Run it after changing a wish in data.js, or the café.
@@ -124,7 +124,9 @@ const pct = (b, fw, fh, ox = 0, oy = 0) => {
   console.log('   neon sign   ', pct(await boxOf(big, '.nrp-pink'), clip.width, clip.height, clip.x, clip.y));
   const cpng = path.join(TMP, 'cafe.png');
   await big.screenshot({ path: cpng, clip });
+  // two sizes (Nov 1): 1400 px wide for phones and laptops, 2100 px for big sharp screens (cafe.html picks with srcset)
   await toWebp(browser, cpng, path.join(OUT, 'cafe.webp'), 1400, .85);
+  await toWebp(browser, cpng, path.join(OUT, 'cafe-2100.webp'), 2100, .85);
   await big.close();
 
   // 3 · THE WISHING WALL, flat and straight on: only when asked (WALL=1), since the wall's own popup in the room
