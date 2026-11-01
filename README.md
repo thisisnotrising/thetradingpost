@@ -82,7 +82,7 @@ The issue appears on the rack and in the storefront window together, and the "Co
 
 ### Swap a photo in THE POST's Gallery
 
-1. **Make the print.** Add the photo to `PHOTOS` in `tools/tone-gallery.py` and run it. It turns the photo black and white in the Wishing Wall's two tones (like every print in the exhibit), saves the print and a small copy for the wall, and prints the photo's `ar` (its shape).
+1. **Make the print.** Add the photo to `PHOTOS` in `tools/tone-gallery.py` and run it on a folder holding just that one original (any photo not in the folder is skipped). It turns the photo black and white in the Wishing Wall's two tones (like every print in the exhibit), saves the print and a small copy for the wall, and prints the photo's `ar` (its shape).
 2. **Upload** the print to `assets/img/post/gallery/life-exhibit/` and the small copy, with the *same file name*, to `assets/img/post/gallery/life-exhibit/wall/`.
 3. **Change its line** in `data.js` under `GALLERY`: the file name, `ar`, `crop` (which part shows in the square on the wall) and `alt` (what's in the photo, for screen readers). The Gallery popup updates by itself.
 4. **Re-photograph the wall.** The room's black brick wall is a baked picture, so the old photo stays on it until the stage is re-baked (`node tools/bake-stage.js`, see above). Only the right-wall pictures that hold that photo change; upload just those to `assets/img/post/stage/wide/` and `.../narrow/`.
