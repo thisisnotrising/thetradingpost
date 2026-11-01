@@ -72,14 +72,24 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .4  0 0 0 0 .38  0 0 0 0 .35  0 0 0 .18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>"); }
 /* The arch: the bar photo seen through it, with the plaster's thickness shading the edge */
 .nrp-arch { display: block; overflow: hidden; background-color: #8d867c; box-shadow: inset 0 0 0 calc(var(--u) * .08) #d9d4cb, inset calc(var(--u) * .2) calc(var(--u) * .12) calc(var(--u) * .35) rgba(0,0,0,.35); }
-.nrp-arch-shade { position: absolute; inset: 0; pointer-events: none;   /* the café beyond the arch sits in shade, warm lamplight low down */
-  background: linear-gradient(180deg, rgba(40,32,24,.55), rgba(40,32,24,.38) 45%, rgba(40,32,24,.1) 72%, rgba(0,0,0,0)); }
+/* The café's white brick is the very same brick as the left wall's, and (Nov 1, Kathi's ask) just as white: only a
+   whisper of shade is left up under the arch's crown. (It used to sit in deep shade: .55 at the top, .38 halfway down.) */
+.nrp-arch-shade { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(40,32,24,.14), rgba(40,32,24,.05) 40%, rgba(0,0,0,0) 65%); }
 .nrp-arch::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
   box-shadow: inset 0 0 0 calc(var(--u) * .07) #e6e2da, inset calc(var(--u) * .16) calc(var(--u) * .1) calc(var(--u) * .3) rgba(30,20,10,.35); }
 .nrp-mirror img { display: block; width: 100%; height: 100%; filter: drop-shadow(calc(var(--u) * .04) calc(var(--u) * .05) calc(var(--u) * .05) rgba(0,0,0,.3)); }
-/* The name in warm white neon, like the café in the reference */
-.nrp-neon { display: grid; justify-items: start; align-content: center; text-decoration: none; color: #fffaf0;
-  text-shadow: 0 0 2px #fff, 0 0 calc(var(--u) * .06) #ffe9c2, 0 0 calc(var(--u) * .18) rgba(255,214,150,.85), 0 0 calc(var(--u) * .45) rgba(255,200,120,.5); }
+/* The name in neon that glows like the Edison bulbs (Nov 1, Kathi's ask; it was warm white, which faded into the café's
+   brick once the brick was lit as white as the left wall). The colours are the bulbs' own (edisonDefs() in post.js):
+   each letter a bright core (#fff1cf) inside an amber rim (the stroke), like a lit tube, then the bulbs' halo, #ffb04a
+   out to #ff8a20, spreading onto the brick. */
+.nrp-neon { display: grid; justify-items: start; align-content: center; text-decoration: none; color: #fff1cf;
+  -webkit-text-stroke: calc(var(--u) * .014) #ffa83c; paint-order: stroke fill;   /* a bright core inside an amber tube */
+  text-shadow: 0 0 calc(var(--u) * .02) #ffb04a, 0 0 calc(var(--u) * .06) #ff9a30, 0 0 calc(var(--u) * .15) rgba(255,146,40,.95),
+    0 0 calc(var(--u) * .32) rgba(255,138,32,.65), 0 0 calc(var(--u) * .7) rgba(255,138,32,.32); }
+.nrp-neon i { -webkit-text-stroke-width: calc(var(--u) * .013);   /* "cafe" is a thin script: a little more amber, so it reads as well as NEBULA */
+  text-shadow: 0 0 calc(var(--u) * .02) #ffa83c, 0 0 calc(var(--u) * .05) #ff9a30, 0 0 calc(var(--u) * .12) rgba(255,146,40,1),
+    0 0 calc(var(--u) * .26) rgba(255,138,32,.8), 0 0 calc(var(--u) * .6) rgba(255,138,32,.4); }
 .nrp-neon b { font: 400 min(calc(var(--u) * .62), calc(var(--nw) * .17)) / 1 Oswald, "Arial Narrow", sans-serif; letter-spacing: .22em; }
 .nrp-neon i { font: 400 min(calc(var(--u) * .5), calc(var(--nw) * .14)) / 1 Sacramento, cursive; font-style: normal; margin: .05em 0 0 .2em; }
 /* THE EVIL EYE (Oct 31), above the word NEBULA (post.js puts it inside the word's <b>, so 1em = the letters' size).
@@ -223,33 +233,14 @@
 .nrp-bulbs { pointer-events: none; }
 .nrp-bulbs svg { position: absolute; left: 0; top: 0; }
 
-/* The neon's hand-written tube lettering: Neonderthaw (free, SIL Open Font Licence), kept in assets/fonts
-   so it always loads, even when Google Fonts doesn't */
-@font-face { font-family: "Neonderthaw"; src: url(fonts/neonderthaw.woff2) format("woff2"); font-display: swap; }
-/* ---------- THE NEON (front of the café bar) ----------
-   Its colour matches the red of the ivy on the walls (Oct 2026; it was hot pink).
-   Each line is drawn three times on top of itself (the ::before and ::after copies come from data-t):
-     the glow:  thick, blurred, deep ivy red, spilling onto the concrete
-     the tube:  the red glass tube itself
-     the core:  a thin near-white line down the middle, where a lit tube is brightest */
-.nrp-pink { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; overflow: visible;
-  font-family: Neonderthaw, "Sacramento", cursive; font-size: var(--fs); line-height: 1.02; }
-.nrp-pink-wash { position: absolute; inset: -30% -12%; pointer-events: none; z-index: -1;
-  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(226, 34, 58, .42), rgba(226, 34, 58, .16) 45%, rgba(226, 34, 58, 0) 72%); }
-.nrp-pink-line { position: relative; white-space: nowrap; color: #ffd9dc;
-  text-shadow: 0 0 .015em #fff, 0 0 .04em #ff5a66, 0 0 .08em #f0324a, 0 0 .16em #dc1f3c, 0 0 .32em rgba(214, 26, 54, .9), 0 0 .7em rgba(196, 22, 48, .55); }
-.nrp-pink-line::before { content: attr(data-t); position: absolute; inset: 0; color: transparent; filter: blur(.1em);
-  -webkit-text-stroke: .1em rgba(226, 36, 60, .55); z-index: -1; }
-.nrp-pink-line::after { content: attr(data-t); position: absolute; inset: 0; color: #fff1f1; -webkit-text-stroke: 0;
-  -webkit-mask: linear-gradient(#000, #000); clip-path: inset(0); text-shadow: none; opacity: .9;
-  font-size: 1em; transform: translateY(-.01em); filter: blur(.006em); }
-.nrp-pink-line:nth-child(2) { margin-left: -.3em; }   /* the first line sits a touch right of the second, as in the photo */
-.nrp-pink-line:nth-child(3) { margin-left: .5em; }
-.nrp-pink:hover .nrp-pink-line, .nrp-pink:focus-visible .nrp-pink-line { color: #ff6f7a; }
-@media (prefers-reduced-motion: no-preference) {   /* a neon tube flickers on, once, then holds steady */
-  .nrp.ready .nrp-pink-line { animation: nrp-flicker 2.2s steps(1) .6s both; }
-  @keyframes nrp-flicker { 0% { opacity: .15 } 8% { opacity: 1 } 12% { opacity: .3 } 18% { opacity: 1 } 22% { opacity: .5 } 26%, 100% { opacity: 1 } }
-}
+/* ---------- THE PINK NEON ("buy me a cosmo", on the café's white brick) ----------
+   Two pictures from tools/bend-neon.py, placed by post.js (NEON_PIC), each reaching past the sign's box onto the wall:
+     .nrp-pink-light  the pink light on the brick: "multiply" darkens the wall's green and blue a little, so the
+                      brick turns pink near the tubes while its own shading (the joints, the grit) still shows
+     .nrp-pink-tubes  the tubes, their glow and the clear acrylic panel, laid on top as they are */
+.nrp-pink { display: block; text-decoration: none; overflow: visible; }
+.nrp-pink img { position: absolute; max-width: none; pointer-events: none; }
+.nrp-pink-light { mix-blend-mode: multiply; }
 
 
 /* ---------- THE GALLERY VIEWER (opens when you click a frame) ----------
@@ -526,10 +517,6 @@ html.nrlb-open, html.nrlb-open body { overflow: hidden; }
   opacity: 0; animation: nrp-twinkle 4s ease-in-out infinite; }
 @keyframes nrp-twinkle { 0%, 70%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 82% { opacity: 1; transform: scale(1) rotate(20deg); } }
 @media (prefers-reduced-motion: reduce) { .nrp-obsidian i { animation: none; opacity: .5; transform: scale(.7); } }
-/* the red neon's glow on the café's white brick (Oct 31: the sign moved up off the obsidian): soft, like light on a wall */
-.nrp-pink-wash {
-  background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(230, 30, 56, .3), rgba(214, 26, 50, .1) 45%, rgba(214, 26, 50, 0) 72%); }
-
 /* THE IVY ON THE ARCH WALL (placed by post.js): pictures grown by tools/grow-ivy.py */
 .nrp-archivy { pointer-events: none; background-repeat: no-repeat; }
 

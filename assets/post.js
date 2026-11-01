@@ -139,6 +139,13 @@
   // leaves on the roof match the vines indoors. A colour listed more often turns up more often.
   const IVY_PALETTE = ["#801a2e", "#ba2430", "#ba2430", "#ba2430", "#ba2430", "#d43834", "#d43834", "#d43834", "#ce4660", "#ce4660", "#ce4660",
     "#e2748a", "#e2748a", "#e26444", "#e26444", "#d68032", "#d68032", "#deaa40", "#deaa40", "#eacc6e", "#96963e", "#487046"];
+  // THE PINK NEON'S TWO PICTURES (tools/bend-neon.py prints these numbers; copy them here after re-bending it):
+  //   w, h        the sign itself (end of the first letter to end of the last, top of the b to the tail of the y), m
+  //   pw, ph      the whole picture, m (the sign plus the wall round it, where its light falls)
+  //   left, top   how far in from the picture's left and top edges the sign starts, m
+  //   mid         how far down from the sign's top the middle of its small letters is, m (the sign hangs by this line)
+  const NEON_PIC = { tubes: "post/neon/cosmo-tubes.webp", light: "post/neon/cosmo-light.webp",
+    w: 2.201, h: 0.540, pw: 3.104, ph: 1.448, left: 0.450, top: 0.450, mid: 0.277 };
   function paintTextures() {
     const B = IMG + "post/baked/", t = (f, wm, hm, pw, ph) => ({ url: B + f, wm, hm, pw, ph, pad: 0 });
     TILE.white = t("brick-white.webp", 2.3, 1.72); TILE.black = t("brick-black.webp", 2.3, 1.72);
@@ -644,17 +651,24 @@
     neon.dataset.room = "cafe"; neon.dataset.tip = "Nebula Cafe"; neon.setAttribute("aria-label", "Nebula Cafe");
     neon.style.setProperty("--nw", (nw * u) + "px");
     onWall(make("div", "nrp-plastershade", back), { x: 0, y: 0, w: Wm, h: HM });
-    // THE PINK NEON, after your photo: hand-written neon tube. (Oct 31: moved up off the front of the stone bar, onto the
-    // café's white brick between the top shelf and NEBULA cafe, so the lounge in front of the café never hides it.)
-    // It is three layers of the same words: a wide soft pink glow, a brighter pink tube, and a near-white
-    // core where the light is strongest (see .nrp-pink in post.css). It also throws a pink wash on the counter.
+    // THE PINK NEON (Nov 1, after Kathi's "Oh Baby" photo): a real LED neon tube, written in one continuous italic hand, on a
+    // clear acrylic panel cut to the shape of the words, in the pink of the big plant in the lounge. It sits on the
+    // café's white brick between the top shelf and NEBULA cafe (Oct 31: up off the front of the stone bar, so the
+    // lounge in front of the café never hides it). It is two pictures, made by tools/bend-neon.py (see NEON_PIC):
+    //   the light:  the pink light the tubes throw on the brick, and the panel's faint shadow. It is laid on with
+    //               "multiply" (post.css), so the brick's own shading shows through the pink, as real light does.
+    //   the tubes:  the tubes, their glow and the acrylic panel, laid on top.
+    // The words are in the pictures (and in aria-label for screen readers): to change them, change NEON in data.js,
+    // run tools/bend-neon.py, and copy the numbers it prints into NEON_PIC.
     const NE = DATA.NEON || { lines: [] };
     if (NE.lines.length) {
-      // centred on the café wall, with the same margin at each end, just above the top shelf (barH is the bar's height)
-      const free0 = aX + (narrow ? 0.15 : 1.25), free1 = Wm - free0;
-      const pw = Math.min(free1 - free0, 2.2), ph = 0.52, sign = onWall(make(NE.link ? "a" : "div", "nrp-pink", back,
-        `<span class="nrp-pink-wash"></span>${NE.lines.map(l => `<span class="nrp-pink-line" data-t="${esc(l)}">${esc(l)}</span>`).join("")}`), { x: (Wm - pw) / 2, y: barH + 0.1, w: pw, h: ph });   // smaller (Oct 2026), centred on the café wall
-      sign.style.setProperty("--fs", Math.min(ph / NE.lines.length * .85, pw / Math.max(...NE.lines.map(l => l.length)) * 2.7) * u + "px");   // as big as fits (this script's letters are narrow)
+      const NP = NEON_PIC;
+      // centred on the café wall. Its small letters sit at the same height as the old neon's (Nov 1, Kathi's ask): their
+      // middle 0.283 m above the top shelf (barH is the bar's height); the tail of the y comes down to just above the bottles.
+      const sign = onWall(make(NE.link ? "a" : "div", "nrp-pink", back,
+        `<img class="nrp-pink-light" src="${IMG}${NP.light}" alt="" decoding="async"><img class="nrp-pink-tubes" src="${IMG}${NP.tubes}" alt="" decoding="async">`),
+        { x: (Wm - NP.w) / 2, y: barH + 0.283 - (NP.h - NP.mid), w: NP.w, h: NP.h });
+      sign.querySelectorAll("img").forEach(im => Object.assign(im.style, { left: (-NP.left * u) + "px", top: (-NP.top * u) + "px", width: (NP.pw * u) + "px", height: (NP.ph * u) + "px" }));
       if (NE.link) { sign.href = NE.link; sign.target = "_blank"; sign.rel = "noopener"; sign.setAttribute("aria-label", NE.lines.join(" ") + " (opens in a new tab)"); sign.classList.add("nrp-hot"); sign.dataset.tip = "Buy me a cosmo"; }
       else sign.setAttribute("aria-label", NE.lines.join(" "));
     }
