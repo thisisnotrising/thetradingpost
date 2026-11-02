@@ -33,6 +33,9 @@ assets/storefront.css   how the storefront looks
 assets/newsstand.css    how the newsstand and the magazines look
 assets/vendor/          the page-flip library (hosted here, so no outside service is needed)
 
+assets/img/storefront/  the storefront, baked: the building, ivy, doors and shop windows as finished pictures
+                        (one set for phones, one for bigger screens) plus the black-and-white "Teleporting" picture.
+                        Made by: node tools/bake-storefront.js  (run it again after changing the building or the ivy)
 assets/img/             every photo, as WebP files
 assets/img/thumbs/      small copies of the covers, for the rack and the shop window
 assets/img/tbh-s2/      To Be Human Season 2, page by page
@@ -44,7 +47,8 @@ assets/img/tbh-holiday/ To Be Human Holiday Special, page by page
 **Why it loads fast.**
 - Photos are separate WebP files. The browser downloads one only when it's needed: the rack loads small cover thumbnails, a magazine's photos load when someone opens it, and a memoir's pages load as they're turned.
 - The code is split into files, so the browser keeps them after the first visit. A returning reader downloads almost nothing.
-- Measured: the storefront is about 260 KB and the newsstand about 330 KB. The old single-file page was 10.9 MB.
+- The storefront is baked: the building, ivy, doors and shop windows are pictures painted ahead of time, so a visitor's phone just shows them instead of painting every brick and leaf itself (that took a mid-range phone about 5 seconds; the colour building now arrives in under 2). While they load, a black-and-white picture of the street shows with a "Teleporting . . ." sign.
+- Measured (Nov 2026): the storefront downloads about 1 MB on a phone and about 2 MB on a big screen; the newsstand about 330 KB. The old single-file page was 10.9 MB.
 
 ---
 
@@ -96,6 +100,11 @@ The issue appears on the rack and in the storefront window together, and the "Co
 | Rack tabs | `TABS` | `[[1, 20], [21, 40], [41, 60]]` |
 | Where each door goes | `LINKS` (Part 2) | `""` means "opens soon" |
 | Words on the building | `SIGNS` (Part 2) | `marquee: "GRAND OPENING"` |
+| The letter board up close | `LINKS` → `marquee` and `SIGNS` → `marqueeButton` (Part 2) | clicking the board shows it up close with a button: `marqueeButton: "Read Press Release"` opens the press release link. `""` link = no popup |
+| The NOT RISING sign up close | `LINKS` → `magazine` (Part 2) | `"https://thisisnotrising.org/"`. Clicking the sign shows the newest issue in `FEATURES` that has a `url` (so it follows the Newsstand by itself), with a READ THE MAGAZINE button |
+
+**Signs never leave the street by themselves.** The letter board, the NOT RISING sign, the A-frame sign and the poster in the window only open their popup. The button in the popup is the one way out, and it opens in a new tab, so the street stays open behind it.
+| Seasons with baked pictures | `BAKED` (Part 2) | `["fall"]`; a season not listed is painted live (slow on phones) |
 | Posters in the window | `POSTERS` (Part 2) | |
 
 **Check the full Issue 01 before Dec 1:** add `?full` to the newsstand address: `.../thetradingpost/newsstand/?full`

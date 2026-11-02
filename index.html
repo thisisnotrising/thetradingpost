@@ -38,10 +38,11 @@ img { max-width: 100%; }
     <canvas class="nrsf-paint" id="nrsf-paint" aria-hidden="true"></canvas>
 
     <!-- Upstairs: the antique swinging sign and the GRAND OPENING marquee -->
-    <div class="nrsf-signbox" id="nrsf-sign" aria-hidden="true"></div><!-- the hanging sign is drawn by the script -->
+    <div class="nrsf-signbox" id="nrsf-sign"></div><!-- the hanging sign is drawn by the script; clicking it shows the current cover up close -->
+    <!-- The letter board: clicking it shows it up close, with a button to LINKS.marquee (today: the press release) -->
     <div class="nrsf-marquee" id="nrsf-marquee-box">
-      <div class="nrsf-globes" id="nrsf-marquee-lights" aria-hidden="true"></div>
-      <div class="nrsf-board"><h1 class="nrsf-tiles" id="nrsf-marquee"></h1></div>
+      <span class="nrsf-globes" id="nrsf-marquee-lights" aria-hidden="true"></span>
+      <span class="nrsf-board"><span class="nrsf-tiles" id="nrsf-marquee"></span></span>
     </div>
 
     <!-- The fascia lettering -->
@@ -85,11 +86,14 @@ img { max-width: 100%; }
 
     <!-- The A-frame floor sign on the pavement, between the red door and the poster window.
          The script fills in its words and link from data.js (SIGNS.floorSign and LINKS.ramh). -->
-    <a class="nrsf-floorsign" id="nrsf-floorsign" href="#" target="_blank" rel="noopener"></a>
+    <div class="nrsf-floorsign" id="nrsf-floorsign"></div>
 
     <canvas class="nrsf-ivy" id="nrsf-ivy" aria-hidden="true"></canvas>
     <div class="nrsf-fall" id="nrsf-fall" aria-hidden="true"></div>
   </div>
+  <!-- Teleporting: a black-and-white picture of the storefront and a little sign, shown the instant the page
+       opens, then faded away by the script once the colour building is in (arrive() in storefront.js). -->
+  <div class="nrsf-teleport" id="nrsf-teleport" role="status"><p class="nrsf-tp-sign"><span class="w">Teleporting</span><span class="d">.</span><span class="d">.</span><span class="d">.</span></p></div>
   <div class="nrsf-veil" aria-hidden="true"></div>
   <div class="nrsf-toast" id="nrsf-toast" role="status" hidden></div>
 </div>
