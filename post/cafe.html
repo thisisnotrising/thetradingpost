@@ -17,10 +17,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The Post at 777 Daydream St.: a black-and-gold shopfront wrapped in red Boston ivy, with a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
 <meta name="twitter:card" content="summary_large_image">
-<!-- Oswald, for the poster popup's BUY IT button (the same lettering as on the storefront). It loads without holding
-     up the page (media="print" until it arrives, then switched on). -->
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&display=swap" media="print" onload="this.media='all'">
 <!-- START THE BIG DOWNLOADS AT ONCE (Oct 31): the room's heaviest pictures, fetched while the page itself is still
      arriving, instead of waiting for the scripts at the bottom to ask for them. Each screen shape fetches only its own
      set: "wide" for screens wider than they are tall (and anything up to 9 : 10), "narrow" for phones held upright.
@@ -279,17 +275,23 @@ dialog.pop-cafe[open] { display: grid; place-items: center; align-content: cente
      .lb-box     the poster and its button, stacked and centred, 20px apart; it pops in, growing slightly
      .lb-poster  as big as fits: 86% of the screen's width, or short enough to leave room for the button
                  (.784 = the poster's shape, 864 / 1102), and never over 560px wide
-     .lb-buy     the button: cream with black letters; with a mouse over it (or keyboard focus) it turns to an outline */
+     .lb-panel   a small crystal panel holding the BUY IT button: crystal glass with a plain white arrow, the same as
+                 the storefront's popups (.nrsf-lb-panel / .nrsf-lb-go in assets/storefront.css) */
 dialog.pop-poster { background: rgba(6,6,8,.84); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 dialog.pop-poster[open] { display: grid; place-items: center; padding: 16px; }
 .lb-box { position: relative; display: grid; justify-items: center; gap: 20px; outline: none; animation: lb-pop .35s cubic-bezier(.2,.7,.2,1); }
 @keyframes lb-pop { from { opacity: 0; scale: .92; } }
 .lb-poster { display: block; width: min(86vw, calc((100vh - 150px) * .784), 560px); height: auto; aspect-ratio: 864 / 1102;
   box-shadow: 0 20px 60px rgba(0,0,0,.7); }
-.lb-buy { font: 600 18px/1 Oswald, "Arial Narrow", sans-serif; letter-spacing: .16em; text-transform: uppercase; text-decoration: none;
-  background: #f4f1ea; color: #111; padding: 15px 44px; border: 2px solid #f4f1ea; transition: background .2s, color .2s; }
-.lb-buy:focus-visible { background: transparent; color: #f4f1ea; outline: none; }
-@media (hover: hover) { .lb-buy:hover { background: transparent; color: #f4f1ea; } }   /* (only with a mouse, so a tap doesn't leave it stuck) */
+.lb-panel { display: inline-block; padding: 5px; border-radius: 6px; }   /* (crystal glass: see above) */
+.lb-buy { display: inline-flex; align-items: center; gap: .9em; padding: 13px 18px; border: 0; border-radius: 3px; white-space: nowrap; text-decoration: none;
+  font: 700 12px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; font-variant-emoji: text;
+  transition: background-color .2s; }   /* (crystal glass: see above) */
+.lb-buy .arr { font-size: 1.35em; letter-spacing: 0; transition: transform .2s; }
+.lb-buy:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.lb-buy:active { background-color: rgba(255,255,255,.3); }
+@media (hover: hover) { .lb-buy:hover { background-color: rgba(255,255,255,.18); } .lb-buy:hover .arr { transform: translateX(3px); } }
+@media (max-width: 639px) { .lb-buy { font-size: 11px; padding: 12px 16px; } }
 .pop-poster .close { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
   border: 1px solid #555; background: #111; color: #f4f1ea; font: 400 24px/1 Arimo, Arial, sans-serif; display: grid; place-items: center; }
 .pop-poster .close:hover, .pop-poster .close:focus-visible { background: #f4f1ea; color: #111; outline: none; }
@@ -462,7 +464,7 @@ body.leaving::before { opacity: 1; }
   <div class="lb-box" tabindex="-1" autofocus>   <!-- (autofocus: the popup opens with nothing lit up, as on the storefront) -->
     <button class="close" type="button" aria-label="Close">×</button>
     <img class="lb-poster" id="lb-poster" width="864" height="1102" alt="">
-    <a class="lb-buy" id="lb-buy" href="#" target="_blank" rel="noopener">Buy it</a>
+    <span class="lb-panel crystal"><a class="lb-buy crystal" id="lb-buy" href="#" target="_blank" rel="noopener">Buy it<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
   </div>
 </dialog>
 
