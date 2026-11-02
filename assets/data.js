@@ -296,13 +296,16 @@ window.NRSF = {
     tradingPost: "post/cafe", // right door, unit 10: opens into THE POST (the room inside); its directory leads on to the Newsstand
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
-    ramh: "https://robotsatemyhomework.com/ramh-library"   // the A-frame floor sign (opens in a new tab)
+    ramh: "https://robotsatemyhomework.com/ramh-library",  // the A-frame floor sign (opens in a new tab)
+    marquee: "https://substack.com/home/post/p-222940546",   // the button under the letter board up close: the press release ("" = no popup)
+    magazine: "https://thisisnotrising.org/"                 // the button under the NOT RISING sign up close ("" = no popup)
   },
 
   /* The words on the building */
   SIGNS: {
     marquee: "GRAND OPENING",       // letter board under the upstairs window
     marqueeSub: "Sunday 11.1 @ 11:11 AM SLC / 1:11 PM NYC",      // the smaller second line under it (leave "" for one line)
+    marqueeButton: "Read Press Release",  // the button under the letter board up close (it opens LINKS.marquee)
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the cut-metal swinging sign (split over two lines: NOT / RISING)
@@ -325,6 +328,11 @@ window.NRSF = {
     }
   },
   FALLBACK_SEASON: "fall",
+
+  /* Seasons whose building, ivy, doors and shop windows are baked into pictures (assets/img/storefront/),
+     so they load fast. A season not listed here is painted live on the visitor's device (slow on phones).
+     Changed the building, the ivy colours or a season? Run tools/bake-storefront.js to bake it again. */
+  BAKED: ["fall"],
 
   /* The poster window: one poster, styled like a best-seller poster.
      (The Now Playing bills for the Speakeasy come back when it opens.) */

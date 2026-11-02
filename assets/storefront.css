@@ -156,10 +156,48 @@
 /* The A-frame floor sign's poster up close: its shape is 70 wide : 112 tall (.625), never over 380px wide */
 .nrsf .nrsf-lb-poster.is-floorsign { aspect-ratio: 70 / 112; width: min(80vw, calc((100vh - 150px) * .625), 380px); }
 .nrsf .nrsf-lb-poster.is-floorsign svg { display: block; width: 100%; height: 100%; }
-.nrsf .nrsf-lb-buy { font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: 18px; line-height: 1; letter-spacing: .16em; text-transform: uppercase;
-  background: #f4f1ea; color: #111; padding: 15px 44px; border: 2px solid #f4f1ea; transition: background .2s, color .2s; }
-.nrsf .nrsf-lb-buy:focus-visible { background: transparent; color: #f4f1ea; outline: none; }
-@media (hover: hover) { .nrsf .nrsf-lb-buy:hover { background: transparent; color: #f4f1ea; } }   /* mouse hover turns it to an outline (only on devices with a mouse, so taps on phones don't leave it stuck) */
+/* The NOT RISING sign up close: the current issue's cover (1000 wide : 1294 tall = .773), never over 520px wide */
+.nrsf .nrsf-lb-poster.is-cover { aspect-ratio: 1000 / 1294; width: min(86vw, calc((100vh - 150px) * .773), 520px); }
+.nrsf .nrsf-lb-poster.is-cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* The hanging sign and the letter board open up close when clicked: a little lift when you point at them */
+.nrsf .nrsf-scene .nrsf-signbox[role=button], .nrsf .nrsf-scene .nrsf-marquee[role=button] { cursor: pointer; transition: filter .2s; }
+.nrsf .nrsf-scene .nrsf-signbox[role=button]:hover, .nrsf .nrsf-scene .nrsf-signbox:focus-visible { filter: brightness(1.18); }
+.nrsf .nrsf-scene .nrsf-marquee[role=button]:hover, .nrsf .nrsf-scene .nrsf-marquee:focus-visible { filter: brightness(1.12); }
+.nrsf .nrsf-signbox:focus-visible, .nrsf .nrsf-scene .nrsf-marquee:focus-visible { outline: calc(var(--u) * 3) solid #ffd79a; outline-offset: calc(var(--u) * 2); }
+.nrsf .nrsf-floorsign, .nrsf .nrsf-poster { cursor: pointer; }
+/* CRYSTAL GLASS: the same recipe as THE POST's floating buttons and directory (post/cafe.html, "CRYSTAL GLASS").
+   Clear and see-through, like cut crystal:
+     - what's behind shows through, blurred and a little brighter (backdrop-filter)
+     - a faint white wash, brighter at the top-left facet (the first gradient)
+     - a hairline of light around the edge and a brighter line along the top (the inset box-shadows)
+     - a faint rainbow at the edge, the way crystal splits light (the ::before layer, a thin ring of colour)
+   White lettering with a soft dark shadow, so it reads over light and dark alike. */
+.nrsf .nrsf-crystal { position: relative; isolation: isolate; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.08) 42%, rgba(255,255,255,.04) 58%, rgba(255,255,255,.2));
+  -webkit-backdrop-filter: blur(6px) saturate(1.5) brightness(1.08); backdrop-filter: blur(6px) saturate(1.5) brightness(1.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(255,255,255,.2),
+    0 4px 14px rgba(0,0,0,.28); }
+.nrsf .nrsf-crystal::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; padding: 1px;
+  background: linear-gradient(115deg, rgba(255,120,170,.55), rgba(255,220,120,.5) 25%, rgba(120,255,200,.45) 50%, rgba(120,170,255,.55) 75%, rgba(220,140,255,.5));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: .7; }
+/* The popup button (every popup: the letter board, the NOT RISING sign, the A-frame sign, the poster):
+   a small crystal panel holding one crystal button, like THE POST's directory,
+   with the same lettering (small bold capitals, widely spaced) and a plain white arrow (never an emoji) */
+.nrsf .nrsf-lb-panel { display: inline-block; padding: 5px; border-radius: 6px; }
+.nrsf .nrsf-lb-go { display: inline-flex; align-items: center; gap: .9em; padding: 13px 18px; border: 0; border-radius: 3px; white-space: nowrap;
+  font: 700 12px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; font-variant-emoji: text;
+  transition: background-color .2s; }
+.nrsf .nrsf-lb-go .arr { font-size: 1.35em; letter-spacing: 0; transition: transform .2s; }
+.nrsf .nrsf-lb-go:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.nrsf .nrsf-lb-go:active { background-color: rgba(255,255,255,.3); }
+@media (hover: hover) { .nrsf .nrsf-lb-go:hover { background-color: rgba(255,255,255,.18); color: #fff; } .nrsf .nrsf-lb-go:hover .arr { transform: translateX(3px); } }
+@media (max-width: 639px) { .nrsf .nrsf-lb-go { font-size: 11px; padding: 12px 16px; } }
+
+/* The letter board up close: the same board, blown up (its --u, frame and bulbs are set to its own size by the script) */
+.nrsf .nrsf-lb-poster.is-board { container-type: normal; aspect-ratio: auto; width: auto; box-shadow: none; }
+.nrsf .nrsf-lb .nrsf-mq-big { position: relative; z-index: 1; display: block; width: min(92vw, 1080px);   /* z-index 1: under the close button */ box-shadow: 0 20px 60px rgba(0, 0, 0, .7); }
 .nrsf .nrsf-lb-x { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
   border: 1px solid #555; background: #111; color: #f4f1ea; font: 400 24px/1 Arimo, Arial, sans-serif; display: grid; place-items: center; padding: 0; }
 .nrsf .nrsf-lb-x:hover, .nrsf .nrsf-lb-x:focus-visible { background: #f4f1ea; color: #111; outline: none; }
@@ -265,3 +303,42 @@
 .nrsk-copy a { margin-top: 12px; display: inline-block; padding: 12px 18px; border: 1px solid #8f8f8f; color: #f0f0f0; text-decoration: none; font-weight: 700; letter-spacing: .2em; font-size: 12px; text-transform: uppercase; }
 .nrsk-copy a:hover { background: #1a1a1a; }
 .nrsk-copy a:focus-visible { outline: 2px solid #ffffff; outline-offset: 3px; }
+
+/* ============================================================
+   TELEPORTING: the first thing a visitor sees
+   The black-and-white storefront (baked by tools/bake-storefront.js, a few KB) covers the street
+   while the colour pictures load, with a small hanging sign in the shop's lettering (Cinzel).
+   The script adds "gone" when the colour building is in, and the picture fades away.
+   Before the script runs, the street is given its height from its shape: 1200 x 1120 on bigger
+   screens, 400 x 1060 on phones (the same plans as storefront.js), so nothing jumps.
+   ============================================================ */
+.nrsf .nrsf-scene { aspect-ratio: 1200 / 1120; }
+@media (max-width: 639px) { .nrsf .nrsf-scene { aspect-ratio: 400 / 1060; } }
+.nrsf .nrsf-teleport { position: absolute; inset: 0; z-index: 45; pointer-events: none;
+  background: #1a1a1a url("img/storefront/fall-desk-bw.webp") top center / 100% auto no-repeat;
+  transition: opacity .9s ease; }
+@media (max-width: 639px) { .nrsf .nrsf-teleport { background-image: url("img/storefront/fall-phone-bw.webp"); } }
+.nrsf .nrsf-teleport.gone { opacity: 0; }
+.nrsf .nrsf-tp-sign { position: absolute; left: 50%; top: 17.5%; translate: -50% -50%; margin: 0; white-space: nowrap;   /* hung over the upstairs window (17.5% down the street on both plans) */
+  display: flex; align-items: baseline;
+  font: 700 clamp(15px, 2.2vw, 24px)/1 Cinzel, "Trajan Pro", Georgia, serif; letter-spacing: .28em; text-transform: uppercase;
+  background: rgba(10, 9, 7, .86); padding: .95em 1.3em .95em 1.6em;
+  border: 1px solid #c9a35a; outline: 1px solid rgba(217, 180, 106, .35); outline-offset: 5px;   /* a gold rule, and a fainter one outside it */
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .55), inset 0 0 0 3px rgba(10, 9, 7, .86), inset 0 0 0 4px rgba(217, 180, 106, .25);
+  }
+/* Gilt lettering, the same gold as "The Newsstand" on the shop window: light at the top, deep at the bottom */
+.nrsf .nrsf-tp-sign .w, .nrsf .nrsf-tp-sign .d {
+  background: linear-gradient(#fff3c9, #e8c77e 45%, #d9b46a 60%, #9a7230); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(42, 27, 8, .9)) drop-shadow(0 0 6px rgba(255, 215, 140, .35)); }
+/* The three dots hop one after another, each glowing as it lands at the top, like a signal going out */
+.nrsf .nrsf-tp-sign .d { display: inline-block; margin-left: .26em; font-size: 1.35em; line-height: .7; letter-spacing: 0; animation: nrsf-tp-dot 1.4s ease-in-out infinite; }
+.nrsf .nrsf-tp-sign .d:nth-child(3) { animation-delay: .18s; }
+.nrsf .nrsf-tp-sign .d:nth-child(4) { animation-delay: .36s; }
+@keyframes nrsf-tp-dot {
+  0%, 55%, 100% { transform: translateY(0); opacity: .35; }
+  22% { transform: translateY(-.45em); opacity: 1; filter: drop-shadow(0 1px 0 rgba(42, 27, 8, .9)) drop-shadow(0 0 10px rgba(255, 220, 150, .9)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nrsf .nrsf-tp-sign .d { animation: none; opacity: 1; }
+  .nrsf .nrsf-teleport { transition: none; }
+}

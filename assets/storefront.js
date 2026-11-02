@@ -270,11 +270,20 @@
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const $ = id => document.getElementById(id);
     const scene = $("nrsf-scene");
+    // Everything that opens "up close" (the letter board, the NOT RISING sign, the A-frame sign, the poster in the
+    // window) is a pressable object on the street, not a web link: clicking it only opens the popup, so visitors stay
+    // in the world. The button inside the popup is the one way out (it opens in a new tab). Works with Enter/Space too.
+    const upClose = (el, label, open) => {
+      ["href", "target", "rel"].forEach(a => el.removeAttribute(a));
+      el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", label);
+      el.addEventListener("click", e => { e.preventDefault(); open(); });
+      el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    };
 
     /* Season, picked by today's date */
     const m = new Date().getMonth() + 1;
     const byDate = m >= 9 && m <= 11 ? "fall" : (m === 12 || m <= 2) ? "winter" : m <= 5 ? "spring" : "summer";
-    let season = D.SEASON === "auto" ? byDate : D.SEASON;
+    let season = window.NRSF_SEASON || (D.SEASON === "auto" ? byDate : D.SEASON);   // NRSF_SEASON: set by the bake tool
     if (!D.SEASONS[season]) season = D.FALLBACK_SEASON;
     const S = D.SEASONS[season];
     root.dataset.season = season;
@@ -313,8 +322,6 @@
         <circle cx="50" cy="90" r=".8" fill="#f4f1ea"/>
         <rect x="${LX - 1}" y="${LY - 2}" width="${LW + 2}" height="${(LH + 4).toFixed(2)}" rx="1.6" fill="#fff"/>
         <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>`;
-      fs.href = LINKS.ramh;
-      fs.setAttribute("aria-label", `${SIGNS.floorSign.join(" ")}: see the sign up close`);
       fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
         <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
         <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
@@ -323,17 +330,44 @@
         ${FLOOR_POSTER}
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
       </svg>`;
-      // Clicking the sign doesn't leave the shop: it opens the poster up close first, with a button to the library
-      // (a Cmd/Ctrl/Shift-click still goes straight there, as links usually do)
-      fs.addEventListener("click", e => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-        e.preventDefault();
+      // Clicking the sign doesn't leave the shop: it opens the poster up close, with a button to the library
+      upClose(fs, `${SIGNS.floorSign.join(" ")}: see the sign up close`, () =>
         openLb({ label: `${SIGNS.floorSign.join(" ")}, Robots Ate My Homework`, kind: "is-floorsign",
           art: `<svg viewBox="15 13 70 112" role="img" aria-label="${esc(SIGNS.floorSign.join(" "))}">${FLOOR_POSTER}</svg>`,
-          button: "Visit the library", href: LINKS.ramh, from: fs });
-      });
+          button: "Visit the library", href: LINKS.ramh, from: fs }));
     }
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
+
+    // The letter board: clicking it shows the board up close (the same letters and bulbs, blown up) with a button
+    // under it (SIGNS.marqueeButton) that opens LINKS.marquee, today the press release. LINKS.marquee "" = just a sign.
+    {
+      const mq = $("nrsf-marquee-box"), words = [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", ");
+      if (LINKS.marquee) upClose(mq, `${words}: see the sign up close`, () => {
+        openLb({ label: words, kind: "is-board",
+          art: `<div class="nrsf-marquee nrsf-mq-big" style="aspect-ratio:${G.marquee.w} / ${G.marquee.h}"><span class="nrsf-globes" aria-hidden="true"></span>` +
+               `<span class="nrsf-board"><span class="nrsf-tiles">${$("nrsf-marquee").innerHTML}</span></span></div>`,
+          button: SIGNS.marqueeButton || "Read more", href: LINKS.marquee, from: mq });
+        // the big board's own scale: its frame and bulbs grow with it, so it looks like the board on the wall
+        const big = lb.querySelector(".nrsf-mq-big"), k = big.clientWidth / G.marquee.w;
+        big.style.setProperty("--u", k + "px");
+        drawGlobes(big.querySelector(".nrsf-globes"), k);
+      });
+    }
+
+    // The NOT RISING hanging sign: clicking it shows the current issue's cover up close, with a button that
+    // opens the magazine (LINKS.magazine). "Current" = the newest issue in FEATURES (data.js) that has a url,
+    // the same issue the Newsstand is showing. So when the next issue gets its url, the sign follows by itself.
+    {
+      const sg = $("nrsf-sign"), NR = window.NR;
+      const live = NR ? NR.FEATURES.filter(f => f.url && f.cover) : [], cur = live[live.length - 1];
+      if (LINKS.magazine && cur) {
+        const no = NR.FEATURES.indexOf(cur) + 1;
+        upClose(sg, `${SIGNS.hanging}: see the magazine up close`, () =>
+          openLb({ label: `${SIGNS.hanging} magazine, issue ${no}: ${cur.name}`, kind: "is-cover",
+            art: `<img src="${img(NR.IMAGES[cur.cover], NS_BASE)}" alt="NOT RISING issue ${no} cover: ${esc(cur.name)}">`,
+            button: "Read the magazine", href: LINKS.magazine, from: sg }));
+      }
+    }
 
     let G, u, W, H, dpr;
     const place = (el, r) => { el.style.left = r.x * u + "px"; el.style.top = r.y * u + "px"; el.style.width = r.w * u + "px"; if (r.h != null) el.style.height = r.h * u + "px"; };
@@ -1142,10 +1176,9 @@
     // framed by a ring of bulbs, in front of the bookshop's shelves, with the street reflected in the glass
     function buildPosters(gl) {
       const host = $("nrsf-posters"), best = POSTERS.find(p => p.kind === "bestseller");
-      const linkAttrs = p => { const href = LINKS[p.link] || p.link, ext = /^https?:/.test(href); return `href="${esc(href)}"${ext ? ' target="_blank" rel="noopener"' : ` data-link="${esc(p.link)}"`}`; };
-      const bestHTML = (x, y, w) => best ? `<a class="nrsf-poster" ${linkAttrs(best)} style="${pos(x, y, w)}" aria-label="${esc(best.book)} by ${esc(best.author)}: ${esc(best.rank)} NOT RISING Magazine, Best Storyteller">
+      const bestHTML = (x, y, w) => best ? `<span class="nrsf-poster" style="${pos(x, y, w)}">
           <span class="nrsf-p-best"><span class="l1"><em>${esc(best.rank)}</em> NOT RISING MAGAZINE</span><span class="l2">BEST STORYTELLER</span>
-          <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title">${esc(best.book.toUpperCase())}</span></span></a>` : "";
+          <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title">${esc(best.book.toUpperCase())}</span></span></span>` : "";
       // Same bulb sizes as the newsstand window next door, so the two match
       const P = G.phone ? { ring: 7, gap: 22, r: 3.6, posterW: 64 } : { ring: 13, gap: 30, r: 6.2, posterW: 172 };
       const pw = P.posterW, ph = pw * 1102 / 864;               // the poster's height follows from its shape (864 wide : 1102 tall)
@@ -1154,7 +1187,7 @@
       host.innerHTML = html;
       // Clicking the poster opens it up close first (with a BUY IT button), instead of going straight to the shop
       const posterEl = host.querySelector(".nrsf-poster");
-      if (posterEl && best) posterEl.addEventListener("click", e => { e.preventDefault(); openPoster(best, posterEl); });
+      if (posterEl && best) upClose(posterEl, `${best.book} by ${best.author}: ${best.rank} NOT RISING Magazine, Best Storyteller. See the poster up close`, () => openPoster(best, posterEl));
     }
 
     /* ---------- Up close ----------
@@ -1170,6 +1203,7 @@
     }
     // label = read aloud; kind = an extra class for the picture's frame (sets its shape); art = what's shown big;
     // button + href = the button under it (opens in a new tab, so the shop stays open behind); from = what to go back to
+    // The button sits in a crystal-glass panel with an arrow, like THE POST's directory (every popup, so they all match)
     function openLb({ label, kind = "", art, button, href, from }) {
       if (!lb) {                                                              // build the overlay the first time it's needed
         lb = document.createElement("div");
@@ -1183,7 +1217,7 @@
       lb.innerHTML = `<div class="nrsf-lb-box">
           <button class="nrsf-lb-x" type="button" aria-label="Close">\u00d7</button>
           <div class="nrsf-lb-poster ${kind}">${art}</div>
-          <a class="nrsf-lb-buy" href="${esc(href)}" target="_blank" rel="noopener">${esc(button)}</a>
+          <span class="nrsf-lb-panel nrsf-crystal"><a class="nrsf-lb-go nrsf-crystal" href="${esc(href)}" target="_blank" rel="noopener">${esc(button)}<span class="arr" aria-hidden="true">\u2192\uFE0E</span></a></span>
         </div>`;
       lb.querySelector(".nrsf-lb-x").addEventListener("click", closePoster);
       lbBack = from;
@@ -1232,10 +1266,10 @@
       <radialGradient id="nrsf-globe" cx=".45" cy=".42" r=".62"><stop offset="0" stop-color="#fffef8"/><stop offset=".55" stop-color="#fff0c8"/><stop offset=".85" stop-color="#ffd98a"/><stop offset="1" stop-color="#e9b25a"/></radialGradient>
       <radialGradient id="nrsf-halo"><stop offset="0" stop-color="#ffe2a8" stop-opacity=".55"/><stop offset=".35" stop-color="#ffc874" stop-opacity=".2"/><stop offset="1" stop-color="#ffb050" stop-opacity="0"/></radialGradient>
       <radialGradient id="nrsf-glass2" cx=".5" cy=".55" r=".65"><stop offset="0" stop-color="#fff6d8"/><stop offset=".5" stop-color="#ffd690" stop-opacity=".95"/><stop offset="1" stop-color="#e8a24a" stop-opacity=".85"/></radialGradient></defs>`;
-    function drawGlobes(el) {
+    function drawGlobes(el, k = u) {                                   // k = the scale (the street's own, or the big board's)
       const w = el.clientWidth, h = el.clientHeight;
       if (!w || !h) return;
-      const r = (G.phone ? 6 : 9) * u, edge = (G.phone ? 10 : 14) * u, target = (G.phone ? 30 : 46) * u, pts = [];
+      const r = (G.phone ? 6 : 9) * k, edge = (G.phone ? 10 : 14) * k, target = (G.phone ? 30 : 46) * k, pts = [];
       const nx = Math.max(2, Math.round((w - 2 * edge) / target)), ny = Math.max(1, Math.round((h - 2 * edge) / target));
       for (let i = 0; i <= nx; i++) { const x = edge + (w - 2 * edge) * i / nx; pts.push([x, edge], [x, h - edge]); }
       for (let j = 1; j < ny; j++) { const y = edge + (h - 2 * edge) * j / ny; pts.push([edge, y], [w - edge, y]); }
@@ -1266,6 +1300,51 @@
       place($("nrsf-door-l"), dl.leaf);
       place($("nrsf-door-r"), dr.leaf);
 
+      const painted = paintScene();          // the building, ivy, doors and shop interiors (baked pictures, or painted live)
+      buildPosters(G.front.glass[0]);
+      buildNews(G.front.glass[1]);
+      wireLinks();
+      drawGlobes($("nrsf-marquee-lights"));
+      placeOpenSign(dr.leaf);
+      place($("nrsf-floorsign"), G.floorSign);
+      return painted;
+    }
+
+    /* ---------- Baked or live ----------
+       The building, the ivy, both doors and both shop interiors are pictures painted ahead of time by
+       tools/bake-storefront.js and saved in assets/img/storefront/ (one set for phones, one for bigger screens),
+       so a visitor's phone only has to show them. Painting them live takes a phone about 5 seconds;
+       showing the pictures takes a blink. It is the same painting either way.
+       BAKED in data.js lists the seasons that have pictures. Any other season paints live, and so does
+       the page with ?live at the end of its address (that's how the bake tool, and you, can see the live painting).
+       After changing anything about the building or the ivy, run the bake tool again. */
+    const LIVE = !!window.NRSF_PAINT_LIVE || /[?&]live\b/.test(location.search) || !(D.BAKED || []).includes(season);
+    const PICS = {};                                                 // baked pictures, loaded once each
+    function layers() {                                              // [name, canvas, width, height] of every baked layer
+      const [dl, dr] = G.doors, [g0, g1] = G.front.glass;
+      return [
+        ["building", $("nrsf-paint"), W, H],
+        ["ivy", $("nrsf-ivy"), W, H],
+        ["door-l", $("nrsf-door-l").querySelector("canvas"), dl.leaf.w * u, dl.leaf.h * u],
+        ["door-r", $("nrsf-door-r").querySelector("canvas"), dr.leaf.w * u, dr.leaf.h * u],
+        ["window-1", $("nrsf-win-posters").querySelector(".nrsf-interior"), g0.w * u, g0.h * u],
+        ["window-2", $("nrsf-win-news").querySelector(".nrsf-interior"), g1.w * u, g1.h * u]
+      ];
+    }
+    const picture = name => {
+      const file = `storefront/${season}-${G.phone ? "phone" : "desk"}-${name}.webp`;
+      return PICS[file] || (PICS[file] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = img(file); }));
+    };
+    function paintScene() {
+      if (LIVE) { paintLive(); return Promise.resolve(); }
+      const L = layers();
+      return Promise.all(L.map(([name]) => picture(name))).then(pics => {
+        if (pics.some(p => !p)) return textures().then(paintLive);   // a picture is missing: paint live instead
+        L.forEach(([, c, w, h], i) => { const ctx = sizeCanvas(c, w, h, dpr); ctx.drawImage(pics[i], 0, 0, c.width, c.height); });
+      });
+    }
+    function paintLive() {
+      const [dl, dr] = G.doors;
       paintBuilding();
       paintIvy();
       paintDoor($("nrsf-door-l").querySelector("canvas"), dl.leaf, "red");
@@ -1275,12 +1354,6 @@
         const gl = G.front.glass[i];
         paintShelves(win.querySelector(".nrsf-interior"), gl.w, gl.h, u, dpr, 40 + i, { shelf: G.phone ? 26 : 34, lamps: G.phone ? [.5] : [.25, .75] });
       });
-      buildPosters(G.front.glass[0]);
-      buildNews(G.front.glass[1]);
-      wireLinks();
-      drawGlobes($("nrsf-marquee-lights"));
-      placeOpenSign(dr.leaf);
-      place($("nrsf-floorsign"), G.floorSign);
     }
 
     /* The glowing OPEN sign, centred in the glass pane of the black door (unit 9).
@@ -1368,17 +1441,26 @@
     }
     addEventListener("pageshow", () => { root.classList.remove("leaving", "into-light"); root.querySelectorAll(".open").forEach(d => d.classList.remove("open")); });
 
-    // Load the photo textures first, then paint
+    // Live painting needs the photo textures (brick, wood, leaves, cobbles) first. Baked pictures don't.
+    let TEXP = null;
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
-    const texReady = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick-red.webp")]);
+    const textures = () => TEXP || (TEXP = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick-red.webp")]));
     const fontsReady = document.fonts
       ? Promise.all(["700 20px Cinzel", "400 20px Sancreek", "600 20px Oswald", "400 20px \"Archivo Black\""].map(f => document.fonts.load(f).catch(() => {})))
       : Promise.resolve();
-    // Paint once, when the photo textures and the fonts are in (fonts get 3 seconds at most).
-    // If the fonts turn up after that, repaint once more so the lettering uses them.
+    // Arriving: the black-and-white "Teleporting . . ." picture (in index.html) fades away once the colour building is in
+    function arrive() {
+      const tp = $("nrsf-teleport");
+      if (!tp) return;
+      tp.classList.add("gone");
+      setTimeout(() => tp.remove(), 1200);
+    }
+    // Baked: lay it out and show the pictures right away. Live: wait for the textures and the fonts
+    // (fonts get 3 seconds at most), and if the fonts turn up after that, repaint once more.
     let built = false;
-    fontsReady.then(() => built && build());
-    Promise.all([texReady, Promise.race([fontsReady, new Promise(r => setTimeout(r, 3000))])]).then(() => { build(); built = true; startLeaves(); });
+    if (LIVE) fontsReady.then(() => built && build());
+    const ready = LIVE ? Promise.all([textures(), Promise.race([fontsReady, new Promise(r => setTimeout(r, 3000))])]) : Promise.resolve();
+    ready.then(() => { const p = build(); built = true; return p; }).then(() => { arrive(); startLeaves(); });
     if ("ResizeObserver" in window) {
       let t, lastW = root.clientWidth;                         // only repaint when the width really changes
       new ResizeObserver(() => { if (!built || root.clientWidth === lastW) return; lastW = root.clientWidth; clearTimeout(t); t = setTimeout(build, 150); }).observe(root);
