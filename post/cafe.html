@@ -33,6 +33,8 @@
   picture, as wide as the screen: you land up under the glass roof and scroll down into the room. On a phone you see
   the middle of the hall (a tall slice, centred on Nebula Cafe) and the directory takes you to the walls.
   Five invisible buttons sit on the picture (Newsstand, Wishing Wall, Cafe, Gallery, the poster); each opens a popup.
+  Inside the café, Kathi greets you (hover over her) and every button opens a card first (Buy Me A Cosmo, her
+  Substack); only a card's own button leaves the tiny world.
   (The old 3D stage set, assets/post-stage.js and post-final.js, is no longer used by this page.)
 
   THIS FILE HAS THREE PARTS
@@ -47,10 +49,11 @@
     The Wishing Wall close-up: assets/img/post/room/wall.webp
     The gallery's photos and label, and the wishes' words: assets/data.js
     The poster up close and its BUY IT link: WALL_POSTER and POSTERS in assets/data.js
+    The café's two cards (Buy Me a Coffee, Substack): in PART 2, with Kathi's photo assets/img/post/kathi-hat.webp
   ------------------------------------------------------------------
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Caveat:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Arimo:wght@400;700&family=Caveat:wght@700&display=swap">
 <style>
 /* ================================================================
    PART 1 · THE LOOK
@@ -188,25 +191,68 @@ dialog.pop-cafe { overflow-y: auto; overflow-x: hidden; }
 .cafe .spot:hover, .cafe .spot:focus-visible { background: transparent; box-shadow: 0 0 0 2px rgba(255,255,255,.8), 0 0 1.4em rgba(255,214,160,.55); }
 .cafe .c-neon:hover, .cafe .c-neon:focus-visible { box-shadow: none; background: radial-gradient(closest-side, rgba(255,92,160,.3), transparent); }
 .c-jar svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
-/* "Hi Human": Kathi's speech bubble, smoky crystal, just off her headphones on the right, its tail pointing at her.
-   Like the buttons, it sits ON the picture in percent (left 57%, top 48% = its bottom-left corner), so it stays by her
-   head on every screen and scrolls with the café; it needs no JavaScript to place it. It pops up a moment after the
-   café opens (PART 3, STEP 8B): .on fades it in, growing from the corner by its tail.
-   (Below the pink neon on purpose: it never covers "buy me a cosmo".) */
-.hello { position: absolute; z-index: 1; left: 57%; top: 48%; margin: 0; padding: .42em .68em .4em; border-radius: .45em; pointer-events: none;
-  white-space: nowrap; font: 700 clamp(15px, 2vw, 24px)/1 Arimo, Arial, sans-serif; letter-spacing: .02em;
-  background-color: rgba(18, 16, 20, .6); opacity: 0; transform: translateY(-100%) scale(.85); transform-origin: 0 100%;
-  transition: opacity .35s, transform .35s cubic-bezier(.2, .7, .2, 1.3); }
-.hello.on { opacity: 1; transform: translateY(-100%); }
-.hello::after { content: ""; position: absolute; left: .3em; top: calc(100% - 1px); width: .7em; height: .55em;   /* the tail, pointing down-left at her */
-  background: rgba(46, 43, 48, .82); clip-path: polygon(40% 0, 100% 0, 0 100%); }
-/* the café's panel: one row, BUY ME A COSMO | WORD JAR, the same width as the room's directory, on every screen */
+/* KATHI: an invisible button over her, from her headphones down to her hands on the counter (it stops at 61% across,
+   so it never overlaps the Word Jar at 61.5%). Hovering it makes her say hi; clicking it opens her Substack card
+   (PART 3, STEP 8B). Not a ".spot", so it never draws a box around her. */
+.c-kathi { position: absolute; left: 35%; top: 42%; width: 26%; height: 42%; margin: 0; padding: 0; border: 0; border-radius: 40% 40% 10% 10%;
+  background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.c-kathi:focus-visible { outline: 2px solid rgba(255,255,255,.8); outline-offset: -2px; }
+/* "Hi, Human!": Kathi's CONVERSATION BUBBLE. Its tail sits at the bottom-left and points at her, the way a chat app
+   shows who's talking. The tail's tip is pinned just off her headphones (left 57%, top 48% of the picture), so it
+   stays on her on every screen and scrolls with the café; no JavaScript places it.
+   Three layers, stacked in one box 7.4 x 2.8 "em" (em = the bubble's letter size, so it all scales together):
+     .hello-glass  the body: crystal glass, a rounded rectangle (it blurs the café behind it, like every crystal button)
+     .hello-edge   a drawing (SVG) on top: the tail, its soft shadow, and ONE outline around body and tail, so they read
+                   as one bubble (a white hairline brightest at the top, over a faint rainbow: the crystal buttons' light)
+     .hello-say    what she says: three "typing" dots, then the words, in the same spot
+   (Why not cut the glass itself into a bubble shape? Safari has a bug where glass blur ignores a cut-out shape, so the
+   glass stays a plain rounded rectangle and the drawing adds the tail.)
+   HOW IT MOVES: one switch, the class "on" (PART 3, STEP 8B). Hidden, the bubble is tiny and tucked into the tail's tip
+   (scale .2, growing from transform-origin = the tip), so it grows out of her. On: it springs to full size, the dots
+   type for a moment, "Hi, Human!" rises in at 0.85 s, and it floats gently. Off: it shrinks back into her. While it's
+   on it can be clicked (pointer-events), which opens her Substack card too. */
+.hello { position: absolute; z-index: 1; left: 57%; top: 48%; width: 7.4em; height: 2.8em; margin: 0; pointer-events: none;
+  font: 700 clamp(15px, 2vw, 24px)/1 Arimo, Arial, sans-serif; letter-spacing: .02em; color: #fff;
+  transform: translateY(-100%) scale(.2); transform-origin: .8% 98.6%;
+  transition: transform .3s cubic-bezier(.5, 0, .75, 0) .1s; }   /* leaving: shrinks back into her, after a 0.1 s grace */
+.hello-glass { position: absolute; left: 5.405%; top: 0; width: 94.595%; height: 75%; border-radius: .95em;
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.08) 42%, rgba(255,255,255,.04) 58%, rgba(255,255,255,.2)), rgba(18,16,20,.6);
+  -webkit-backdrop-filter: blur(6px) saturate(1.5) brightness(1.08); backdrop-filter: blur(6px) saturate(1.5) brightness(1.08); }
+.hello-edge { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.hello-say { position: absolute; left: 5.405%; top: 0; width: 94.595%; height: 75%; display: grid; place-items: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55); white-space: nowrap; }
+.hello-say > * { grid-area: 1 / 1; }   /* the dots and the words share one spot */
+.hello-dots { display: flex; gap: .2em; opacity: 0; }
+.hello-dots i { width: .26em; height: .26em; border-radius: 50%; background: rgba(255,255,255,.92); }
+.hello-words { opacity: 0; transform: translateY(.3em); transition: opacity .15s .1s; }
+.hello-glass, .hello-edge, .hello-say { opacity: 0; transition: opacity .2s .1s; }
+.hello.on { pointer-events: auto; cursor: pointer; transform: translateY(-100%) scale(1);
+  transition: transform .55s cubic-bezier(.2, 1.6, .4, 1);          /* grows with a little spring */
+  animation: hello-float 3.6s ease-in-out .7s infinite; }             /* then floats gently */
+.hello.on .hello-glass, .hello.on .hello-edge, .hello.on .hello-say { opacity: 1; transition: opacity .2s; }
+.hello.on .hello-dots { animation: dots-life 1s forwards; }           /* the dots show, then go at 0.8 s... */
+.hello.on .hello-dots i { animation: dot-hop .6s ease-in-out infinite; }
+.hello.on .hello-dots i:nth-child(2) { animation-delay: .1s; } .hello.on .hello-dots i:nth-child(3) { animation-delay: .2s; }
+.hello.on .hello-words { opacity: 1; transform: none;                 /* ...and the words rise in at 0.85 s */
+  transition: opacity .3s .85s, transform .45s cubic-bezier(.2, 1.4, .4, 1) .85s; }
+@keyframes hello-float { 50% { translate: 0 -.12em; } }
+@keyframes dots-life { 0% { opacity: 0; } 12%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes dot-hop { 0%, 60%, 100% { transform: none; opacity: .55; } 30% { transform: translateY(-.16em); opacity: 1; } }
+/* the café's panel: one row, 🍸 BUY ME A COSMO | WORD JAR 🫙, the same width as the room's directory, on every screen */
 .c-panel { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px));
   display: grid; grid-template-columns: 123px 87px; gap: 5px; padding: 5px; border-radius: 6px; }
 .c-panel button, .c-panel a { overflow: hidden; border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left;
   white-space: nowrap; text-decoration: none; color: #fff; font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em;
   text-transform: uppercase; font-variant-emoji: text; transition: background-color .2s; }
 .c-panel button:hover, .c-panel a:hover, .c-panel button:focus-visible, .c-panel a:focus-visible { outline: none; background-color: rgba(255,255,255,.18); }
+/* the emoji, in the arrows' old places (🍸 before Buy Me A Cosmo, 🫙 after Word Jar): 9px, just taller than the lettering,
+   sunk to the line (line-height: 0, so the buttons don't get taller) and softened (a bit see-through, less colourful)
+   so they sit quietly in the glass. The emoji is a little wider than the arrow was, so the padding on its side is 8px
+   instead of 10px: the buttons keep their exact widths (123px and 87px). */
+.c-panel .em { font-size: 9px; line-height: 0; vertical-align: -1px; letter-spacing: 0; font-variant-emoji: emoji;
+  opacity: .8; filter: saturate(.55); text-shadow: none; }
+.c-panel .em:first-child { margin-right: 2px; } .c-panel .em:last-child { margin-left: 2px; }
+.c-panel .c-cosmo { padding-left: 8px; } .c-panel .c-tip { padding-right: 8px; }
 .c-cue { position: fixed; z-index: 3; left: 50%; bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 52px); transform: translateX(-50%); margin: 0;
   display: grid; justify-items: center; gap: 6px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
   font: 700 11px/1 Arimo, "Helvetica Neue", Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
@@ -246,8 +292,8 @@ dialog.pop-cafe { overflow-y: auto; overflow-x: hidden; }
                  (.784 = the poster's shape, 864 / 1102), and never over 560px wide
      .lb-panel   a small crystal panel holding the BUY IT button: crystal glass with a plain white arrow, the same as
                  the storefront's popups (.nrsf-lb-panel / .nrsf-lb-go in assets/storefront.css) */
-dialog.pop-poster { background: rgba(6,6,8,.84); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
-dialog.pop-poster[open] { display: grid; place-items: center; padding: 16px; }
+dialog.pop-poster, dialog.pop-card { background: rgba(6,6,8,.84); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+dialog.pop-poster[open], dialog.pop-card[open] { display: grid; place-items: center; padding: 16px; }
 .lb-box { position: relative; display: grid; justify-items: center; gap: 20px; outline: none; animation: lb-pop .35s cubic-bezier(.2,.7,.2,1); }
 @keyframes lb-pop { from { opacity: 0; scale: .92; } }
 .lb-poster { display: block; width: min(86vw, calc((100vh - 150px) * .784), 560px); height: auto; aspect-ratio: 864 / 1102;
@@ -261,9 +307,35 @@ dialog.pop-poster[open] { display: grid; place-items: center; padding: 16px; }
 .lb-buy:active { background-color: rgba(255,255,255,.3); }
 @media (hover: hover) { .lb-buy:hover { background-color: rgba(255,255,255,.18); } .lb-buy:hover .arr { transform: translateX(3px); } }
 @media (max-width: 639px) { .lb-buy { font-size: 11px; padding: 12px 16px; } }
-.pop-poster .close { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
+.pop-poster .close, .pop-card .close { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
   border: 1px solid #555; background: #111; color: #f4f1ea; font: 400 24px/1 Arimo, Arial, sans-serif; display: grid; place-items: center; }
-.pop-poster .close:hover, .pop-poster .close:focus-visible { background: #f4f1ea; color: #111; outline: none; }
+.pop-poster .close:hover, .pop-poster .close:focus-visible, .pop-card .close:hover, .pop-card .close:focus-visible { background: #f4f1ea; color: #111; outline: none; }
+
+/* 6 · THE CAFÉ'S TWO CARDS (Nov 3): built exactly like the poster up close (dialog.pop-card shares its rules above), so
+   every popup in the tiny world behaves the same: the room dimmed and softly blurred behind, the card as big as fits,
+   a crystal button under it with a plain white arrow, a small round x on the card's corner. Each card is a miniature of
+   Kathi's real page; its button is the only way out of the tiny world.
+     .bmc  BUY ME A COSMO: her Buy Me a Coffee page (the black NOT RISING banner, her photo, the page's name)
+     .ss   JOIN THE CONVERSATION: her Substack profile (name, handle, photo, bio, her publication Hi, Human)
+   --w is the card's width; the banner's letters and the photo are sized from it, so they fit on every screen. */
+.bmc, .ss { --w: min(86vw, 400px); width: var(--w); margin: 0; overflow: hidden; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.bmc { text-align: center; background: #f4f4f4; color: #1c1c1c; }
+.bmc-banner { display: grid; place-items: center; height: calc(var(--w) * .25); padding-bottom: calc(var(--w) * .04); overflow: hidden;
+  background: #000; color: #ebebeb; white-space: nowrap; letter-spacing: -.01em;
+  font: 400 calc(var(--w) * .142)/1 "Archivo Black", "Arial Black", Impact, sans-serif; }
+.bmc-avatar { position: relative; display: block; width: calc(var(--w) * .27); height: auto; aspect-ratio: 1; object-fit: cover;
+  margin: calc(var(--w) * -.105) auto 0; border: 3px solid #f4f4f4; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.18); background: #ddd; }
+.bmc figcaption { display: grid; gap: 6px; padding: 12px 16px 22px; }
+.bmc-name { font: 700 clamp(17px, 4.8vw, 20px)/1.2 Arimo, "Helvetica Neue", Arial, sans-serif; }
+.card-where { font: 400 12px/1.3 Arimo, "Helvetica Neue", Arial, sans-serif; color: #6b6b6b; }
+.ss { display: grid; gap: 14px; padding: 20px 20px 18px; text-align: left; background: #fff; color: #363737;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arimo, "Helvetica Neue", Arial, sans-serif; }
+.ss-top { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.ss-name { margin: 0; font-size: clamp(18px, 5vw, 21px); font-weight: 700; line-height: 1.2; color: #000; }
+.ss-handle { margin: 3px 0 0; font-size: 14px; color: #757575; }
+.ss-avatar { flex: none; display: block; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: #ddd; }
+.ss-bio { margin: 0; font-size: 14.5px; line-height: 1.45; }
+.ss-pub { justify-self: start; margin: 0; padding: 6px 12px; border-radius: 999px; background: #f0f0f0; font-size: 13px; font-weight: 600; color: #363737; }
 
 /* 4 · Gallery: the whole exhibit on one black brick wall, then each photo big (the viewer) */
 dialog.pop-gallery { overflow-y: auto;
@@ -350,7 +422,9 @@ body.leaving::before { opacity: 1; }
 /* Visitors who ask for less motion get none */
 @media (prefers-reduced-motion: reduce) {
   .cue::after, .c-cue::after, dialog.pop[open], .lb-box, html.from-light body::after { animation: none; }
-  .hello { transition: none; }
+  .hello, .hello.on { transform: translateY(-100%); transition: none; animation: none; }   /* the bubble just fades in with its words */
+  .hello.on .hello-dots { animation: none; }
+  .hello-words, .hello.on .hello-words { transform: none; transition: opacity .2s; }
   html.from-light body::after { display: none; }
   .spot, .print, body::before, .stage.ready .art { transition: none; }
 }
@@ -430,23 +504,54 @@ body.leaving::before { opacity: 1; }
         <source media="(max-width: 1500px)" data-srcset="../assets/img/post/room2/cafe-1600.webp">
         <img data-src="../assets/img/post/room2/cafe-2400.webp" width="2486" height="2532" alt="Nebula Cafe through a black arch hung with pink flowering vines and Edison bulbs. Inside, white brick: an evil-eye charm, NEBULA cafe in amber neon, a pink neon that reads buy me a cosmo, iron and oak shelves of bottles and plants with letterboard words along their edges, and Kathi in a green beanie, headphones and a NEBULA cafe apron with a brass name tag that reads Kathi, leaning on the glittering black counter, smiling. On the counter: a potted plant, pastries under a glass dome, the word jar, a card reader with a pink cosmo glass on it, a cup of straws and a pink plant.">
       </picture>
-      <a class="spot c-neon" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="Buy me a cosmo (opens in a new tab)"></a>
+      <!-- the pink neon and the card reader: buttons (not links), so all they can do is open the Buy Me A Cosmo card -->
+      <button class="spot c-neon" type="button" data-pop="cosmo" aria-label="Buy me a cosmo"></button>
       <button class="spot c-jar" type="button" data-jar aria-label="The word jar: tip your barista with a kind word or two">
         <svg viewBox="760 960 115 155" aria-hidden="true">
           <defs><clipPath id="jar-inside"><path clip-rule="evenodd" d="M772 990 Q772 984 778 984 L861 984 Q867 984 867 990 L867 1100 Q867 1106 861 1106 L778 1106 Q772 1106 772 1100 Z M790 1015 L860 1019 L858 1108 L790 1105 Z"/></clipPath></defs>
           <g clip-path="url(#jar-inside)" id="jar-strips"></g>
         </svg>
       </button>
-      <a class="spot c-reader" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="The card reader: buy me a cosmo (opens in a new tab)"></a>
-      <!-- Kathi's speech bubble: on the picture, by her head (PART 1 places it; PART 3 pops it up) -->
-      <p class="hello crystal" id="hello">Hi Human</p>
+      <button class="spot c-reader" type="button" data-pop="cosmo" aria-label="The card reader: buy me a cosmo"></button>
+      <!-- Kathi (the invisible button over her) and her conversation bubble (PART 1 draws it; PART 3 switches it on) -->
+      <button class="c-kathi" id="c-kathi" type="button" aria-label="Kathi says Hi, Human! Join the conversation"></button>
+      <p class="hello" id="hello">
+        <span class="hello-glass"></span>
+        <!-- the drawing: 74 x 28 units (10 units = 1 em). The body runs from x 4 to 74, y 0 to 21; the tail's tip is at (0.6, 27.6). -->
+        <svg class="hello-edge" viewBox="0 0 74 28" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <!-- THE BUBBLE'S OUTLINE, read like directions: start top-left, along the top, round the top-right corner, down,
+                 round the bottom-right corner, back along the bottom, sweep down-left into the tail's tip, curve back up
+                 into the left side, up, and round the top-left corner. -->
+            <path id="hb" d="M13.5 0H64.5A9.5 9.5 0 0 1 74 9.5V11.5A9.5 9.5 0 0 1 64.5 21H17C12 21 6.5 23.4 .6 27.6C3.6 25.4 4 21 4 15.5V9.5A9.5 9.5 0 0 1 13.5 0Z"/>
+            <!-- the body's rounded rectangle (the same as .hello-glass), to leave the body out where it's needed -->
+            <rect id="hb-body" x="4.3" y=".3" width="69.4" height="20.4" rx="9.2"/>
+            <mask id="hb-tail-only" maskUnits="userSpaceOnUse" x="-10" y="-10" width="94" height="48">
+              <rect x="-10" y="-10" width="94" height="48" fill="#fff"/><use href="#hb-body" fill="#000"/></mask>
+            <mask id="hb-outside" maskUnits="userSpaceOnUse" x="-10" y="-10" width="94" height="48">
+              <rect x="-10" y="-10" width="94" height="48" fill="#fff"/><use href="#hb" fill="#000"/></mask>
+            <filter id="hb-soft" x="-20%" y="-50%" width="140%" height="220%"><feGaussianBlur stdDeviation="1.8"/></filter>
+            <linearGradient id="hb-rainbow" x1="0" y1="0" x2="1" y2=".4">
+              <stop offset="0" stop-color="#ff78aa"/><stop offset=".25" stop-color="#ffdc78"/><stop offset=".5" stop-color="#78ffc8"/>
+              <stop offset=".75" stop-color="#78aaff"/><stop offset="1" stop-color="#dc8cff"/></linearGradient>
+            <linearGradient id="hb-light" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#fff" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#fff" stop-opacity=".3"/></linearGradient>
+          </defs>
+          <g mask="url(#hb-outside)"><use href="#hb" transform="translate(0 2)" fill="#000" fill-opacity=".3" filter="url(#hb-soft)"/></g>   <!-- soft shadow, only outside the bubble -->
+          <g mask="url(#hb-tail-only)"><use href="#hb" fill="#121014" fill-opacity=".62"/><use href="#hb" fill="#fff" fill-opacity=".07"/></g>   <!-- the tail's smoky glass -->
+          <use href="#hb" fill="none" stroke="url(#hb-rainbow)" stroke-width="1" stroke-opacity=".6"/>   <!-- faint rainbow edge -->
+          <use href="#hb" fill="none" stroke="url(#hb-light)" stroke-width=".55"/>                       <!-- white hairline -->
+        </svg>
+        <span class="hello-say"><span class="hello-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="hello-words">Hi, Human!</span></span>
+      </p>
     </div>
   </div>
   <p class="c-cue" id="c-cue" aria-hidden="true">Scroll down</p>
-  <!-- the café's panel, one row:  BUY ME A COSMO | WORD JAR -->
+  <!-- the café's panel, one row:  🍸 BUY ME A COSMO | WORD JAR 🫙  (the emoji are aria-hidden: screen readers read the words) -->
   <nav class="c-panel crystal" aria-label="Nebula Cafe">
-    <a class="crystal" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="Buy me a cosmo (opens in a new tab)">&#x2196;&#xFE0E; Buy Me A Cosmo</a>
-    <button class="crystal" id="c-tip" type="button" data-jar aria-label="The word jar: tip a kind word">Word Jar &#x2192;&#xFE0E;</button>
+    <button class="crystal c-cosmo" type="button" data-pop="cosmo" aria-label="Buy me a cosmo"><span class="em" aria-hidden="true">&#x1F378;&#xFE0F;</span>Buy Me A Cosmo</button>
+    <button class="crystal c-tip" id="c-tip" type="button" data-jar aria-label="The word jar: tip a kind word">Word Jar<span class="em" aria-hidden="true">&#x1FAD9;</span></button>
   </nav>
   <!-- THE WORD JAR: a name and up to five kind words, on post-it strips. One jar shared by everyone: the strips live in
        Kathi's "Word Jar" Google Sheet (see THE WORD JAR in PART 3 for how they get there and back). -->
@@ -478,6 +583,40 @@ body.leaving::before { opacity: 1; }
     <button class="close" type="button" aria-label="Close">×</button>
     <img class="lb-poster" id="lb-poster" width="864" height="1102" alt="">
     <span class="lb-panel crystal"><a class="lb-buy crystal" id="lb-buy" href="#" target="_blank" rel="noopener">Buy it<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+  </div>
+</dialog>
+
+<!-- 6 · THE CAFÉ'S TWO CARDS, each a miniature of Kathi's real page, opened from the café (PART 1, section 6, has their look).
+     Nothing in the café links out: these cards' crystal buttons are the only way out of the tiny world.
+     The photo is held back (data-src) until a card first opens, like every popup's pictures. -->
+<!-- 6A · BUY ME A COSMO: from the panel button, the pink neon or the card reader -->
+<dialog class="pop pop-card" id="pop-cosmo" aria-label="Buy Me a Coffee: NOT RISING Magazine">
+  <div class="lb-box" tabindex="-1" autofocus>
+    <button class="close" type="button" aria-label="Close">×</button>
+    <figure class="bmc">
+      <div class="bmc-banner" aria-hidden="true">NOT RISING</div>
+      <img class="bmc-avatar" data-src="../assets/img/post/kathi-hat.webp" width="240" height="240" alt="Kathi in a wide-brimmed black hat, smiling">
+      <figcaption><span class="bmc-name">NOT RISING Magazine</span><span class="card-where">buymeacoffee.com/thisisnotrising</span></figcaption>
+    </figure>
+    <span class="lb-panel crystal"><a class="lb-buy crystal" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener"
+      aria-label="Support human curation on Buy Me a Coffee (opens in a new tab)">Support Human Curation<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+  </div>
+</dialog>
+<!-- 6B · JOIN THE CONVERSATION: from Kathi or her bubble -->
+<dialog class="pop pop-card" id="pop-convo" aria-label="Kathi on Substack: Chief Absurdist Officer">
+  <div class="lb-box" tabindex="-1" autofocus>
+    <button class="close" type="button" aria-label="Close">×</button>
+    <figure class="ss">
+      <div class="ss-top">
+        <div><p class="ss-name">Chief Absurdist Officer</p><p class="ss-handle">@chiefabsurdistofficer</p></div>
+        <img class="ss-avatar" data-src="../assets/img/post/kathi-hat.webp" width="240" height="240" alt="Kathi in a wide-brimmed black hat, smiling">
+      </div>
+      <p class="ss-bio">Hi, Human is the free discovery engine behind NOT RISING Magazine. I’m Kathi. Everyone here calls me CiAO. I search for the voices being drowned out by the algorithm, and amplify them through word of mouth. Help me find you, Human.</p>
+      <p class="ss-pub">Hi, Human</p>
+      <figcaption class="card-where">substack.com/@chiefabsurdistofficer</figcaption>
+    </figure>
+    <span class="lb-panel crystal"><a class="lb-buy crystal" href="https://substack.com/@chiefabsurdistofficer" target="_blank" rel="noopener"
+      aria-label="Join the conversation on Substack (opens in a new tab)">Join the Conversation<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
   </div>
 </dialog>
 
@@ -599,6 +738,7 @@ body.leaving::before { opacity: 1; }
   document.addEventListener("click", e => { const b = e.target.closest("[data-pop]"); if (b) openPop(b.dataset.pop); });
   document.querySelectorAll("dialog.pop").forEach(pop => {
     pop.addEventListener("close", () => {
+      if (document.querySelector("dialog.pop[open]")) return;   // a card closed over the café: the café is still open, so stay put
       document.documentElement.classList.remove("locked");
       if (scrollY !== standingAt) scrollTo(0, standingAt);  // (back where you stood, even if the browser moved the page meanwhile)
     });
@@ -719,19 +859,41 @@ body.leaving::before { opacity: 1; }
   }, { passive: true });
 
   /* STEP 8B · NEBULA CAFE
-     HI HUMAN: a moment after you walk in, Kathi's speech bubble pops up by her head. It's part of the picture (PART 1
-     places it), so all this does is switch it on (.on) as the café opens, and off as you leave, so it greets you
-     again every time you come back in. The "Scroll down" cue goes once you start looking down. */
-  const popCafe = $("pop-cafe"), hello = $("hello"), cCue = $("c-cue");
+     HI, HUMAN: Kathi's conversation bubble. PART 1 draws and animates it; all this does is flip one switch, the class
+     "on", for everyone:
+       - a mouse: on while it's over Kathi (or her bubble), off when it leaves them both
+       - a finger (phones have no hover): the first tap on Kathi says hi for 3.5 seconds
+       - the keyboard: on while Kathi's button has the focus (Tab to her)
+     JOIN THE CONVERSATION: a click on Kathi or her bubble opens her Substack card (on a phone: a tap while she's saying
+     hi), through the same door as every popup, openPop("convo"). BUY ME A COSMO (the panel button, the pink neon, the
+     card reader) is a data-pop button, so the page's one listener in STEP 6 opens its card, openPop("cosmo").
+     The "Scroll down" cue goes once you start looking down. */
+  const popCafe = $("pop-cafe"), hello = $("hello"), kathi = $("c-kathi"), cCue = $("c-cue");
+  const hasMouse = matchMedia("(hover: hover)");
   let helloTimer = 0;
+  function greet(on) { clearTimeout(helloTimer); hello.classList.toggle("on", on); }
+  function hoverOff(e) { if (e.pointerType === "mouse" && !kathi.contains(e.relatedTarget) && !hello.contains(e.relatedTarget)) greet(false); }
+  kathi.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") greet(true); });
+  kathi.addEventListener("pointerleave", hoverOff);
+  hello.addEventListener("pointerleave", hoverOff);          // (moving from Kathi onto her bubble keeps it on)
+  // the keyboard: only a keyboard's focus switches it (a tap focuses the button too, and must not switch it off again)
+  let byKeyboard = false;
+  kathi.addEventListener("focus", () => { byKeyboard = kathi.matches(":focus-visible"); if (byKeyboard) greet(true); });
+  kathi.addEventListener("blur", () => {
+    if (!byKeyboard) return;
+    byKeyboard = false;
+    helloTimer = setTimeout(() => greet(false), 300);       // (a moment's grace, so a click on the bubble still lands)
+  });
+  kathi.addEventListener("click", () => {
+    if (hasMouse.matches || hello.classList.contains("on")) { openPop("convo"); return; }
+    greet(true);
+    helloTimer = setTimeout(() => greet(false), 3500);
+  });
+  hello.addEventListener("click", () => openPop("convo"));
   function cafeCue() { cCue.classList.toggle("gone", popCafe.scrollTop > 40 || popCafe.scrollHeight - popCafe.clientHeight < 60); }
   popCafe.addEventListener("scroll", cafeCue, { passive: true });
-  function cafeOpened() {
-    askJar(); cCue.classList.remove("gone"); setTimeout(cafeCue, 400);
-    clearTimeout(helloTimer); hello.classList.remove("on");
-    helloTimer = setTimeout(() => hello.classList.add("on"), reduceMotion ? 0 : 600);   // (after the café has faded in)
-  }
-  popCafe.addEventListener("close", () => { clearTimeout(helloTimer); hello.classList.remove("on"); closeJar(); });
+  function cafeOpened() { askJar(); cCue.classList.remove("gone"); setTimeout(cafeCue, 400); greet(false); }
+  popCafe.addEventListener("close", () => { greet(false); closeJar(); });
   // Escape: closes the Word Jar card first, and only then leaves the café
   popCafe.addEventListener("cancel", e => { if (!wj.hidden) { e.preventDefault(); closeJar(); } });
 
