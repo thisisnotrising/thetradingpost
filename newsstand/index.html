@@ -26,7 +26,9 @@
   img { max-width: 100%; }
   [hidden] { display: none !important; }
 </style>
-<link rel="stylesheet" href="../assets/newsstand.css">
+<!-- "?v=2026-11-04" = the date these files last changed. Change the date whenever you edit them, so every visitor's browser
+     fetches the new copy instead of an old saved one (no hard refresh needed). -->
+<link rel="stylesheet" href="../assets/newsstand.css?v=2026-11-04">
 <!-- Came through a storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
 <style>
 html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
@@ -64,21 +66,40 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
 <!-- The reader, the measuring room and the toast. The script moves
      this block to the end of the page so it can cover the full screen. -->
 <div class="nrns" id="nrns-overlay" lang="en">
+  <!-- THE READER (rebuilt Nov 4): the open magazine fills the screen, and the buttons float on top.
+       Wide (landscape) screen: a two-page spread as tall as the screen; the buttons sit in the dark strips
+       to its left and right (or fade away over its edges when there is no strip, as on an iPad).
+       Tall (portrait) screen: one page at a time, with a row of buttons above it and a row below.
+       Where each button goes is in newsstand.css, "THE READER". -->
   <div class="reader" id="nrns-reader" role="dialog" aria-modal="true" aria-labelledby="nrns-reader-title" hidden>
-    <div class="bar">
-      <span id="nrns-reader-title"></span>
-      <span class="hint">Click a page, drag a corner, or use the arrow keys</span>
-      <button class="icon-btn" id="nrns-close" type="button" aria-label="Put the magazine back">Close ✕</button>
-    </div>
     <div class="stage" id="nrns-stage"><div class="sizer" id="nrns-sizer"></div></div>
-    <div class="bar">
-      <a class="site-link" id="nrns-site-link" href="#" target="_blank" rel="noopener">Read the feature online ↗</a>
-      <span style="display:flex;gap:8px;align-items:center;margin-inline:auto">
-        <button class="icon-btn" id="nrns-prev" type="button" aria-label="Previous page">←</button>
-        <span class="counter" id="nrns-counter" aria-live="polite"></span>
-        <button class="icon-btn" id="nrns-next" type="button" aria-label="Next page">→</button>
-      </span>
+    <!-- ZOOM: the open page(s), big enough to read, in a box you scroll (the script fills it) -->
+    <div class="r-zoomview" id="nrns-zoomview" hidden><div class="r-zoompages" id="nrns-zoompages"></div></div>
+    <!-- top left: full screen (only where the browser allows it) and the title (only when there is room) -->
+    <div class="r-group r-tl">
+      <button class="r-btn r-round" id="nrns-full" type="button" aria-label="Full screen" title="Full screen" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="fs-in" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="fs-out" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>
+      </button>
+      <span class="r-title" id="nrns-reader-title"></span>
     </div>
+    <!-- top right: close, and (interview features only) the link to read it online -->
+    <div class="r-group r-tr">
+      <button class="r-btn r-round" id="nrns-close" type="button" aria-label="Put the magazine back" title="Close">✕&#xFE0E;</button>
+      <a class="r-btn" id="nrns-site-link" href="#" target="_blank" rel="noopener">Online ↗&#xFE0E;</a>
+    </div>
+    <!-- left and right: turn the page -->
+    <button class="r-btn r-round r-arrow r-prev" id="nrns-prev" type="button" aria-label="Previous page">←&#xFE0E;</button>
+    <button class="r-btn r-round r-arrow r-next" id="nrns-next" type="button" aria-label="Next page">→&#xFE0E;</button>
+    <!-- bottom left: zoom in to read (and back out) -->
+    <div class="r-group r-bl">
+      <button class="r-btn r-round" id="nrns-zoom" type="button" aria-label="Zoom in to read" title="Zoom in to read">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M7.5 10.5h6"/><path class="zm-plus" d="M10.5 7.5v6"/></svg>
+      </button>
+    </div>
+    <!-- bottom right (bottom centre on a tall screen): which page you're on -->
+    <div class="r-group r-br"><span class="r-counter" id="nrns-counter" aria-live="polite"></span></div>
+    <!-- a one-time tip, shown for a few seconds when the first magazine opens -->
+    <span class="r-hint" id="nrns-hint" aria-hidden="true"></span>
   </div>
   <div class="measure" id="nrns-measure" aria-hidden="true"></div>
   <div class="toast" id="nrns-toast" role="status" hidden></div>
@@ -87,8 +108,8 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
 
 <!-- Where the pictures live, then the data, the page-flip library, and the engine -->
 <script>window.NRNS_BASE = "../assets/img/";</script>
-<script src="../assets/data.js"></script>
+<script src="../assets/data.js?v=2026-11-04"></script>
 <script src="../assets/vendor/page-flip.browser.js"></script>
-<script src="../assets/newsstand.js"></script>
+<script src="../assets/newsstand.js?v=2026-11-04"></script>
 </body>
 </html>
