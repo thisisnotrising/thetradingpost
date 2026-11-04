@@ -42,6 +42,7 @@ window.NR = {
     memoir03: "memoir03-cover.webp",          // To Be Human: Season 1 (Kathi)
     memoir03Back: "memoir03-back.webp",       // its back cover (the last page of the S1 ebook PDF)
     memoir04: "memoir04-cover.webp",          // To Be Human: Season 3 (Amanda Jane Lee)
+    memoir04Back: "memoir04-back.webp",       // its back cover
     cover14: "issue14-cover.webp",
     cover15: "issue15-cover.webp",
     cover16: "issue16-cover.webp",
@@ -79,7 +80,7 @@ window.NR = {
   MEMOIRS: [
     { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", issue: "tbh-s1", paper: "#e3e2dc" },
     { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2" },
-    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", soon: "Available by request.", read: "https://chiefabsurdistofficer.substack.com/p/s3-e1-shraddha", paper: "#fafbf8" }
+    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", issue: "tbh-s3", paper: "#fafbf8" }
   ],
 
   /* The masthead, shared by every issue. x and y place each group
@@ -182,6 +183,25 @@ window.NR = {
         { page: 3, to: 25, label: "Chapter 4: To weep is human; to let yourself, divine.", x: 283, y: 526, w: 461, h: 94 },
         { page: 3, to: 35, label: "Chapter 5: To break is human; to blaze, divine.",  x: 283, y: 643, w: 461, h: 94 },
         { page: 3, to: 45, label: "Chapter 6: To be human is divine.",               x: 283, y: 760, w: 461, h: 94 }
+      ]
+    },
+    /* Season 3 (Nov 4), rebuilt as a 32-page magazine from Amanda's manuscript (the build kit is in tools/tbh-s3:
+       see its README). The cover is memoir04; p01-p30 are printed pages 2-31; the back cover is memoir04Back. The page files are
+       numbered so that pXX is printed page XX + 1, which is also the flipbook's page counter.
+       Clickable: the contents rows (p03) jump to each chapter and to the finale (p28, straight after Chapter 4's
+       last page); "Read it online" (p29) and "Subscribe to Amanda" (p30) open their Substack pages in a new tab. x, y, w, h in design pixels (816 x 1056). */
+    "tbh-s3": {
+      kind: "pages", title: "To Be Human · Season 3 · Amanda Jane Lee",
+      pageDir: "tbh-s3/", pageCount: 30, pageExt: "webp", back: "memoir04Back",
+      insideFront: false, insideBack: false,
+      links: [
+        { page: 3, to: 5,  label: "Chapter 1: Shraddha",    x: 282, y: 168, w: 462, h: 132 },
+        { page: 3, to: 11, label: "Chapter 2: Backlog",     x: 282, y: 324, w: 462, h: 132 },
+        { page: 3, to: 17, label: "Chapter 3: Silk",        x: 282, y: 480, w: 462, h: 132 },
+        { page: 3, to: 23, label: "Chapter 4: Cul-de-sacs", x: 282, y: 636, w: 462, h: 132 },
+        { page: 3, to: 28, label: "Chapter 5: The Season Finale, arrives Saturday 11.7", x: 282, y: 792, w: 462, h: 132 },
+        { page: 29, href: "https://chiefabsurdistofficer.substack.com/s/to-be-human", label: "Read To Be Human online (opens Substack)", x: 72, y: 540, w: 373, h: 118 },
+        { page: 30, href: "https://substack.com/@ajlol", label: "Subscribe to Amanda Jane Lee on Substack (opens a new tab)", x: 72, y: 540, w: 391, h: 130 }
       ]
     },
     "tbh-s2": {

@@ -390,12 +390,15 @@
         const front = is.insideFront === undefined ? "#000" : is.insideFront, back = is.insideBack === undefined ? "#000" : is.insideBack;
         const html = [imgPage(src(f.cover), `${is.title}: cover`, { dark: true, hard: true })];
         if (front) html.push(inside(front));
-        /* "links" (optional, in data.js): invisible buttons laid over a page picture, e.g. the rows of a contents
-           page, that jump to another page. A file pXX sits at spot XX in the book (+1 with an inside front cover). */
+        /* "links" (optional, in data.js): invisible buttons laid over a page picture. With "to" they jump to another
+           page (e.g. the rows of a contents page); with "href" they open a web address in a new tab (e.g. a
+           Subscribe button). A file pXX sits at spot XX in the book (+1 with an inside front cover). */
         const goto = {}, at = n => n + (front ? 1 : 0);
         const hotspots = n => (is.links || []).filter(l => l.page === n).map((l, k) => {
+          const spot = `aria-label="${esc(l.label)}" style="left:${P(l.x)};top:${P(l.y)};width:${P(l.w)};height:${P(l.h)}"`;
+          if (l.href) return `<a class="hot" href="${esc(l.href)}" target="_blank" rel="noopener" ${spot}></a>`;   // a web link: opens in a new tab
           goto[`p${n}-${k}`] = at(l.to);
-          return `<button class="hot" type="button" data-goto="p${n}-${k}" aria-label="${esc(l.label)}" style="left:${P(l.x)};top:${P(l.y)};width:${P(l.w)};height:${P(l.h)}"></button>`;
+          return `<button class="hot" type="button" data-goto="p${n}-${k}" ${spot}></button>`;
         }).join("");
         for (let n = 1; n <= is.pageCount; n++) {
           const url = fileSrc(`${is.pageDir}p${two(n)}.${is.pageExt || "jpg"}`), alt = esc(`${is.title}: page ${n}`);
