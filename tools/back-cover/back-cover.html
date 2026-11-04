@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Back cover</title>
+<!-- THE BACK COVER of every To Be Human season, laid out exactly like Season 2's:
+     the cover's own paper colour, a small QR code to thisisnotrising.org near the foot,
+     and "NOT RISING Magazine © 2026" under it. The page is 816 x 1056 (8.5 x 11 in).
+     make-back-cover.js fills in the two colours (?bg=…&ink=…) and saves the picture. -->
+<style>
+@font-face { font-family: Montserrat; font-weight: 700; src: url(../tbh-s3/build/fonts/montserrat-latin-700-normal.woff2) format("woff2"); }
+html, body { margin: 0; }
+.back { position: relative; width: 816px; height: 1056px; overflow: hidden; background: var(--bg); color: var(--ink); }
+.qr { position: absolute; left: 367px; top: 907px; width: 82px; height: 82px; }   /* centred, 82 px: Season 2's size and spot */
+.qr svg { width: 100%; height: 100%; display: block; }
+.mark { position: absolute; left: 0; right: 0; top: 999.6px; text-align: center; white-space: nowrap;
+  font: 700 10.5px/1 Montserrat; letter-spacing: .06em; }   /* Season 2's size, measured */
+</style>
+</head>
+<body>
+<div class="back" id="back"><div class="qr" id="qr"></div><div class="mark">NOT RISING Magazine © 2026</div></div>
+<script>
+const q = new URLSearchParams(location.search);
+const back = document.getElementById("back");
+back.style.setProperty("--bg", q.get("bg") || "#1E1B1E");
+back.style.setProperty("--ink", q.get("ink") || "#FAF9F8");
+fetch("qr-thisisnotrising.svg").then(r => r.text()).then(svg => { document.getElementById("qr").innerHTML = svg; document.title = "ready"; });
+</script>
+</body>
+</html>
