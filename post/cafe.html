@@ -233,6 +233,7 @@ dialog.pop-cafe.near { overflow: hidden; }
 .pi .count.over { color: #ff6b6b; opacity: 1; }
 .wj-msg { margin: 0; min-height: 1.2em; text-align: center; font: 400 13px/1.4 Arimo, Arial, sans-serif; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
 .wj-msg.err { color: #ffb4b4; }
+.wj-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }   /* the bot trap: off screen, never seen */
 .wj-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; border-radius: 6px; justify-self: center; }
 .wj-actions button { border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left; white-space: nowrap; color: #fff;
   font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; font-variant-emoji: text; }
@@ -449,8 +450,8 @@ body.leaving::before { opacity: 1; }
     <a class="crystal" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="Buy me a cosmo (opens in a new tab)">&#x2196;&#xFE0E; Buy Me A Cosmo</a>
     <span class="blank crystal" aria-hidden="true"></span>
   </nav>
-  <!-- THE WORD JAR: a name and up to five kind words, on post-it strips. (The live site has nowhere to keep strips
-       for everyone yet, so each visitor's strips are kept in their own browser and drop into the jar they see.) -->
+  <!-- THE WORD JAR: a name and up to five kind words, on post-it strips. One jar shared by everyone: the strips live in
+       Kathi's "Word Jar" Google Sheet (see THE WORD JAR in PART 3 for how they get there and back). -->
   <div class="wj" id="wj" hidden>
     <div class="wj-stack" role="dialog" aria-modal="true" aria-labelledby="wj-title">
       <div class="pi black"><h2 id="wj-title">The Word Jar</h2><p class="lede">Tip your barista with a kind word or two.</p></div>
@@ -458,6 +459,9 @@ body.leaving::before { opacity: 1; }
         <div class="pi white"><label for="wj-name"><span>Your name</span></label><input id="wj-name" name="name" maxlength="24" placeholder="Human"></div>
         <div class="pi black"><label for="wj-words"><span>Your kind words</span><span class="count" id="wj-count">0 of 5 words</span></label>
           <input id="wj-words" name="words" maxlength="60" placeholder="you make this world kinder"></div>
+        <!-- the bot trap: people never see this box (it sits off screen, and Tab and screen readers skip it).
+             Spam bots fill in every box they find, so a strip with this filled in is thrown away by the sheet's script. -->
+        <div class="wj-trap" aria-hidden="true"><label for="wj-site">Leave this empty</label><input id="wj-site" name="website" tabindex="-1" autocomplete="off"></div>
         <p class="wj-msg" id="wj-msg" role="status"></p>
         <div class="wj-actions crystal">
           <button class="crystal" type="submit">&#x2193;&#xFE0E; Drop it in the jar</button>
@@ -724,7 +728,7 @@ body.leaving::before { opacity: 1; }
   let near = false;
   function cafeCue() { cCue.classList.toggle("gone", near || popCafe.scrollTop > 40 || popCafe.scrollHeight - popCafe.clientHeight < 60); }
   popCafe.addEventListener("scroll", cafeCue, { passive: true });
-  function cafeOpened() { stepBack(true); cCue.classList.remove("gone"); setTimeout(cafeCue, 400); }
+  function cafeOpened() { stepBack(true); askJar(); cCue.classList.remove("gone"); setTimeout(cafeCue, 400); }
   function camera() {
     cafeArt.style.transition = "none"; cafeArt.style.transform = "";
     const box = cafeArt.getBoundingClientRect(); void cafeArt.offsetWidth; cafeArt.style.transition = "";
@@ -762,15 +766,40 @@ body.leaving::before { opacity: 1; }
   popCafe.addEventListener("cancel", e => { if (!wj.hidden) { e.preventDefault(); closeJar(); } else if (near) { e.preventDefault(); stepBack(); } });
 
   /* THE WORD JAR: a name and at most five kind words, on a post-it strip that drops into the jar on the counter.
-     (For now each visitor's strips are kept in their own browser, and the jar they see fills with them. Nothing is
-     sent anywhere. Sharing one jar between everyone needs somewhere to keep the strips: a later step.) */
-  const MAX_WORDS = 5, KEY = "nr-word-jar";
+     ONE JAR FOR EVERYONE: the strips live in Kathi's "Word Jar" Google Sheet, behind a small script (word-jar.gs,
+     kept in her Google account) with two doors. JAR_URL is that script's address. It is safe to have in the page:
+     it holds no key, and it can only do two things: take in a strip, or hand out the strips Kathi has ticked "Show".
+       - the way OUT (askJar): the first time the café opens, the page asks for the ticked strips
+       - the way IN (sendStrip): a dropped strip goes to the sheet as a new row, unticked until Kathi approves it
+     The visitor's own strips are also kept in their own browser (localStorage), so a strip drops into the jar the
+     moment they tip, before it's approved. The jar shows everyone's ticked strips plus the visitor's own, each strip
+     once, newest 52 (all the jar on the counter holds). If Google can't be reached, the jar shows the visitor's own. */
+  const MAX_WORDS = 5, KEY = "nr-word-jar", JAR_HOLDS = 52;
+  const JAR_URL = "https://script.google.com/macros/s/AKfycbx6K9_n_b6VWF5DsRyXl1kkKiY9q1CWcNeNi7XUMRtfM8LtOFU6KAwWpNzcNu_8ByP06w/exec";
+  let shared = [], askedJar = false;                         // everyone's approved strips, once they've arrived
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } };
   const save = list => { try { localStorage.setItem(KEY, JSON.stringify(list.slice(-40))); } catch (e) {} };
+  function inJar() {                                         // everyone's strips, then this visitor's own that aren't among them yet
+    const seen = new Set(shared.map(s => s.name + "|" + s.words));
+    return shared.concat(load().filter(s => !seen.has(s.name + "|" + s.words))).slice(-JAR_HOLDS);
+  }
+  function askJar() {                                        // the way OUT, once per visit
+    if (askedJar) return;
+    askedJar = true;
+    fetch(JAR_URL).then(r => r.json())
+      .then(d => { if (d && d.ok && Array.isArray(d.strips)) { shared = d.strips; drawJar(); } })
+      .catch(() => {});                                      // (no answer: the jar keeps showing the visitor's own strips)
+  }
+  function sendStrip(strip) {                                // the way IN
+    // sent as plain text, which browsers send straight to Google; any other kind would first need a permission check
+    // that Google's scripts don't answer
+    fetch(JAR_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(strip) })
+      .catch(() => {});                                      // (the strip is already in this visitor's own jar either way)
+  }
   function seeded(n) { const x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); }
   function drawJar() {   // white and black strips by turns, piled from the bottom (the jar's inside: x 772-867, y 984-1106)
     const g = $("jar-strips"), NS = "http://www.w3.org/2000/svg"; g.textContent = "";
-    load().forEach((_, i) => {
+    inJar().forEach((_, i) => {
       const level = 1101 - Math.floor(i / 4) * 9 - seeded(i) * 4, x = 772 + seeded(i + 99) * 78, a = (seeded(i + 7) - .5) * 60;
       const r = document.createElementNS(NS, "rect");
       r.setAttribute("x", x.toFixed(1)); r.setAttribute("y", (level - 2.5).toFixed(1)); r.setAttribute("width", 17); r.setAttribute("height", 4.6);
@@ -798,7 +827,8 @@ body.leaving::before { opacity: 1; }
     else if (/https?:|www\.|\.(com|net|org|io|co)\b|@/i.test(name + " " + w.join(" "))) problem = "No links or handles on the strip, just kind words.";
     msg.classList.toggle("err", !!problem);
     if (problem) { msg.textContent = problem; return; }
-    save(load().concat({ name, words: w.join(" "), at: Date.now() })); drawJar();
+    save(load().concat({ name, words: w.join(" "), at: Date.now() })); drawJar();          // into this visitor's own jar, right away
+    sendStrip({ name, words: w.join(" "), website: $("wj-site").value });                // and on to the sheet, for Kathi to approve
     msg.textContent = `Thank you, ${name}. Your strip is in the jar.`;
     $("wj-words").value = ""; $("wj-count").textContent = `0 of ${MAX_WORDS} words`;
   });
