@@ -44,7 +44,7 @@ PHOTOS = [
     ("mural-alley.jpg",    "08-mural-alley",        None),
     ("stencil-cowboy.jpg", "09-stencil-cowboy",     None),
     ("towers.jpg",         "10-towers",             (0, 7, 1284, 1285)),     # a dark bar along the top
-    ("steel-door.jpg",     "11-steel-door",         None),
+    ("window-selfie.jpg",  "11-self-portrait",      None),                   # (Nov 4: replaced the steel door photo)
     ("dog-sofa.jpg",       "12-dog-sofa",           None),
     ("payphone.jpg",       "13-payphone",           None),
     ("plant-window.jpg",   "14-plant-window",       (0, 2, 1020, 771)),      # a light line along the top
