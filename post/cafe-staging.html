@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE POST · 777 Daydream St.</title>
+<meta name="description" content="Inside the Trading Post: the Newsstand, the Wishing Wall, Nebula Cafe and the Gallery.">
+<!-- Link preview: what apps (iMessage, Substack, Facebook, X) show when this page's link is shared.
+     The picture is assets/img/share-card.jpg (1200x630). Addresses must be full https:// links. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NOT RISING">
+<meta property="og:title" content="THE POST · 777 Daydream St.">
+<meta property="og:description" content="Inside the Trading Post: the Newsstand, the Wishing Wall, Nebula Cafe and the Gallery.">
+<meta property="og:url" content="https://nebularising.media/thetradingpost/post/cafe">
+<meta name="robots" content="noindex">
+<meta property="og:image" content="https://nebularising.media/thetradingpost/assets/img/share-card.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Post at 777 Daydream St.: a black-and-gold shopfront wrapped in red Boston ivy, with a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
+<meta name="twitter:card" content="summary_large_image">
+<!-- START THE BIG DOWNLOAD AT ONCE: the room's picture, fetched while the page is still arriving. Each screen fetches
+     only its own copy (the same choice as the <picture> in PART 2): phones held upright get the phone slice, laptops
+     the 1600 px room, big sharp screens the 2400 px room. -->
+<link rel="preload" as="image" href="../assets/img/post/room2/room-phone.webp" media="(max-aspect-ratio: 9/10)">
+<link rel="preload" as="image" href="../assets/img/post/room2/room-1600.webp" media="(min-aspect-ratio: 9/10) and (max-width: 1500px)">
+<link rel="preload" as="image" href="../assets/img/post/room2/room-2400.webp" media="(min-aspect-ratio: 9/10) and (min-width: 1501px)">
+<!--
+  NOT RISING · THE POST, the room inside 777 Daydream St.
+  ------------------------------------------------------------------
+  THE BIG IDEA (Nov 3): ONE PHOTOREAL PICTURE
+  The room is one finished picture of the whole hall (assets/img/post/room2/), from the glass roof down to the floor.
+  Everything in it is baked in: the Newsstand's 3D marquee, awning and crystal stand with every cover, the Wishing
+  Wall, the Gallery's 16 canvas prints, the Best Storyteller poster, the lounge and Nebula Cafe. The page is that
+  picture, as wide as the screen: you land up under the glass roof and scroll down into the room. On a phone you see
+  the middle of the hall (a tall slice, centred on Nebula Cafe) and the directory takes you to the walls.
+  Five invisible buttons sit on the picture (Newsstand, Wishing Wall, Cafe, Gallery, the poster); each opens a popup.
+  (The old 3D stage set, assets/post-stage.js and post-final.js, is no longer used by this page.)
+
+  THIS FILE HAS THREE PARTS
+    PART 1 · THE LOOK       (CSS, in the <style> below): the picture, the buttons, the popups
+    PART 2 · THE BONES      (HTML, in the <body>): the picture and its buttons, the cue, the popups
+    PART 3 · THE BEHAVIOUR  (JavaScript, at the bottom): land, open and close popups, the café, the gallery
+
+  WHERE THINGS COME FROM
+    The room and the café: assets/img/post/room2/ (from Kathi's renders, every fix baked in). Three copies of each:
+      -2400 (big sharp screens), -1600 (laptops), -phone (the middle slice, for phones held upright).
+    The buttons: in percent of the picture, in PART 1 (the ".s-..." and ".c-..." rules).
+    The Wishing Wall close-up: assets/img/post/room/wall.webp
+    The gallery's photos and label, and the wishes' words: assets/data.js
+    The poster up close and its BUY IT link: WALL_POSTER and POSTERS in assets/data.js
+  ------------------------------------------------------------------
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Caveat:wght@700&display=swap">
+<style>
+/* ================================================================
+   PART 1 · THE LOOK
+   ================================================================ */
+
+/* --- The page itself: black behind everything. The page scrolls up and down only, never sideways: how far it
+   scrolls is how far the camera comes down through the room. While a popup is open it stays put (.locked). --- */
+html { box-sizing: border-box; overflow-x: hidden; } *, *::before, *::after { box-sizing: inherit; }
+html, body { margin: 0; background: #0d0d0e; }
+/* (Oct 31) No rubber-band bounce past the top or bottom (it showed black above the roof and below the floor) */
+html, body { overscroll-behavior: none; }
+/* (Oct 31) The ceiling fan holds still. Spinning right in front of the camera it swept big black blades across the
+   view, and it made the browser re-sort the whole room every frame, which is what stuttered. */
+.nrp-fan-spin { animation: none !important; }
+html.locked, html.locked body { overflow: hidden; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read aloud by screen readers, not shown */
+
+/* --- THE STAGE: the room's picture, as wide as the screen, as tall as its shape says (the page scrolls down it).
+   .stage  the window onto the picture. --x0 and --x1 say which slice of the picture's width shows (0 to 1): all of it
+           on a computer; on a phone the middle 40% (a tall slice with Nebula Cafe in the middle).
+   .art    the picture and its buttons together, slid left so the slice lines up with the window. The buttons are in
+           percent of the WHOLE picture, so they stay on their things at any size, on any screen.
+   (A phone downloads only the slice itself, so its picture is laid over just that part of .art.) --- */
+.stage { --x0: 0; --x1: 1; position: relative; width: 100%; overflow: hidden; aspect-ratio: 2398 / 2624; background: #0d0d0e; }
+@media (max-aspect-ratio: 9/10) { .stage { --x0: .30; --x1: .70; aspect-ratio: 959 / 2624; } }   /* phones: x 30% to 70% */
+.art { position: absolute; top: 0; height: 100%; width: calc(100% / (var(--x1) - var(--x0)));
+  left: calc(-100% * var(--x0) / (var(--x1) - var(--x0))); }
+.art > picture > img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+@media (max-aspect-ratio: 9/10) { .art > picture > img { left: calc(100% * var(--x0)); width: calc(100% * (var(--x1) - var(--x0))); } }
+.stage:not(.ready) .art { opacity: 0; }                       /* hidden until the picture has arrived... */
+.stage.ready .art { opacity: 1; transition: opacity .6s; }    /* ...then it fades in */
+
+/* where each button sits, in percent of the whole picture (2398 x 2624) */
+.s-newsstand { left: 1.5%;   top: 32.01%; width: 20.35%; height: 58.3%; }
+.s-wall      { left: 22.19%; top: 41.54%; width: 13.84%; height: 40.78%; }
+.s-cafe      { left: 36.7%;  top: 39.25%; width: 29.36%; height: 32.01%; }
+.s-poster    { left: 70.31%; top: 47.87%; width: 4.42%;  height: 18.29%; }
+.s-gallery   { left: 75.48%; top: 34.3%;  width: 22.27%; height: 51.45%; }
+
+/* --- CRYSTAL GLASS: the look of every button and label that floats over the room (the four spots' name tags,
+   the way back out, the phone directory, the popups' close buttons). Clear and see-through, like cut crystal:
+     - the room behind shows through, blurred and a little brighter (backdrop-filter)
+     - a faint white wash, brighter at the top-left facet (the first gradient)
+     - a hairline of light around the edge and a brighter line along the top (the inset box-shadows)
+     - a faint rainbow at the edge, the way crystal splits light (the ::before layer, a thin ring of colour)
+   White lettering with a soft dark shadow, so it reads over light and dark parts of the room alike. --- */
+.crystal { position: relative; isolation: isolate; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  background: linear-gradient(135deg, rgba(255,255,255,.34), rgba(255,255,255,.08) 42%, rgba(255,255,255,.04) 58%, rgba(255,255,255,.2));
+  -webkit-backdrop-filter: blur(6px) saturate(1.5) brightness(1.08); backdrop-filter: blur(6px) saturate(1.5) brightness(1.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.55), inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(255,255,255,.2),
+    0 4px 14px rgba(0,0,0,.28); }
+.crystal::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; padding: 1px;
+  background: linear-gradient(115deg, rgba(255,120,170,.55), rgba(255,220,120,.5) 25%, rgba(120,255,200,.45) 50%, rgba(120,170,255,.55) 75%, rgba(220,140,255,.5));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); opacity: .7; }
+
+/* --- THE FIVE BUTTONS: invisible patches on the picture (inside .art, so they move with it).
+   pointer-events: auto = they answer to the mouse, though the room around them doesn't. A faint glow on hover. --- */
+.spot { position: absolute; display: block; margin: 0; padding: 0; border: 0; background: transparent; cursor: pointer;
+  pointer-events: auto; transition: background .3s; -webkit-tap-highlight-color: transparent; }
+.spot:hover, .spot:focus-visible { background: rgba(255,248,232,.1); }
+@media (hover: none) { .spot:hover { background: transparent; } }   /* (touch screens: no lit box left behind after a tap) */
+.spot:focus-visible { outline: 2px solid rgba(255,255,255,.8); outline-offset: -2px; }   /* (for keyboard visitors) */
+/* its name: a small crystal tag that follows the mouse (and sits on the button for keyboard visitors) */
+.tag { position: fixed; z-index: 6; pointer-events: none; white-space: nowrap; transform: translate(14px, 14px);
+  font: 700 11px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  padding: 8px 12px; border-radius: 3px; }   /* (crystal glass: see above) */
+
+/* --- The page furniture: the way back out, the "Scroll down" cue (at the bottom of the screen), the phone directory --- */
+.back { position: fixed; z-index: 5; top: max(10px, env(safe-area-inset-top, 0px)); left: max(16px, env(safe-area-inset-left, 0px));
+  font: 700 10px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  text-decoration: none; padding: 6px 9px; border-radius: 3px; }   /* (crystal glass: see above) */
+.back:hover { background-color: rgba(255,255,255,.12); }
+.back:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+.cue { position: fixed; z-index: 5; left: 50%; bottom: max(16px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
+  display: grid; justify-items: center; gap: 6px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
+  font: 700 11px/1 Arimo, "Helvetica Neue", Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
+.cue::after { content: ""; width: 12px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); animation: bob 1.6s ease-in-out infinite; }       /* a little arrow under the words, pointing down */
+.cue.gone { opacity: 0; }
+@media (max-aspect-ratio: 9/10) { .cue { bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 82px); } }   /* phones: just above the directory */
+@keyframes bob { 50% { transform: translateY(5px) rotate(45deg); } }
+
+/* The directory: the four places as buttons, for phones only (on a phone some of the room is off to the side).
+   A small crystal panel (about a third smaller than it was): four crystal buttons in a 2 x 2 grid. */
+.directory { display: none; }
+@media (max-aspect-ratio: 9/10) {
+  .directory { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; position: fixed; z-index: 5; padding: 5px; border-radius: 6px;
+    left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .directory button { border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left; white-space: nowrap;
+    font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase;
+    font-variant-emoji: text; }   /* (Nov 1) arrows stay plain white text, never emoji (backs up the &#xFE0E; in the HTML) */
+  .directory button:active { background-color: rgba(255,255,255,.3); }
+}
+
+/* --- THE POPUPS. Each popup is a <dialog>: the browser's own popup box. It covers the screen, keeps the keyboard
+   inside itself while open, and closes with the Escape key all by itself. --- */
+dialog.pop { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: #0d0d0c; color: #f1ece2; overflow: hidden; overscroll-behavior: contain;
+  font-family: Arimo, "Helvetica Neue", Arial, sans-serif; }
+dialog.pop[open] { animation: fade-in .35s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+.close { position: fixed; z-index: 3; top: max(8px, env(safe-area-inset-top, 0px)); right: max(10px, env(safe-area-inset-right, 0px));
+  width: 44px; height: 44px; border: 0; border-radius: 50%; padding: 0; cursor: pointer;
+  font: 300 30px/1 "Helvetica Neue", Arial, sans-serif; }   /* (crystal glass: see above) */
+.close:hover, .close:focus-visible { outline: none; background-color: rgba(255,255,255,.18); }
+.close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* 1 · Newsstand: the real Newsstand page, shown inside the popup (an <iframe> is a window onto another page) */
+.pop-newsstand iframe { display: block; width: 100%; height: 100%; border: 0; background: #f4efe6; }
+
+/* 2 · Wishing Wall: the whole wall, as big as the screen allows. Click (or tap) it to zoom in and read; the zoomed
+   wall is 3 times bigger and scrolls every way (swipe, or the scroll wheel); click again to see it all. */
+.wall-scroll { position: absolute; inset: 0; display: flex; overflow: auto;
+  padding: 24px max(24px, env(safe-area-inset-right, 0px)) 48px max(24px, env(safe-area-inset-left, 0px)); }
+.wall-scroll img { display: block; margin: auto; width: auto; height: auto; max-width: 100%; max-height: 100%; cursor: zoom-in;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.wall-scroll.zoomed img { max-width: none; max-height: none; cursor: zoom-out; }
+.wall-hint { position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); margin: 0;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: #8d8a86; pointer-events: none; }
+
+/* 3 · NEBULA CAFE (Nov 3): Kathi's photoreal café, through the arch. Like the room, it's a picture you scroll down
+   (the café is two storeys), with buttons on it in percent of the picture: the pink neon and the card reader (Buy Me
+   a Cosmo), Kathi (Step up: the camera moves in to her and she says "Hi, Human!") and the WORD JAR.
+   Its own 2 x 2 crystal panel at the bottom, the same size as the room's directory. */
+dialog.pop-cafe { overflow-y: auto; overflow-x: hidden; }
+dialog.pop-cafe.near { overflow: hidden; }
+.cafe { --x0: 0; --x1: 1; position: relative; width: 100%; overflow: hidden; aspect-ratio: 2486 / 2532; }
+@media (max-aspect-ratio: 9/10) { .cafe { --x0: .2414; --x1: .7241; aspect-ratio: 1200 / 2532; } }   /* phones: the middle slice */
+.cafe.moving { overflow: visible; }
+.cafe .art { transform-origin: 0 0; transition: transform 1.2s cubic-bezier(.2, .7, .2, 1); }
+.c-neon   { left: 30.57%; top: 37.12%; width: 32.18%; height: 6.71%; border-radius: 40%; }
+.c-me     { left: 34.59%; top: 42.65%; width: 26.55%; height: 41.07%; border-radius: 30% 30% 8% 8%; }
+.c-jar    { left: 61.54%; top: 76.22%; width: 8.61%;  height: 11.61%; border-radius: 12%; }
+.c-reader { left: 67.98%; top: 72.27%; width: 12.87%; height: 13.03%; border-radius: 10%; }
+.cafe .spot:hover, .cafe .spot:focus-visible { background: transparent; box-shadow: 0 0 0 2px rgba(255,255,255,.8), 0 0 1.4em rgba(255,214,160,.55); }
+.cafe .c-neon:hover, .cafe .c-neon:focus-visible { box-shadow: none; background: radial-gradient(closest-side, rgba(255,92,160,.3), transparent); }
+.cafe .c-me:hover { box-shadow: none; }
+.c-jar svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+/* "Hi, Human!": a smoky crystal tag above her beanie, its tail pointing down at her */
+.hello { position: fixed; z-index: 4; margin: 0; padding: 10px 14px 9px; border-radius: 10px; pointer-events: none; white-space: nowrap; text-align: center;
+  background-color: rgba(18, 16, 20, .6); opacity: 0; transform: translateY(6px) scale(.96); transform-origin: 50% 100%; transition: opacity .35s, transform .35s; }
+.hello.on { opacity: 1; transform: none; }
+.hello b { display: block; font: 700 clamp(17px, 2.2vw, 26px)/1 Arimo, Arial, sans-serif; letter-spacing: .02em; }
+.hello small { display: block; margin-top: 6px; font: 700 8px/1.3 Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+.hello::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg);
+  background: rgba(40, 38, 44, .8); box-shadow: inset -1px -1px 0 rgba(255,255,255,.55); }
+/* the café's panel: the room's directory exactly (2 x 2, a blank block keeps its shape), on every screen */
+.c-panel { position: fixed; z-index: 3; left: 50%; transform: translateX(-50%); bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  display: grid; grid-template-columns: 123px 87px; gap: 5px; padding: 5px; border-radius: 6px; }
+.c-panel button, .c-panel a, .c-panel .blank { overflow: hidden; border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left;
+  white-space: nowrap; text-decoration: none; color: #fff; font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em;
+  text-transform: uppercase; font-variant-emoji: text; transition: background-color .2s; }
+.c-panel .blank { cursor: default; min-height: 24px; }
+.c-panel button:hover, .c-panel a:hover, .c-panel button:focus-visible, .c-panel a:focus-visible { outline: none; background-color: rgba(255,255,255,.18); }
+.c-cue { position: fixed; z-index: 3; left: 50%; bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 82px); transform: translateX(-50%); margin: 0;
+  display: grid; justify-items: center; gap: 6px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); pointer-events: none;
+  font: 700 11px/1 Arimo, "Helvetica Neue", Arial, sans-serif; letter-spacing: .22em; text-transform: uppercase; transition: opacity .4s; }
+.c-cue::after { content: ""; width: 12px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); animation: bob 1.6s ease-in-out infinite; }
+.c-cue.gone { opacity: 0; }
+
+/* THE WORD JAR's card: post-it strips, black and white, stuck over the café */
+.wj { position: fixed; inset: 0; z-index: 5; overflow-y: auto; display: grid; place-items: center; padding: 64px 16px 24px; background: rgba(6, 6, 8, .62);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.wj-stack { width: min(380px, 100%); display: grid; gap: 12px; }
+.pi { position: relative; margin: 0; padding: 18px 20px 16px; text-align: left; text-shadow: none; box-shadow: 0 1px 1px rgba(0,0,0,.18), 0 14px 18px -12px rgba(0,0,0,.75); }
+.pi::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26%; pointer-events: none; }
+.pi.white { background: #fbfaf6; color: #191919; } .pi.white::before { background: rgba(0,0,0,.035); }
+.pi.black { background: #161616; color: #f4f2ec; } .pi.black::before { background: rgba(255,255,255,.045); }
+.wj-stack .pi:nth-of-type(odd) { transform: rotate(-1.1deg); } .wj-stack .pi:nth-of-type(even) { transform: rotate(.8deg); }
+.pi h2 { margin: 0 0 8px; font: 700 9px/1 Arimo, Arial, sans-serif; letter-spacing: .26em; text-transform: uppercase; opacity: .7; }
+.pi .lede { margin: 0; font: 700 clamp(18px, 4.6vw, 21px)/1.25 Arimo, Arial, sans-serif; text-wrap: balance; }
+.pi label { display: flex; justify-content: space-between; font: 700 8px/1 Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; opacity: .6; }
+.pi input { display: block; width: 100%; margin: 6px 0 0; padding: 2px 0 4px; border: 0; border-bottom: 1px dashed currentColor; background: transparent;
+  color: inherit; font: 700 28px/1.1 Caveat, "Bradley Hand", cursive; outline: none; }
+.pi input::placeholder { color: inherit; opacity: .35; }
+.pi input:focus { border-bottom-style: solid; }
+.pi .count.over { color: #ff6b6b; opacity: 1; }
+.wj-msg { margin: 0; min-height: 1.2em; text-align: center; font: 400 13px/1.4 Arimo, Arial, sans-serif; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+.wj-msg.err { color: #ffb4b4; }
+.wj-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }   /* the bot trap: off screen, never seen */
+.wj-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; padding: 5px; border-radius: 6px; justify-self: center; }
+.wj-actions button { border: 0; margin: 0; cursor: pointer; padding: 8px 10px; border-radius: 3px; text-align: left; white-space: nowrap; color: #fff;
+  font: 700 8px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; font-variant-emoji: text; }
+.wj-actions button:hover, .wj-actions button:focus-visible { outline: none; background-color: rgba(255,255,255,.18); }
+
+/* 5 · The poster up close: a copy of the storefront's ("The poster up close" in assets/storefront.css), so the two
+   posters behave the same: the room dimmed and softly blurred behind, the poster as big as fits, a BUY IT button
+   under it, and a small round x on the poster's top corner.
+     .lb-box     the poster and its button, stacked and centred, 20px apart; it pops in, growing slightly
+     .lb-poster  as big as fits: 86% of the screen's width, or short enough to leave room for the button
+                 (.784 = the poster's shape, 864 / 1102), and never over 560px wide
+     .lb-panel   a small crystal panel holding the BUY IT button: crystal glass with a plain white arrow, the same as
+                 the storefront's popups (.nrsf-lb-panel / .nrsf-lb-go in assets/storefront.css) */
+dialog.pop-poster { background: rgba(6,6,8,.84); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+dialog.pop-poster[open] { display: grid; place-items: center; padding: 16px; }
+.lb-box { position: relative; display: grid; justify-items: center; gap: 20px; outline: none; animation: lb-pop .35s cubic-bezier(.2,.7,.2,1); }
+@keyframes lb-pop { from { opacity: 0; scale: .92; } }
+.lb-poster { display: block; width: min(86vw, calc((100vh - 150px) * .784), 560px); height: auto; aspect-ratio: 864 / 1102;
+  box-shadow: 0 20px 60px rgba(0,0,0,.7); }
+.lb-panel { display: inline-block; padding: 5px; border-radius: 6px; }   /* (crystal glass: see above) */
+.lb-buy { display: inline-flex; align-items: center; gap: .9em; padding: 13px 18px; border: 0; border-radius: 3px; white-space: nowrap; text-decoration: none;
+  font: 700 12px/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .18em; text-transform: uppercase; font-variant-emoji: text;
+  transition: background-color .2s; }   /* (crystal glass: see above) */
+.lb-buy .arr { font-size: 1.35em; letter-spacing: 0; transition: transform .2s; }
+.lb-buy:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.lb-buy:active { background-color: rgba(255,255,255,.3); }
+@media (hover: hover) { .lb-buy:hover { background-color: rgba(255,255,255,.18); } .lb-buy:hover .arr { transform: translateX(3px); } }
+@media (max-width: 639px) { .lb-buy { font-size: 11px; padding: 12px 16px; } }
+.pop-poster .close { position: absolute; top: -14px; right: -14px; z-index: 2; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid #555; background: #111; color: #f4f1ea; font: 400 24px/1 Arimo, Arial, sans-serif; display: grid; place-items: center; }
+.pop-poster .close:hover, .pop-poster .close:focus-visible { background: #f4f1ea; color: #111; outline: none; }
+
+/* 4 · Gallery: the whole exhibit on one black brick wall, then each photo big (the viewer) */
+dialog.pop-gallery { overflow-y: auto;
+  background:
+    radial-gradient(ellipse 58% 52% at 50% 40%, rgba(255,232,196,.13), rgba(255,232,196,.04) 55%, transparent 75%),
+    radial-gradient(ellipse 85% 80% at 50% 45%, transparent 45%, rgba(0,0,0,.72)),
+    url(../assets/img/post/black-brick.webp) 50% 50% / 484px auto repeat, #111;
+  background-attachment: fixed; }
+.hang { max-width: 1060px; margin: 0 auto; padding: 64px 24px 48px; }
+.hang header { margin: 0 0 30px; }
+.hang h2 { margin: 0; font: 300 clamp(34px, 6vw, 56px)/1 "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif; letter-spacing: .3em; text-transform: uppercase; }
+.hang header p { margin: 8px 0 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: #b9b3a9; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(16px, 3vw, 34px); }
+@media (max-width: 700px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+/* each photo as a small canvas print: a thin black float frame around a square crop */
+.print { display: block; aspect-ratio: 1; margin: 0; padding: 5px; border: 0; cursor: pointer; background: #070707;
+  box-shadow: 0 0 0 4px #1c1c1c, 0 0 0 5px #3a3a3a, 0 14px 30px rgba(0,0,0,.6); transition: transform .25s; }
+.print:hover, .print:focus-visible { outline: none; transform: translateY(-3px); box-shadow: 0 0 0 4px #1c1c1c, 0 0 0 5px #8d8a86, 0 18px 36px rgba(0,0,0,.7); }
+.print img { display: block; width: 100%; height: 100%; object-fit: cover; background: #222; }
+
+/* the viewer: one photo, whole and untrimmed, with its museum label flush to the frame's outer edge */
+.viewer { position: fixed; inset: 0; display: grid; place-items: center;
+  padding: max(56px, env(safe-area-inset-top, 0px)) 72px max(40px, env(safe-area-inset-bottom, 0px)); }
+.v-count { position: absolute; top: max(20px, env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); margin: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .2em; color: #8d8a86; }
+.v-btn { position: absolute; z-index: 1; border: 0; padding: 0; background: transparent; color: #f1ece2; cursor: pointer; opacity: .75; }
+.v-btn:hover, .v-btn:focus-visible { opacity: 1; outline: none; }
+.v-btn:focus-visible { box-shadow: 0 0 0 2px #f1ece2; }
+.v-all { top: max(14px, env(safe-area-inset-top, 0px)); left: 16px; padding: 6px 8px; font: 700 11px/1 Arimo, Arial, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.v-prev, .v-next { top: 50%; transform: translateY(-50%); width: 48px; height: 64px; font: 300 56px/1 "Helvetica Neue", Arial, sans-serif; }
+.v-prev { left: 12px; } .v-next { right: 12px; }
+.piece { margin: 0; display: flex; align-items: flex-end; gap: 30px; max-width: 100%; max-height: 100%; }
+.frame { position: relative; flex: 0 1 auto; min-width: 0; background: #070707; padding: 7px;
+  box-shadow: 0 0 0 6px #1c1c1c, 0 0 0 7px #3a3a3a, 0 22px 55px rgba(0,0,0,.7); }
+.frame img { display: block; width: auto; height: auto; object-fit: contain;
+  max-height: calc(100vh - 140px); max-height: calc(100dvh - 140px); max-width: calc(100vw - 144px - 190px); }
+/* the label: a printed card behind clear glass, held off the wall by four chrome standoffs.
+   (Nov 1) TINY next to the photo, the way a museum's wall label is: the same card, shrunk to half size (zoom), so the
+   lettering, line breaks, glass and screws all stay the same, only smaller. --k is that size; change it in one place
+   (phones have their own, below). zoom shrinks the label's own margin too, so the margin is divided by --k to still
+   land 7px down, flush with the frame's bottom edge. The photo gets the room the smaller label frees up (190px is
+   kept for the label and the gap beside it; it was 330px). */
+.label { --k: .5; zoom: var(--k); position: relative; flex: 0 0 auto; margin: 0 0 calc(-7px / var(--k)); }
+.glass { position: relative; padding: 11px; border-radius: 3px;
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.05) 45%, rgba(220,235,255,.08));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 1px 0 rgba(255,255,255,.6), 0 8px 22px rgba(0,0,0,.55); }
+.glass::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 18%, rgba(255,255,255,.28) 24%, rgba(255,255,255,.06) 31%, transparent 37%, transparent 64%, rgba(255,255,255,.12) 68%, transparent 73%); }
+.card { background: #f7f5f0; color: #111; padding: 13px 18px 14px 16px; width: max-content; min-width: 200px; max-width: 290px; }
+.card p { margin: 0; }
+.v-artist { font-weight: 700; font-size: 12px; letter-spacing: .06em; line-height: 1.35; }
+.v-title  { font-size: 13px; line-height: 1.35; margin-top: 6px !important; }
+.v-medium { font-size: 12px; line-height: 1.35; color: #333; margin-top: 2px !important; }
+.v-credit { font-size: 10.5px; line-height: 1.4; color: #666; margin-top: 9px !important; }   /* line 4: whose collection it's in */
+.card em { font-style: italic; }
+.screw { position: absolute; z-index: 2; width: 7px; height: 7px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #c9ccd0 40%, #7d8287 75%, #4a4e52); box-shadow: 0 1px 2px rgba(0,0,0,.6); }
+/* on a phone (Oct 31; label made 2x smaller Nov 1): the gallery's words come in at 3/4 size, so they sit beside the photos in the same proportion
+   as on a computer instead of crowding them.
+     - the line under LIFE: 9px instead of 12px, its two parts stacked (the title, then the artist), one to a line
+     - the label goes under the photo (flush with its right edge) and is the very same card, shrunk to 3/8 (zoom):
+       same lettering, same line breaks, same glass and screws, only smaller. --k is that size; change it in one place.
+       (zoom shrinks the label's own margin too, so the margin is divided by --k to land at 6px down and 7px out.)
+     - the photo gets the room the smaller label frees up: the screen's height minus 230px (it was 290px, and 330px before that)
+     - the arrows drop to the bottom corners */
+@media (max-width: 760px) {
+  .hang header p { font-size: 9px; letter-spacing: .12em; line-height: 1.6; }
+  .hang header p span { display: block; }
+  .hang header p .g-dot { display: none; }
+  .viewer { padding: max(52px, env(safe-area-inset-top, 0px)) 16px max(76px, env(safe-area-inset-bottom, 0px)); }
+  .piece { flex-direction: column; align-items: flex-end; gap: 4px; }
+  .frame img { max-width: calc(100vw - 32px - 28px); max-height: calc(100vh - 230px); max-height: calc(100dvh - 230px); }
+  .label { --k: .375; zoom: var(--k); margin: calc(6px / var(--k)) calc(-7px / var(--k)) 0 0; }
+  .v-prev, .v-next { top: auto; transform: none; bottom: max(14px, env(safe-area-inset-bottom, 0px)); }
+  .v-prev { left: 16px; } .v-next { right: 16px; }
+}
+
+/* --- Coming in through the storefront door, and leaving: a fade from (and to) white light --- */
+html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: from-light 1.2s ease-out .1s both; }
+@keyframes from-light { to { opacity: 0; visibility: hidden; } }
+body::before { content: ""; position: fixed; inset: 0; z-index: 2147483646; background: #fff; opacity: 0; pointer-events: none; transition: opacity .6s ease-in; }
+body.leaving::before { opacity: 1; }
+
+/* Visitors who ask for less motion get none */
+@media (prefers-reduced-motion: reduce) {
+  .cue::after, .c-cue::after, dialog.pop[open], .lb-box, html.from-light body::after { animation: none; }
+  .cafe .art, .hello { transition: none; }
+  html.from-light body::after { display: none; }
+  .spot, .print, body::before, .stage.ready .art { transition: none; }
+}
+</style>
+<script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
+</head>
+<body>
+<!-- ================================================================
+     PART 2 · THE BONES
+     ================================================================ -->
+
+<!-- The way back out: the street's full, secure address (https), so the address bar shows .../thetradingpost/ and never index.html -->
+<a class="back crystal" href="https://nebularising.media/thetradingpost/">← 777 Daydream St.</a>
+
+<!-- THE STAGE: the room's picture and its five buttons (data-pop = which popup; data-label = the name tag).
+     <picture> lets each screen fetch only its own copy: the phone slice, the 1600 px room or the 2400 px room. -->
+<main class="stage" id="stage" aria-label="THE POST: a tall hall under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand, NOW SOARING on a bulb-lit marquee with a black-and-white awning over a crystal-glass stand of NOT RISING covers, framed by Edison bulbs, then the Wishing Wall, a stencilled cowboy with every wish painted around him. Ahead, through an arch hung with flowering vines, Nebula Cafe glowing, with Kathi behind the bar. In front of it a lounge: a low green L-shaped sofa, a jute rug and pouf, and a pink plant in a white pot. On the right, black brick: the Best Storyteller poster, LIFE, sixteen black-and-white canvas prints in a 4 by 4 grid, and GALLERY at floor level.">
+  <div class="art" id="room">
+    <picture>
+      <source media="(max-aspect-ratio: 9/10)" srcset="../assets/img/post/room2/room-phone.webp">
+      <source media="(max-width: 1500px)" srcset="../assets/img/post/room2/room-1600.webp">
+      <img id="room-img" src="../assets/img/post/room2/room-2400.webp" width="2398" height="2624" alt="" decoding="async" fetchpriority="high">
+    </picture>
+    <button class="spot s-newsstand" type="button" data-pop="newsstand" data-label="Newsstand" aria-label="Open the Newsstand"></button>
+    <button class="spot s-wall" type="button" data-pop="wall" data-label="Wishing Wall" aria-label="Open the Wishing Wall"></button>
+    <button class="spot s-cafe" type="button" data-pop="cafe" data-label="Nebula Cafe" aria-label="Open Nebula Cafe"></button>
+    <button class="spot s-poster" type="button" data-pop="poster" data-label="Best Storyteller" aria-label="The Best Storyteller poster: open it up close"></button>
+    <button class="spot s-gallery" type="button" data-pop="gallery" data-label="Gallery" aria-label="Open the Gallery"></button>
+  </div>
+</main>
+
+<!-- the buttons' name tag, and the nudge to look down -->
+<div class="tag crystal" id="tag" hidden></div>
+<p class="cue" id="cue" aria-hidden="true">Scroll down</p>
+
+<!-- The directory by the door (shows on phones only): the same four places as buttons.
+     (Nov 1) The 2 x 2 grid fills left to right, top to bottom, so the order of the buttons here IS the order on
+     screen:   WISHING WALL | CAFE
+               NEWSSTAND    | GALLERY
+     The arrows still point to where each place is in the room. "&#xFE0E;" after the ↖ is an invisible marker that
+     says "draw this as a plain text arrow": without it, iPhones draw ↖ as a blue emoji tile. -->
+<nav class="directory crystal" aria-label="Directory">
+  <button class="crystal" type="button" data-pop="wall">↖&#xFE0E; Wishing Wall</button>
+  <button class="crystal" type="button" data-pop="cafe">↑ Cafe</button>
+  <button class="crystal" type="button" data-pop="newsstand">← Newsstand</button>
+  <button class="crystal" type="button" data-pop="gallery">Gallery →</button>
+</nav>
+
+<!-- THE FOUR POPUPS. Each starts closed. "data-src" (instead of "src") holds back a picture or page
+     until the popup is first opened (PART 3, step 2), so nobody downloads what they don't open. -->
+
+<!-- 1 · THE NEWSSTAND: the real Newsstand page inside the popup -->
+<dialog class="pop pop-newsstand" id="pop-newsstand" aria-label="The Newsstand">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <iframe title="The Newsstand" data-src="../newsstand/index.html" allow="fullscreen"></iframe>
+</dialog>
+
+<!-- 2 · THE WISHING WALL: the painted wall, flat and straight on -->
+<dialog class="pop pop-wall" id="pop-wall" aria-label="The Wishing Wall">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <div class="wall-scroll" data-empty>
+    <img id="wall-img" data-src="../assets/img/post/room/wall.webp" width="2722" height="2053"
+         alt="The Wishing Wall: white brick with a floor-to-ceiling stencilled cowboy in the middle and every cover feature's wish painted in its own block around him, under the words WISHING WALL.">
+  </div>
+  <p class="wall-hint" id="wall-hint" aria-hidden="true">Click the wall to zoom in</p>
+  <!-- the wishes as words too, for screen readers (filled in from data.js) -->
+  <ul class="sr-only" id="wishes"></ul>
+</dialog>
+
+<!-- 3 · NEBULA CAFE: Kathi's café through the arch. The buttons are in percent of the picture (PART 1). -->
+<dialog class="pop pop-cafe" id="pop-cafe" aria-label="Nebula Cafe">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+  <div class="cafe" id="cafe">
+    <div class="art" id="cafe-art">
+      <picture>
+        <source media="(max-aspect-ratio: 9/10)" data-srcset="../assets/img/post/room2/cafe-phone.webp">
+        <source media="(max-width: 1500px)" data-srcset="../assets/img/post/room2/cafe-1600.webp">
+        <img data-src="../assets/img/post/room2/cafe-2400.webp" width="2486" height="2532" alt="Nebula Cafe through a black arch hung with pink flowering vines and Edison bulbs. Inside, white brick: an evil-eye charm, NEBULA cafe in amber neon, a pink neon that reads buy me a cosmo, iron and oak shelves of bottles and plants with letterboard words along their edges, and Kathi in a green beanie, headphones and a NEBULA cafe apron leaning on the glittering black counter, smiling. On the counter: a potted plant, pastries under a glass dome, the word jar, a card reader with a pink cosmo glass on it, a cup of straws and a pink plant.">
+      </picture>
+      <a class="spot c-neon" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="Buy me a cosmo (opens in a new tab)"></a>
+      <button class="spot c-me" type="button" id="c-me" aria-label="Kathi, behind the bar: step up to the bar"></button>
+      <button class="spot c-jar" type="button" data-jar aria-label="The word jar: tip your barista with a kind word or two">
+        <svg viewBox="760 960 115 155" aria-hidden="true">
+          <defs><clipPath id="jar-inside"><path clip-rule="evenodd" d="M772 990 Q772 984 778 984 L861 984 Q867 984 867 990 L867 1100 Q867 1106 861 1106 L778 1106 Q772 1106 772 1100 Z M790 1015 L860 1019 L858 1108 L790 1105 Z"/></clipPath></defs>
+          <g clip-path="url(#jar-inside)" id="jar-strips"></g>
+        </svg>
+      </button>
+      <a class="spot c-reader" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="The card reader: buy me a cosmo (opens in a new tab)"></a>
+    </div>
+  </div>
+  <p class="hello crystal" id="hello" aria-live="polite"><b>Hi, Human!</b><small>Kathi Eric Dalguntas · Chief Absurdist Officer</small></p>
+  <p class="c-cue" id="c-cue" aria-hidden="true">Scroll down</p>
+  <nav class="c-panel crystal" aria-label="Nebula Cafe">
+    <button class="crystal" id="c-step" type="button" aria-label="Step up to the bar">&#x2191;&#xFE0E; Step up</button>
+    <button class="crystal" id="c-tip" type="button" data-jar aria-label="The word jar: tip a kind word">Word Jar &#x2192;&#xFE0E;</button>
+    <a class="crystal" href="https://buymeacoffee.com/thisisnotrising" target="_blank" rel="noopener" aria-label="Buy me a cosmo (opens in a new tab)">&#x2196;&#xFE0E; Buy Me A Cosmo</a>
+    <span class="blank crystal" aria-hidden="true"></span>
+  </nav>
+  <!-- THE WORD JAR: a name and up to five kind words, on post-it strips. One jar shared by everyone: the strips live in
+       Kathi's "Word Jar" Google Sheet (see THE WORD JAR in PART 3 for how they get there and back). -->
+  <div class="wj" id="wj" hidden>
+    <div class="wj-stack" role="dialog" aria-modal="true" aria-labelledby="wj-title">
+      <div class="pi black"><h2 id="wj-title">The Word Jar</h2><p class="lede">Tip your barista with a kind word or two.</p></div>
+      <form id="wj-form" autocomplete="off" novalidate style="display:contents">
+        <div class="pi white"><label for="wj-name"><span>Your name</span></label><input id="wj-name" name="name" maxlength="24" placeholder="Human"></div>
+        <div class="pi black"><label for="wj-words"><span>Your kind words</span><span class="count" id="wj-count">0 of 5 words</span></label>
+          <input id="wj-words" name="words" maxlength="60" placeholder="you make this world kinder"></div>
+        <!-- the bot trap: people never see this box (it sits off screen, and Tab and screen readers skip it).
+             Spam bots fill in every box they find, so a strip with this filled in is thrown away by the sheet's script. -->
+        <div class="wj-trap" aria-hidden="true"><label for="wj-site">Leave this empty</label><input id="wj-site" name="website" tabindex="-1" autocomplete="off"></div>
+        <p class="wj-msg" id="wj-msg" role="status"></p>
+        <div class="wj-actions crystal">
+          <button class="crystal" type="submit">&#x2193;&#xFE0E; Drop it in the jar</button>
+          <button class="crystal" type="button" id="wj-x">&#x2190;&#xFE0E; Back to the bar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</dialog>
+
+<!-- 5 · THE POSTER UP CLOSE: the Best Storyteller poster from the black wall, with a BUY IT button. The same as
+     clicking the poster in the storefront window. PART 3 (step 2B) fills in its picture (the same one hanging on
+     the wall, so nothing new downloads), its name, and the BUY IT link (POSTERS in data.js). -->
+<dialog class="pop pop-poster" id="pop-poster" aria-label="Best Storyteller poster">
+  <div class="lb-box" tabindex="-1" autofocus>   <!-- (autofocus: the popup opens with nothing lit up, as on the storefront) -->
+    <button class="close" type="button" aria-label="Close">×</button>
+    <img class="lb-poster" id="lb-poster" width="864" height="1102" alt="">
+    <span class="lb-panel crystal"><a class="lb-buy crystal" id="lb-buy" href="#" target="_blank" rel="noopener">Buy it<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+  </div>
+</dialog>
+
+<!-- 4 · THE GALLERY: first the whole exhibit on one wall (the hang), then one photo at a time (the viewer) -->
+<dialog class="pop pop-gallery" id="pop-gallery" aria-label="Gallery: Life Exhibit">
+  <button class="close crystal" type="button" aria-label="Close">×</button>
+
+  <section class="hang" id="hang" data-empty>
+    <header>
+      <h2 id="g-title">LIFE</h2>
+      <p id="g-sub"></p>
+    </header>
+    <div class="grid" id="grid"></div>   <!-- the 16 framed prints are added here from data.js -->
+  </section>
+
+  <section class="viewer" id="viewer" hidden data-empty>   <!-- (in the viewer, a click on the dark goes back to the hang) -->
+    <button class="v-btn v-all" id="v-all" type="button">← All photos</button>
+    <p class="v-count" id="v-count"></p>
+    <button class="v-btn v-prev" id="v-prev" type="button" aria-label="Previous photo">‹</button>
+    <button class="v-btn v-next" id="v-next" type="button" aria-label="Next photo">›</button>
+    <figure class="piece" data-empty>
+      <div class="frame"><img id="v-img" alt=""></div>
+      <figcaption class="label">
+        <div class="glass">
+          <div class="card">
+            <p class="v-artist" id="v-artist"></p>
+            <p class="v-title" id="v-title"></p>
+            <p class="v-medium" id="v-medium"></p>
+            <p class="v-credit" id="v-credit"></p>
+          </div>
+          <i class="screw" style="left:6px;top:6px"></i><i class="screw" style="right:6px;top:6px"></i>
+          <i class="screw" style="left:6px;bottom:6px"></i><i class="screw" style="right:6px;bottom:6px"></i>
+        </div>
+      </figcaption>
+    </figure>
+  </section>
+</dialog>
+
+<!-- The words and photo lists (data.js), then PART 3 -->
+<script src="../assets/data.js"></script>
+<script>
+/* ================================================================
+   PART 3 · THE BEHAVIOUR
+   ================================================================ */
+(function () {
+  const $ = id => document.getElementById(id);
+  const DATA = window.NRPOST || {};
+  const IMG = "../assets/img/";
+  const room = $("room"), stage = $("stage"), cue = $("cue"), tag = $("tag");
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const portrait = () => matchMedia("(max-aspect-ratio: 9/10)").matches;
+
+  /* STEP 1 · THE POSTER UP CLOSE: its picture and the BUY IT link (WALL_POSTER and POSTERS in data.js) */
+  const BEST = ((window.NRSF || {}).POSTERS || []).find(p => p.kind === "bestseller");
+  if (BEST) { $("lb-buy").href = BEST.link; $("pop-poster").setAttribute("aria-label", BEST.book + " by " + BEST.author); }
+  const WP = DATA.WALL_POSTER || {};
+  $("lb-poster").dataset.src = IMG + (WP.closeup || WP.img || "post/poster-best-storyteller.webp");
+  $("lb-poster").alt = WP.alt || "";
+  if (BEST) room.querySelector(".s-poster").dataset.label = BEST.book;
+
+  /* STEP 2 · WHERE YOU LAND, once the picture has arrived (at most 3 seconds): a computer at the top, up under the
+     glass roof, with the "Scroll down" cue; a phone with Nebula Cafe in the middle of the screen. */
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  let landedAt = 0;
+  function land() {
+    let y = 0;
+    if (portrait()) {
+      const r = room.querySelector(".s-cafe").getBoundingClientRect();
+      y = Math.max(0, scrollY + r.top + r.height / 2 - innerHeight / 2);
+    }
+    scrollTo(0, y); landedAt = scrollY; cueCheck();
+  }
+  const roomImg = $("room-img");
+  const arrived = roomImg.complete ? Promise.resolve() : new Promise(r => { roomImg.onload = roomImg.onerror = r; });
+  Promise.race([arrived, new Promise(r => setTimeout(r, 3000))]).then(() => { land(); stage.classList.add("ready"); });
+
+  /* STEP 3 · THE CUE goes once you start looking around (and never shows when there's nothing below to see) */
+  function cueCheck() {
+    const room_left = document.documentElement.scrollHeight - innerHeight - scrollY;
+    if (Math.abs(scrollY - landedAt) > 40 || room_left < 60) cue.classList.add("gone");
+  }
+  addEventListener("scroll", () => { if (!tag.hidden) tag.hidden = true; cueCheck(); }, { passive: true });
+
+  /* STEP 4 · THE BUTTONS' NAME TAG: follows the mouse over a button; for keyboard visitors it sits on the button */
+  const showTag = (text, x, y) => { tag.textContent = text; tag.style.left = x + "px"; tag.style.top = y + "px"; tag.hidden = false; };
+  room.addEventListener("pointermove", e => {
+    const b = e.target.closest(".spot");
+    if (b && e.pointerType === "mouse") showTag(b.dataset.label, e.clientX, e.clientY); else tag.hidden = true;
+  });
+  room.addEventListener("pointerleave", () => (tag.hidden = true));
+  room.addEventListener("focusin", e => { const b = e.target.closest(".spot"); if (!b) return; const r = b.getBoundingClientRect(); showTag(b.dataset.label, r.left + r.width / 2, r.top + r.height / 2); });
+  room.addEventListener("focusout", () => (tag.hidden = true));
+
+  /* STEP 6 · OPEN AND CLOSE THE POPUPS: ONE DOOR IN, ONE DOOR OUT
+     Every way into a place goes through the same door: the spot on the wall, the phone directory and the poster are
+     all buttons with data-pop="name", and ONE listener sends every one of them to openPop(name), which opens the
+     <dialog> with id "pop-name". So whether you reach the Gallery from the café, from the door or from the
+     directory, you take exactly the same path and arrive at exactly the same place: the top of the exhibit.
+     The first time a popup opens, its held-back pictures (data-src) are switched on, which is when they download.
+     While it's open the page underneath stays put (.locked), and every way out (the x, Escape, a click on the dark)
+     comes back through the same door: you're returned to the very spot in the room you were standing on. */
+  let standingAt = 0;                                       // where you were in the room when you stepped into a popup
+  function openPop(name) {
+    const pop = $("pop-" + name);
+    pop.querySelectorAll("source[data-srcset]").forEach(el => { el.srcset = el.dataset.srcset; el.removeAttribute("data-srcset"); });   // (a <picture>'s choices first)
+    pop.querySelectorAll("[data-src]").forEach(el => {
+      if (el.dataset.srcset) { el.srcset = el.dataset.srcset; el.removeAttribute("data-srcset"); }   // (a picture with two sizes: set the choice first)
+      el.src = el.dataset.src; el.removeAttribute("data-src");
+    });
+    if (name === "gallery") showHang();
+    if (name === "cafe") cafeOpened();
+    tag.hidden = true;
+    standingAt = scrollY;
+    document.documentElement.classList.add("locked");
+    pop.showModal();
+    pop.scrollTop = 0;                                      // every popup opens at its beginning, however you left it last time
+  }                                                         // (after it's open: a closed popup has nothing to scroll)
+  // (one listener for the whole page: it catches a click on any button with data-pop, in the room or the directory)
+  document.addEventListener("click", e => { const b = e.target.closest("[data-pop]"); if (b) openPop(b.dataset.pop); });
+  document.querySelectorAll("dialog.pop").forEach(pop => {
+    pop.addEventListener("close", () => {
+      document.documentElement.classList.remove("locked");
+      if (scrollY !== standingAt) scrollTo(0, standingAt);  // (back where you stood, even if the browser moved the page meanwhile)
+    });
+    pop.querySelector(".close").addEventListener("click", () => pop.close());
+    // a click on the dark around the picture closes the popup too (data-empty marks those dark areas);
+    // in the gallery's viewer it steps back to the whole exhibit first
+    pop.addEventListener("click", e => {
+      if (e.target !== pop && !e.target.hasAttribute("data-empty")) return;
+      if (pop.id === "pop-gallery" && !viewer.hidden) showHang(); else pop.close();
+    });
+  });
+
+  /* STEP 6B · ZOOMING INTO THE WISHING WALL
+     A click (or tap) on the wall makes it 3 times the size it fits at, and scrolls so the spot you clicked stays
+     under your finger. Another click shows the whole wall again. */
+  const wallBox = document.querySelector(".wall-scroll"), wallImg = $("wall-img"), wallHint = $("wall-hint");
+  const tapWord = matchMedia("(pointer: coarse)").matches ? "Tap" : "Click";
+  wallHint.textContent = tapWord + " the wall to zoom in";
+  wallImg.addEventListener("click", e => {
+    const r = wallImg.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    const zoom = !wallBox.classList.contains("zoomed");
+    if (zoom) { wallImg.style.width = r.width * 3 + "px"; wallImg.style.height = r.height * 3 + "px"; }
+    else { wallImg.style.width = wallImg.style.height = ""; }
+    wallBox.classList.toggle("zoomed", zoom);
+    wallHint.textContent = zoom ? tapWord + " again to see the whole wall" : tapWord + " the wall to zoom in";
+    if (zoom) {
+      const r2 = wallImg.getBoundingClientRect(), b = wallBox.getBoundingClientRect();
+      wallBox.scrollLeft += (r2.left + fx * r2.width) - e.clientX;
+      wallBox.scrollTop += (r2.top + fy * r2.height) - e.clientY;
+    }
+  });
+  $("pop-wall").addEventListener("close", () => { wallBox.classList.remove("zoomed"); wallImg.style.width = wallImg.style.height = ""; });
+
+  /* STEP 7 · THE WISHES AS WORDS, for screen readers (the wall itself is a picture) */
+  (DATA.WISHES || []).forEach(w => {
+    const li = document.createElement("li");
+    li.textContent = w.wish.replace(/\*\*/g, "") + " (" + w.name + (w.human === false ? "" : ", " + (w.title || "Human")) + ")";
+    $("wishes").appendChild(li);
+  });
+
+  /* STEP 8 · THE GALLERY
+     The hang: every photo in data.js as a small framed print, in order. Click one and the viewer
+     shows it whole, with its label. ‹ › (or the arrow keys, or a swipe) move along; "All photos" or Escape
+     goes back to the hang. */
+  const G = DATA.GALLERY || [], LABEL = DATA.GALLERY_LABEL || {};
+  const hang = $("hang"), viewer = $("viewer");
+  let at = 0;
+  const plain = t => String(t || "").replace(/\*/g, "");                     // the words without the *italics* stars
+  // A label line, with any *starred* words set in italics (every odd piece between the stars is italic).
+  // Words in (brackets) stay together on one line, so "(Filipino-American, b. 1986)" never splits at its hyphen.
+  function setLine(el, text) {
+    el.textContent = "";
+    String(text || "").split("*").forEach((part, i) => {
+      if (!part) return;
+      const box = i % 2 ? el.appendChild(document.createElement("em")) : el;
+      part.split(/(\([^)]*\))/).forEach(bit => {
+        if (!bit) return;
+        if (bit[0] === "(") { const keep = document.createElement("span"); keep.style.whiteSpace = "nowrap"; keep.textContent = bit; box.appendChild(keep); }
+        else box.appendChild(document.createTextNode(bit));
+      });
+    });
+  }
+  $("g-title").textContent = plain(LABEL.title || "LIFE").split(" ")[0];   // "Life" (shown in capitals)
+  // The line under LIFE: the title, a dot, the artist ("Life Exhibit, 2026 · KATHI ERIC DALGUNTAS (…)"). Each part is
+  // its own <span>, so on a phone they can stack one to a line, with the dot hidden (see the phone rules in PART 1).
+  [plain(LABEL.title), plain(LABEL.artist)].filter(Boolean).forEach((t, i) => {
+    if (i) { const dot = document.createElement("span"); dot.className = "g-dot"; dot.textContent = " · "; $("g-sub").appendChild(dot); }
+    const part = document.createElement("span"); part.textContent = t; $("g-sub").appendChild(part);
+  });
+  G.forEach((p, i) => {
+    const print = document.createElement("button");
+    print.className = "print"; print.type = "button";
+    print.setAttribute("aria-label", "Photo " + (i + 1) + ": " + (p.alt || ""));
+    const img = document.createElement("img");
+    img.alt = "";
+    img.dataset.src = IMG + (p.thumb || p.img.replace(/[^/]+$/, "wall/$&"));   // the small copy (same name, in wall/); the big one loads in the viewer
+    if (p.crop) img.style.objectPosition = p.crop;                               // which part of the photo the square keeps
+    print.appendChild(img);
+    print.addEventListener("click", () => show(i));
+    $("grid").appendChild(print);
+  });
+  // Back to the whole exhibit. Coming back from the viewer (All photos, Escape, a click on the dark) you land on the
+  // print you were just looking at, scrolled into view, however you got there.
+  function showHang() {
+    viewer.hidden = true; hang.hidden = false;
+    const print = $("grid").children[at];
+    if (print && $("pop-gallery").open) { print.scrollIntoView({ block: "nearest" }); print.focus({ preventScroll: true }); }
+  }
+  function show(i) {
+    at = (i + G.length) % G.length;                                  // wrap around: after the last comes the first
+    const p = G[at], L = Object.assign({}, LABEL, p);                // the shared label, with this photo's own words on top
+    const img = $("v-img");
+    img.src = IMG + p.img; img.alt = p.alt || ""; img.style.aspectRatio = String(p.ar || 1);
+    setLine($("v-artist"), L.artist);
+    setLine($("v-title"), L.title);
+    setLine($("v-medium"), L.medium);
+    setLine($("v-credit"), L.credit);
+    $("v-count").textContent = String(at + 1).padStart(2, "0") + " / " + String(G.length).padStart(2, "0");
+    if (viewer.hidden) { hang.hidden = true; viewer.hidden = false; $("v-next").focus({ preventScroll: true }); }
+    [at + 1, at - 1].forEach(j => { new Image().src = IMG + G[(j + G.length) % G.length].img; });   // fetch the neighbours early
+  }
+  $("v-prev").addEventListener("click", () => show(at - 1));
+  $("v-next").addEventListener("click", () => show(at + 1));
+  $("v-all").addEventListener("click", showHang);
+  const gallery = $("pop-gallery");
+  gallery.addEventListener("keydown", e => {
+    if (viewer.hidden) return;
+    if (e.key === "ArrowRight") show(at + 1);
+    if (e.key === "ArrowLeft") show(at - 1);
+  });
+  gallery.addEventListener("cancel", e => { if (!viewer.hidden) { e.preventDefault(); showHang(); } });   // Escape: back to the hang first
+  let startX = null;                                                 // a swipe: where the finger went down vs. where it came up
+  viewer.addEventListener("touchstart", e => { startX = e.touches[0].clientX; }, { passive: true });
+  viewer.addEventListener("touchend", e => {
+    if (startX == null) return;
+    const dx = e.changedTouches[0].clientX - startX; startX = null;
+    if (Math.abs(dx) > 45) show(at + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  /* STEP 8B · NEBULA CAFE
+     STEP UP: the café picture (with its buttons) is scaled and slid so Kathi's face comes to the middle of the screen,
+     like a camera moving in; then she says "Hi, Human!". Step back undoes it. FACE = where her face is in the picture. */
+  const cafeBox = $("cafe"), cafeArt = $("cafe-art"), popCafe = $("pop-cafe"), hello = $("hello"), cCue = $("c-cue"), cStep = $("c-step");
+  const FACE = { x: .4827, y: .5134 }, CR = 2532 / 2486;
+  let near = false;
+  function cafeCue() { cCue.classList.toggle("gone", near || popCafe.scrollTop > 40 || popCafe.scrollHeight - popCafe.clientHeight < 60); }
+  popCafe.addEventListener("scroll", cafeCue, { passive: true });
+  function cafeOpened() { stepBack(true); askJar(); cCue.classList.remove("gone"); setTimeout(cafeCue, 400); }
+  function camera() {
+    cafeArt.style.transition = "none"; cafeArt.style.transform = "";
+    const box = cafeArt.getBoundingClientRect(); void cafeArt.offsetWidth; cafeArt.style.transition = "";
+    const span = portrait() ? .42 : .84, at = portrait() ? .4 : .3;          // how much of the café fills the screen; where her face sits
+    let W = innerWidth / span; if (W * CR < innerHeight) W = innerHeight / CR;  // always fill the screen, never squash
+    const H = W * CR;
+    let left = innerWidth / 2 - FACE.x * W, top = innerHeight * at - FACE.y * H;
+    left = Math.min(0, Math.max(innerWidth - W, left)); top = Math.min(0, Math.max(innerHeight - H, top));   // never past an edge
+    return `translate(${left - box.left}px, ${top - box.top}px) scale(${W / box.width})`;
+  }
+  function placeHello() {
+    const r = $("c-me").getBoundingClientRect();
+    hello.style.left = Math.max(12, Math.min(innerWidth - hello.offsetWidth - 12, r.left + r.width / 2 - hello.offsetWidth / 2)) + "px";
+    hello.style.top = Math.max(60, r.top - hello.offsetHeight - 10) + "px";
+  }
+  function stepUp() {
+    near = true; popCafe.classList.add("near"); cafeBox.classList.add("moving"); cafeCue();
+    cafeArt.style.transform = camera();
+    setTimeout(() => { if (near) { placeHello(); hello.classList.add("on"); } }, reduceMotion ? 0 : 1150);
+    cStep.innerHTML = "&#x2193;&#xFE0E; Step back"; cStep.setAttribute("aria-label", "Step back to the arch");
+  }
+  function stepBack(now) {
+    near = false; hello.classList.remove("on"); cafeArt.style.transform = "";
+    const done = () => { if (!near) { cafeBox.classList.remove("moving"); popCafe.classList.remove("near"); cafeCue(); } };
+    if (now === true || reduceMotion) done(); else setTimeout(done, 1200);
+    cStep.innerHTML = "&#x2191;&#xFE0E; Step up"; cStep.setAttribute("aria-label", "Step up to the bar");
+  }
+  cStep.addEventListener("click", () => (near ? stepBack() : stepUp()));
+  $("c-me").addEventListener("click", () => { if (!near) stepUp(); });
+  $("c-me").addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !near) { placeHello(); hello.classList.add("on"); } });
+  $("c-me").addEventListener("pointerleave", () => { if (!near) hello.classList.remove("on"); });
+  addEventListener("resize", () => { if (near) { cafeArt.style.transform = camera(); placeHello(); } });
+  popCafe.addEventListener("close", () => { stepBack(true); closeJar(); });
+  // Escape: closes the Word Jar card first, then steps back from the bar, and only then leaves the café
+  popCafe.addEventListener("cancel", e => { if (!wj.hidden) { e.preventDefault(); closeJar(); } else if (near) { e.preventDefault(); stepBack(); } });
+
+  /* THE WORD JAR: a name and at most five kind words, on a post-it strip that drops into the jar on the counter.
+     ONE JAR FOR EVERYONE: the strips live in Kathi's "Word Jar" Google Sheet, behind a small script (word-jar.gs,
+     kept in her Google account) with two doors. JAR_URL is that script's address. It is safe to have in the page:
+     it holds no key, and it can only do two things: take in a strip, or hand out the strips Kathi has ticked "Show".
+       - the way OUT (askJar): the first time the café opens, the page asks for the ticked strips
+       - the way IN (sendStrip): a dropped strip goes to the sheet as a new row, unticked until Kathi approves it
+     The visitor's own strips are also kept in their own browser (localStorage), so a strip drops into the jar the
+     moment they tip, before it's approved. The jar shows everyone's ticked strips plus the visitor's own, each strip
+     once, newest 52 (all the jar on the counter holds). If Google can't be reached, the jar shows the visitor's own. */
+  const MAX_WORDS = 5, KEY = "nr-word-jar", JAR_HOLDS = 52;
+  const JAR_URL = "https://script.google.com/macros/s/AKfycbx6K9_n_b6VWF5DsRyXl1kkKiY9q1CWcNeNi7XUMRtfM8LtOFU6KAwWpNzcNu_8ByP06w/exec";
+  let shared = [], askedJar = false;                         // everyone's approved strips, once they've arrived
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) { return []; } };
+  const save = list => { try { localStorage.setItem(KEY, JSON.stringify(list.slice(-40))); } catch (e) {} };
+  function inJar() {                                         // everyone's strips, then this visitor's own that aren't among them yet
+    const seen = new Set(shared.map(s => s.name + "|" + s.words));
+    return shared.concat(load().filter(s => !seen.has(s.name + "|" + s.words))).slice(-JAR_HOLDS);
+  }
+  function askJar() {                                        // the way OUT, once per visit
+    if (askedJar) return;
+    askedJar = true;
+    fetch(JAR_URL).then(r => r.json())
+      .then(d => { if (d && d.ok && Array.isArray(d.strips)) { shared = d.strips; drawJar(); } })
+      .catch(() => {});                                      // (no answer: the jar keeps showing the visitor's own strips)
+  }
+  function sendStrip(strip) {                                // the way IN
+    // sent as plain text, which browsers send straight to Google; any other kind would first need a permission check
+    // that Google's scripts don't answer
+    fetch(JAR_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(strip) })
+      .catch(() => {});                                      // (the strip is already in this visitor's own jar either way)
+  }
+  function seeded(n) { const x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); }
+  function drawJar() {   // white and black strips by turns, piled from the bottom (the jar's inside: x 772-867, y 984-1106)
+    const g = $("jar-strips"), NS = "http://www.w3.org/2000/svg"; g.textContent = "";
+    inJar().forEach((_, i) => {
+      const level = 1101 - Math.floor(i / 4) * 9 - seeded(i) * 4, x = 772 + seeded(i + 99) * 78, a = (seeded(i + 7) - .5) * 60;
+      const r = document.createElementNS(NS, "rect");
+      r.setAttribute("x", x.toFixed(1)); r.setAttribute("y", (level - 2.5).toFixed(1)); r.setAttribute("width", 17); r.setAttribute("height", 4.6);
+      r.setAttribute("fill", i % 2 ? "#1b1918" : "#f3eee4"); r.setAttribute("stroke", i % 2 ? "#000" : "#bfb5a3"); r.setAttribute("stroke-width", ".4");
+      r.setAttribute("transform", `rotate(${a.toFixed(1)} ${(x + 8.5).toFixed(1)} ${level.toFixed(1)})`);
+      g.appendChild(r);
+    });
+  }
+  drawJar();
+  const wj = $("wj"), msg = $("wj-msg");
+  function openJar() { wj.hidden = false; msg.textContent = ""; msg.classList.remove("err"); setTimeout(() => $("wj-name").focus(), 50); }
+  function closeJar() { wj.hidden = true; }
+  popCafe.querySelectorAll("[data-jar]").forEach(j => j.addEventListener("click", openJar));
+  $("wj-x").addEventListener("click", closeJar);
+  wj.addEventListener("click", e => { if (e.target === wj) closeJar(); });
+  const words = () => $("wj-words").value.trim().split(/\s+/).filter(Boolean);
+  $("wj-words").addEventListener("input", () => { const n = words().length, c = $("wj-count"); c.textContent = `${n} of ${MAX_WORDS} words`; c.classList.toggle("over", n > MAX_WORDS); });
+  $("wj-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("wj-name").value.trim().replace(/\s+/g, " "), w = words();
+    let problem = "";
+    if (!name) problem = "Add your name to the strip.";
+    else if (!w.length) problem = "Add a kind word or two.";
+    else if (w.length > MAX_WORDS) problem = "Five words at most. Keep it short and kind.";
+    else if (/https?:|www\.|\.(com|net|org|io|co)\b|@/i.test(name + " " + w.join(" "))) problem = "No links or handles on the strip, just kind words.";
+    msg.classList.toggle("err", !!problem);
+    if (problem) { msg.textContent = problem; return; }
+    save(load().concat({ name, words: w.join(" "), at: Date.now() })); drawJar();          // into this visitor's own jar, right away
+    sendStrip({ name, words: w.join(" "), website: $("wj-site").value });                // and on to the sheet, for Kathi to approve
+    msg.textContent = `Thank you, ${name}. Your strip is in the jar.`;
+    $("wj-words").value = ""; $("wj-count").textContent = `0 of ${MAX_WORDS} words`;
+  });
+
+  /* STEP 9 · LEAVING: back out to Daydream St. through white light (the storefront fades in from it) */
+  document.querySelector(".back").addEventListener("click", e => {
+    if (reduceMotion) return;
+    e.preventDefault();
+    const href = e.currentTarget.href;
+    document.body.classList.add("leaving");
+    try { sessionStorage.setItem("nr-light", "1"); } catch (err) {}
+    setTimeout(() => (location.href = href), 600);
+  });
+  addEventListener("pageshow", () => document.body.classList.remove("leaving"));   // coming back with the Back button
+})();
+</script>
+</body>
+</html>
