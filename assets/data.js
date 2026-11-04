@@ -474,7 +474,9 @@ window.NRPOST = {
     { img: "post/gallery/life-exhibit/08-mural-alley.webp",        ar: 0.75, alt: "A narrow alley between graffiti-painted brick walls, set with café tables and chairs under string lights" },
     { img: "post/gallery/life-exhibit/09-stencil-cowboy.webp",     ar: 0.75, crop: "50% 15%", alt: "Stencil graffiti of a cowboy with a rifle on a painted cinder-block wall" },
     { img: "post/gallery/life-exhibit/10-towers.webp",             ar: 1.00, alt: "Looking straight up between glass towers into cloud" },
-    { img: "post/gallery/life-exhibit/11-steel-door.webp",         ar: 0.62, crop: "50% 20%", alt: "A black steel door set deep in a brick wall under a pair of caged lights" },
+    // (Nov 4) photo 11 is Kathi's self-portrait by the window (it replaced the steel door). crop "50% 0%" keeps the top
+    // of the photo in the square, so the whole beanie fits.
+    { img: "post/gallery/life-exhibit/11-self-portrait.webp",      ar: 0.75, crop: "50% 0%", alt: "A self-portrait by a sunlit window: smiling in a knit beanie and headphones, rays of light streaming across her, a vine tattoo on her forearm" },
     { img: "post/gallery/life-exhibit/12-dog-sofa.webp",           ar: 1.36, alt: "A small white dog resting on a tufted sofa beside a knit pillow" },
     { img: "post/gallery/life-exhibit/13-payphone.webp",           ar: 0.81, alt: "A pay phone glimpsed between two posts" },
     { img: "post/gallery/life-exhibit/14-plant-window.webp",       ar: 1.33, alt: "A man in a hoodie at a café table by a sunny window, surrounded by tall leafy plants" },
