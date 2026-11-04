@@ -1,0 +1,5 @@
+build/out/
+build/report.json
+build/lut.npy
+paras_edited.json
+copyedits.json
