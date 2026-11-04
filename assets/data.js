@@ -40,6 +40,7 @@ window.NR = {
     memoir02: "memoir02-cover.webp",
     memoir02Back: "memoir02-back.webp",
     memoir03: "memoir03-cover.webp",          // To Be Human: Season 1 (Kathi)
+    memoir03Back: "memoir03-back.webp",       // its back cover (the last page of the S1 ebook PDF)
     memoir04: "memoir04-cover.webp",          // To Be Human: Season 3 (Amanda Jane Lee)
     cover14: "issue14-cover.webp",
     cover15: "issue15-cover.webp",
@@ -76,7 +77,7 @@ window.NR = {
      (The Holiday Special, memoir02 / "tbh-holiday", is off the shelf until its teaser drops; its book
      is still kept in ISSUES below, so putting it back is just adding its line here again.) */
   MEMOIRS: [
-    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", soon: "Available by request.", read: "https://chiefabsurdistofficer.substack.com/p/what-it-is-to-be-human", paper: "#e3e2dc" },
+    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", issue: "tbh-s1", paper: "#e3e2dc" },
     { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2" },
     { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", soon: "Available by request.", read: "https://chiefabsurdistofficer.substack.com/p/s3-e1-shraddha", paper: "#fafbf8" }
   ],
@@ -162,6 +163,27 @@ window.NR = {
        Put the pages in assets/img/<pageDir> named p01.webp, p02.webp, ...
        (pageExt says which kind of file: "webp" or "jpg")
        Black inside covers are added so page 1 lands on the right, like in print. */
+    /* Season 1, from TBH_Season1_ebook_light.pdf (Nov 4): the PDF's first page is the cover (memoir03),
+       its pages 2-56 are p01-p55 here (1400 px wide, so they stay sharp when the book fills a big screen),
+       and its last page is the back cover (memoir03Back). Page 2 of the PDF is already dark (the copyright
+       page), so it serves as the inside front cover: no extra one. One dark inside back cover is added so
+       the closing photo faces it and the back cover sits alone, as in print. #212226 = the PDF's own dark. */
+    "tbh-s1": {
+      kind: "pages", title: "To Be Human · Season 1 · Kathi Eric Dalguntas",
+      pageDir: "tbh-s1/", pageCount: 55, pageExt: "webp", back: "memoir03Back",
+      insideFront: false, insideBack: "#212226",
+      /* The contents page (p03) is clickable: each chapter's row jumps to its opener.
+         page = the picture the button sits on; to = the picture it jumps to (Chapter 1, printed page 4, is p05:
+         the printed page number + 1); x, y, w, h = where the row is, in design pixels (816 x 1056 per page). */
+      links: [
+        { page: 3, to: 5,  label: "Chapter 1: What It Is To Be Human",              x: 283, y: 175, w: 461, h: 94 },
+        { page: 3, to: 11, label: "Chapter 2: To love is human; to grieve, divine.",  x: 283, y: 292, w: 461, h: 94 },
+        { page: 3, to: 17, label: "Chapter 3: To falter is human; to persevere, divine.", x: 283, y: 409, w: 461, h: 94 },
+        { page: 3, to: 25, label: "Chapter 4: To weep is human; to let yourself, divine.", x: 283, y: 526, w: 461, h: 94 },
+        { page: 3, to: 35, label: "Chapter 5: To break is human; to blaze, divine.",  x: 283, y: 643, w: 461, h: 94 },
+        { page: 3, to: 45, label: "Chapter 6: To be human is divine.",               x: 283, y: 760, w: 461, h: 94 }
+      ]
+    },
     "tbh-s2": {
       kind: "pages", title: "To Be Human · Season 2 · Garrett Rees",
       pageDir: "tbh-s2/", pageCount: 48, pageExt: "webp", back: "memoir01Back"

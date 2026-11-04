@@ -390,11 +390,21 @@
         const front = is.insideFront === undefined ? "#000" : is.insideFront, back = is.insideBack === undefined ? "#000" : is.insideBack;
         const html = [imgPage(src(f.cover), `${is.title}: cover`, { dark: true, hard: true })];
         if (front) html.push(inside(front));
-        for (let n = 1; n <= is.pageCount; n++) html.push(imgPage(fileSrc(`${is.pageDir}p${two(n)}.${is.pageExt || "jpg"}`), `${is.title}: page ${n}`, undefined, n > 2));
+        /* "links" (optional, in data.js): invisible buttons laid over a page picture, e.g. the rows of a contents
+           page, that jump to another page. A file pXX sits at spot XX in the book (+1 with an inside front cover). */
+        const goto = {}, at = n => n + (front ? 1 : 0);
+        const hotspots = n => (is.links || []).filter(l => l.page === n).map((l, k) => {
+          goto[`p${n}-${k}`] = at(l.to);
+          return `<button class="hot" type="button" data-goto="p${n}-${k}" aria-label="${esc(l.label)}" style="left:${P(l.x)};top:${P(l.y)};width:${P(l.w)};height:${P(l.h)}"></button>`;
+        }).join("");
+        for (let n = 1; n <= is.pageCount; n++) {
+          const url = fileSrc(`${is.pageDir}p${two(n)}.${is.pageExt || "jpg"}`), alt = esc(`${is.title}: page ${n}`);
+          html.push(page(`<img class="cover-img" src="${url}" alt="${alt}" decoding="async"${n > 2 ? ' loading="lazy"' : ""}>${hotspots(n)}`));
+        }
         if (back) html.push(inside(back));
         html.push(imgPage(src(is.back), `${is.title}: back cover`, { dark: true, hard: true }));
         if (html.length % 2) console.warn(`${is.title}: odd page count (${html.length}); add or remove an inside cover`);
-        return { html, goto: {} };
+        return { html, goto };
       }
 
       await Promise.all([
@@ -810,16 +820,45 @@
     const btnPrev = document.getElementById("nrns-prev");
     const btnNext = document.getElementById("nrns-next");
     const btnClose = document.getElementById("nrns-close");
+    const btnZoom = document.getElementById("nrns-zoom");
+    const btnFull = document.getElementById("nrns-full");
+    const zoomView = document.getElementById("nrns-zoomview");
+    const zoomPages = document.getElementById("nrns-zoompages");
+    const hint = document.getElementById("nrns-hint");
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const touch = matchMedia("(pointer: coarse)").matches;      // a phone or tablet (fingers, not a mouse)
     let book = null, built = null, openBtn = null, mounted = "";
 
-    function pageSize() {                                       // how big can one page be here?
+    /* HOW BIG CAN THE PAGES BE? (rebuilt Nov 4)
+       Every page is 8.5 x 11 in, so a page is always 816/1056 as wide as it is tall (the "ratio").
+       Two ways to show the magazine, and the script measures both:
+         two-page spread  each page gets half the screen's width and the FULL height (the buttons float beside it)
+         one page alone   the full width, but the height minus a row of buttons above and below (BAR)
+       It picks the spread unless the spread's pages would come out much smaller (under 3/4 the size),
+       which is what happens on a tall (portrait) screen. So: phone or iPad held sideways, or a desktop = spread
+       as tall as the screen; phone or iPad held upright = one page. */
+    const BAR = 64;                                             // room kept above and below a single page for the buttons
+    function pageSize() {
       const r = stage.getBoundingClientRect();
-      const W = r.width - 32, H = r.height - 16, ratio = 816 / 1056;
-      const fromH = H * ratio;
-      const spread = W / 2 >= 300;                              // room for two pages side by side?
-      const w = Math.floor(spread ? Math.min(fromH, W / 2) : Math.min(fromH, W));
-      return { w, h: Math.floor(w / ratio), spread };
+      const m = Math.max(6, Math.round(Math.min(r.width, r.height) * 0.015));   // a sliver of dark around the magazine
+      const ratio = 816 / 1056;
+      const fit = (w, h) => Math.floor(Math.min(w, h * ratio));                  // the widest page that fits a w x h box
+      const two = fit((r.width - 2 * m) / 2, r.height - 2 * m);                 // each page of a spread
+      const one = fit(r.width - 2 * m, r.height - 2 * BAR);                     // one page alone
+      const spread = two >= 140 && two >= one * 0.75;
+      const w = spread ? two : one;
+      return { w, h: Math.floor(w / ratio), spread, gutter: Math.floor((r.width - (spread ? 2 * w : w)) / 2) };
+    }
+
+    /* Labels the reader so newsstand.css knows where the buttons go (see "THE READER" there).
+       gutter = the width of the dark strip on each side of the open magazine. */
+    function setMode({ spread, gutter }) {
+      reader.classList.toggle("spread", spread);
+      reader.classList.toggle("single", !spread);
+      reader.classList.toggle("overlap", spread && gutter < 64);  // no room beside the spread for a 44 px button
+      reader.classList.toggle("roomy", spread && gutter >= 190);  // room for the title as well
+      reader.style.setProperty("--gutter", gutter + "px");
+      wake();
     }
 
     function mountBook(startPage = 0) {
@@ -828,9 +867,10 @@
       const el = document.createElement("div");
       sizer.appendChild(el);
       el.innerHTML = built.html.join("");
-      const { w, h, spread } = pageSize();
+      const size = pageSize(), { w, h, spread } = size;
       mounted = w + "x" + h + (spread ? "s" : "");              // remembered, so a resize that changes nothing is ignored
       sizer.style.width = (spread ? w * 2 : w) + "px";
+      setMode(size);
       book = new St.PageFlip(el, {
         width: w, height: h, size: "fixed", showCover: true, usePortrait: !spread,
         maxShadowOpacity: 0.45, flippingTime: 750, mobileScrollSupport: false, startPage
@@ -840,12 +880,92 @@
       updateCounter(startPage);
     }
 
-    function updateCounter(i) {
+    /* Which pages are open right now? One page alone on a tall screen; on a wide screen the cover and the back
+       cover sit alone and every other page is half of a spread (left pages have odd numbers, counting from 0). */
+    function openPages(i = book.getCurrentPageIndex()) {
       const n = book.getPageCount();
-      counter.textContent = `${i + 1} / ${n}`;
-      btnPrev.disabled = i <= 0;
-      btnNext.disabled = i >= n - 1;
+      if (reader.classList.contains("single") || i === 0) return [i];
+      const left = i % 2 ? i : i - 1;
+      return [left, left + 1].filter(p => p < n);
     }
+
+    function updateCounter(i) {
+      const n = book.getPageCount(), open = openPages(i);
+      counter.textContent = `${open.map(p => p + 1).join("–")} / ${n}`;   // "6–7 / 58" on a spread
+      btnPrev.disabled = i <= 0;
+      btnNext.disabled = open[open.length - 1] >= n - 1;
+      if (reader.classList.contains("zoomed")) fillZoom();
+    }
+
+    /* The buttons fade when they sit over the magazine (.overlap) and nobody has touched anything for 2.6 s */
+    let idleTimer;
+    function wake() {
+      reader.classList.remove("idle");
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => reader.classList.add("idle"), 2600);
+    }
+    ["pointermove", "pointerdown", "keydown", "wheel"].forEach(t => reader.addEventListener(t, wake, { capture: true, passive: true }));
+
+    /* ZOOM: copies of the open page(s), stacked, in a box that scrolls. --zw = how wide the pages are in it:
+       wide enough to read (at least 820 px, so a phone held upright scrolls sideways too), never wider than 1100. */
+    function fillZoom() {
+      const zw = Math.min(1100, Math.max(innerWidth - 24, 820));
+      zoomPages.style.setProperty("--zw", zw + "px");
+      zoomPages.innerHTML = openPages().map(p => built.html[p]).join("");
+      zoomView.scrollTo(0, 0);
+    }
+    function setZoom(on) {
+      if (!book) return;
+      reader.classList.toggle("zoomed", on);
+      zoomView.hidden = !on;
+      btnZoom.setAttribute("aria-label", on ? "Zoom out" : "Zoom in to read");
+      btnZoom.title = btnZoom.getAttribute("aria-label");
+      if (on) fillZoom(); else zoomPages.innerHTML = "";
+    }
+    btnZoom.addEventListener("click", () => setZoom(!reader.classList.contains("zoomed")));
+    // a contents link tapped while zoomed: go to that page and show it zoomed
+    zoomPages.addEventListener("click", e => {
+      const go = e.target.closest("[data-goto]");
+      if (!go || !book || built.goto[go.dataset.goto] == null) return;
+      book.turnToPage(built.goto[go.dataset.goto]);
+      updateCounter(book.getCurrentPageIndex());
+    });
+    // while zoomed, the arrows turn the page at once (no flip to watch under the zoom box) and the box shows the new pages
+    const turn = dir => {
+      if (!book) return;
+      if (reader.classList.contains("zoomed")) {
+        const open = openPages(), to = dir > 0 ? open[open.length - 1] + 1 : open[0] - 1;
+        if (to < 0 || to >= book.getPageCount()) return;
+        book.turnToPage(to);
+        updateCounter(book.getCurrentPageIndex());
+      } else if (dir > 0) book.flipNext(); else book.flipPrev();
+    };
+
+    /* FULL SCREEN: hides the browser's own bars too. Only browsers that allow it get the button
+       (iPads, Android phones and desktops do; iPhones don't, so there the reader fills the browser window). */
+    const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    if (document.fullscreenEnabled || document.webkitFullscreenEnabled) btnFull.hidden = false;
+    btnFull.addEventListener("click", () => {
+      const go = fsElement() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document)
+                             : (reader.requestFullscreen || reader.webkitRequestFullscreen).call(reader);
+      if (go && go.catch) go.catch(() => {});
+    });
+    let fsLeftAt = 0;                                           // when full screen last ended (see the Escape key below)
+    const leaveFull = () => { const x = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (x && x.catch) x.catch(() => {}); };
+    const fsChange = () => {
+      const on = fsElement() === reader;
+      if (!on) fsLeftAt = Date.now();
+      reader.classList.toggle("fs", on);
+      btnFull.setAttribute("aria-label", on ? "Leave full screen" : "Full screen");
+      btnFull.title = btnFull.getAttribute("aria-label");
+    };
+    document.addEventListener("fullscreenchange", fsChange);
+    document.addEventListener("webkitfullscreenchange", fsChange);
+
+    /* Inside THE POST's Newsstand popup, the popup has its own × in the same corner as the reader's ×.
+       While a magazine is open, the page around the popup gets the label "nr-reading", and post/cafe.html
+       hides its × then, so only one × shows: the one that puts the magazine back. */
+    const markPost = on => { try { if (window.parent !== window) window.parent.document.documentElement.classList.toggle("nr-reading", on); } catch (e) {} };
 
     let opening = false;                                        // a magazine is on its way: ignore a second tap
     async function openIssue(f, btn) {
@@ -867,7 +987,9 @@
       reader.hidden = false;
       reader.style.opacity = "0";
       document.documentElement.style.overflow = "hidden";       // the page behind stops scrolling
+      markPost(true);
       mountBook(0);
+      showHint();
       btn.classList.add("lifted");
 
       const target = [...sizer.querySelectorAll(".stf__item")].find(p => p.style.display !== "none");
@@ -894,8 +1016,11 @@
 
     function closeReader() {
       if (reader.hidden) return;
+      setZoom(false);
+      if (fsElement() === reader) leaveFull();
       const done = () => {
         reader.hidden = true;
+        markPost(false);
         document.documentElement.style.overflow = "";
         if (book) { book.destroy(); book = null; }
         sizer.innerHTML = "";
@@ -924,14 +1049,29 @@
       } catch (err) {}
       toast("Nebula Cafe\nOpening soon");
     }));
-    btnPrev.addEventListener("click", () => book && book.flipPrev());
-    btnNext.addEventListener("click", () => book && book.flipNext());
+    btnPrev.addEventListener("click", () => turn(-1));
+    btnNext.addEventListener("click", () => turn(1));
     document.addEventListener("keydown", e => {
       if (reader.hidden || !book) return;
-      if (e.key === "Escape") closeReader();
-      if (e.key === "ArrowRight") book.flipNext();
-      if (e.key === "ArrowLeft") book.flipPrev();
+      if (e.key === "Escape") {                                 // one step back at a time: full screen, then zoom, then the magazine
+        if (fsElement()) return leaveFull();
+        if (Date.now() - fsLeftAt < 500) return;                // (that Escape just ended full screen: the browser did it)
+        if (reader.classList.contains("zoomed")) setZoom(false); else closeReader();
+      }
+      if (e.key === "ArrowRight") turn(1);
+      if (e.key === "ArrowLeft") turn(-1);
     });
+
+    /* The tip, shown once per visit for 4 seconds when the first magazine opens */
+    let hinted = false;
+    function showHint() {
+      if (hinted) return;
+      hinted = true;
+      hint.textContent = touch ? "Swipe to turn the page · magnifier to read up close"
+                               : "Click a page or use the arrow keys · magnifier to read up close";
+      reader.classList.add("hinting");
+      setTimeout(() => reader.classList.remove("hinting"), 4000);
+    }
     // "In this issue" links jump to the page where that question starts
     sizer.addEventListener("click", e => {
       const go = e.target.closest("[data-goto]");
@@ -1027,7 +1167,7 @@
         /* Phones fire "resize" when the address bar slides in or out. Rebuilding the
            book then would make it jump, so only rebuild when the page size changes. */
         const { w, h, spread } = pageSize();
-        if (w + "x" + h + (spread ? "s" : "") !== mounted) mountBook(book.getCurrentPageIndex());
+        if (w + "x" + h + (spread ? "s" : "") !== mounted) mountBook(book.getCurrentPageIndex());   // (this also re-fills the zoom box if it is open)
       }, 200);
     });
 
