@@ -1046,9 +1046,20 @@
        live, the links just work. */
     document.querySelectorAll(".nrns-cafe").forEach(cafeLink => cafeLink.addEventListener("click", async e => {
       e.preventDefault();
+      /* (Nov 5) Already inside THE POST, in its Newsstand popup? Then the café is in this same room. So: close the
+         Newsstand popup, then press THE POST's own Cafe button. That button runs openPop("cafe"), the one door every
+         route into the café uses (the arch, the phone directory), so you arrive exactly the same way, and the × on
+         the café brings you back to the spot in the room where you were standing. */
+      if (document.documentElement.classList.contains("in-post")) {
+        try {
+          const room = window.parent.document;
+          const newsPop = room.getElementById("pop-newsstand"), cafeButton = room.querySelector('[data-pop="cafe"]');
+          if (newsPop && cafeButton) { newsPop.close(); cafeButton.click(); return; }
+        } catch (err) {}
+      }
       try {
         const r = await fetch(cafeLink.href, { method: "HEAD", cache: "no-store" });
-        if (r.ok) { location.href = cafeLink.href; return; }
+        if (r.ok) { window.top.location.href = cafeLink.href; return; }   // (window.top = the whole browser window, never just the popup)
       } catch (err) {}
       toast("Nebula Cafe\nOpening soon");
     }));
