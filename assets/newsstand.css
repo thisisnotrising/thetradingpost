@@ -707,3 +707,12 @@ body {
 /* On the narrowest phones, "Nebula Cafe" is long enough to bump into "777 Daydream St.",
    so both signposts pull their letters a little closer together there */
 @media (max-width: 360px) { .nrns a.nrns-back { letter-spacing: .1em; } }
+/* INSIDE THE POST (Nov 5): the Newsstand popup's × (44 px round, 8 px from the top right corner) sits exactly where
+   "Nebula Cafe →" is. So inside the popup, on any screen narrow enough for the two to touch (up to 1280 px wide; on a
+   wider screen the stand stops short of the edge and the × is clear), the top pair of signposts steps down 48 px
+   into a row of their own under the ×, and the whole stand moves down the same 48 px so the marquee keeps its
+   distance. The bottom pair stays where it is (nothing covers it). "in-post" is set in newsstand/index.html. */
+@media (max-width: 1280px) {
+  .in-post .nrns.stand { padding-top: 84px; }                       /* 36 + 48 */
+  .in-post .nrns > a.nrns-back { top: 58px; }                        /* 10 + 48 */
+}
