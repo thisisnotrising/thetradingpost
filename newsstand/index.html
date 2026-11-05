@@ -26,25 +26,31 @@
   img { max-width: 100%; }
   [hidden] { display: none !important; }
 </style>
-<!-- "?v=2026-11-04b" = the date these files last changed. Change it whenever you edit them (add a letter, like 2026-11-04b, for a second change on the same day), so every visitor's browser
+<!-- "?v=2026-11-05" = the date these files last changed. Change it whenever you edit them (add a letter, like 2026-11-04b, for a second change on the same day), so every visitor's browser
      fetches the new copy instead of an old saved one (no hard refresh needed). -->
-<link rel="stylesheet" href="../assets/newsstand.css?v=2026-11-04b">
+<link rel="stylesheet" href="../assets/newsstand.css?v=2026-11-05">
 <!-- Came through a storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
 <style>
 html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
 @keyframes nr-from-light { to { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
 </style>
-<!-- Opened inside THE POST's Newsstand popup (an iframe)? Then hide the signposts out of here: the popup has its own ×,
-     and following them would load the other page inside the popup. -->
+<!-- Opened inside THE POST's Newsstand popup (an iframe = a window onto this page, set inside THE POST)?
+     Then this page gets the label "in-post". (Nov 5) The signposts now show there too, exactly as on this page on its own:
+       ← 777 Daydream St.  has target="_top" (below), which means "open in the WHOLE browser window", so it takes you
+                           out to the street instead of loading the street inside the popup.
+       Nebula Cafe →       closes this popup and presses THE POST's own Cafe button (newsstand.js, "Nebula Cafe →"),
+                           so you walk into the café through the same door as everywhere else in the room.
+     The popup's × sits in the top right corner, right where "Nebula Cafe →" is, so inside the popup (on any screen up to
+     1280 px wide) the top pair of signposts steps down one row, under the ×, and the marquee steps down with them
+     (newsstand.css, "INSIDE THE POST"). -->
 <script>if (window.self !== window.top) document.documentElement.classList.add("in-post");</script>
-<style>.in-post a.nrns-back, .in-post .nrns-foot { display: none !important; }</style>
 <script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
 </head>
 <body>
 <!-- NOT RISING Newsstand: the kiosk (what you see on the page) -->
 <div class="nrns stand" id="nrns-stand" lang="en">
-  <a class="nrns-back" href="https://nebularising.media/thetradingpost/">← 777 Daydream St.</a>
+  <a class="nrns-back" href="https://nebularising.media/thetradingpost/" target="_top">← 777 Daydream St.</a>
   <a class="nrns-back nrns-fwd nrns-cafe" href="../post/cafe">Nebula Cafe →</a>
   <header class="sign"><div class="lights" id="nrns-sign-lights" aria-hidden="true"></div><div class="board"><h1 id="nrns-marquee" aria-label="Now Soaring">NOW SOARING</h1></div></header>
   <span class="awning" aria-hidden="true"></span>
@@ -56,7 +62,7 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
   </section>
   <!-- The same two signposts again at the bottom, so nobody has to scroll back up to leave -->
   <nav class="nrns-foot" aria-label="Leave the newsstand">
-    <a class="nrns-back" href="https://nebularising.media/thetradingpost/">← 777 Daydream St.</a>
+    <a class="nrns-back" href="https://nebularising.media/thetradingpost/" target="_top">← 777 Daydream St.</a>
     <a class="nrns-back nrns-fwd nrns-cafe" href="../post/cafe">Nebula Cafe →</a>
   </nav>
   <!-- Camera flashes are added here by the script -->
@@ -108,8 +114,8 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
 
 <!-- Where the pictures live, then the data, the page-flip library, and the engine -->
 <script>window.NRNS_BASE = "../assets/img/";</script>
-<script src="../assets/data.js?v=2026-11-04b"></script>
+<script src="../assets/data.js?v=2026-11-05"></script>
 <script src="../assets/vendor/page-flip.browser.js"></script>
-<script src="../assets/newsstand.js?v=2026-11-04b"></script>
+<script src="../assets/newsstand.js?v=2026-11-05"></script>
 </body>
 </html>
