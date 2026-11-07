@@ -519,6 +519,9 @@ body {
 .nrns .pv-link { left: calc(66 * var(--p)); top: calc(700 * var(--p)); font-weight: 700; font-size: calc(17 * var(--p)); letter-spacing: .2em; text-transform: uppercase;
   color: var(--ink); text-decoration: underline; text-underline-offset: .35em; text-decoration-thickness: calc(2 * var(--p)); }
 .nrns .pv-link:hover { text-decoration-thickness: calc(4 * var(--p)); }
+/* (Nov 7) The big-link version (an issue's preview "link" in data.js): the link takes the notice's place, in its big type */
+.nrns .pv-go { color: var(--ink); text-decoration: underline; text-underline-offset: .1em; text-decoration-thickness: calc(6 * var(--p)); }
+.nrns .pv-go:hover { text-decoration-thickness: calc(10 * var(--p)); }
 
 /* Invisible buttons over a page picture (the "links" in data.js, e.g. TBH S1's contents rows): a faint wash on hover */
 .nrns .hot { position: absolute; display: block; border-radius: calc(6 * var(--p)); transition: background-color .2s; }

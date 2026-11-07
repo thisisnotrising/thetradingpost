@@ -146,8 +146,13 @@
         <div class="next-date abs">${esc(longDate(f.date).toUpperCase())}</div>
         ${footer("right")}`, { dark: true }),
 
-      // Last page of a preview: when the full issue arrives, and where to read the feature now
-      previewEnd: (f, is) => page(`
+      // Last page of a preview: when the full issue arrives, and where to read the feature now.
+      // (Nov 7) If the issue's preview has a "link" (data.js; Issue 19's says "Read Issue 19"), the page drops the release
+      // notice, its date and the corner arrow: just the link, in the same big type, where the notice was. (\n = new line)
+      previewEnd: (f, is) => is.preview.link ? page(`
+        ${heading(66, 40, "Preview")}
+        ${f.url ? `<a class="pv-big pv-go abs" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(is.preview.link).replace(/\n/g, "<br>")}</a>` : ""}
+        ${footer("right", false)}`, { dark: true }) : page(`
         ${heading(66, 40, "Preview")}${arrow}
         <h3 class="pv-big abs">Full digital<br>issue<br>release</h3>
         <div class="pv-date abs">${esc(longDate(is.preview.until).toUpperCase())}</div>

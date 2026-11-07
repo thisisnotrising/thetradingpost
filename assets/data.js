@@ -233,7 +233,9 @@ window.NR = {
        whole issue opens by itself. Add ?full to the Newsstand address to proof the whole issue before then. */
     "dan-korus": {
       number: 19, year: 2026,
-      preview: { pages: 11, until: "2026-12-19" },
+      /* link: the end page shows only this big link to the feature online (no release notice, date or corner arrow).
+         Leave it out for Issue 01's end page. \n starts a new line. */
+      preview: { pages: 11, until: "2026-12-19", link: "Read\nIssue 19" },
       name: "Dan Korus", publication: "The Updraft",
       photoCredit: "Dan Korus",
       nameRows: ["DAN", "KO", "RUS"],

@@ -48,7 +48,9 @@ save(bw(workshop.crop((600, 180, 1200, 535))), "issue19-toc-laugh.webp", q=78, w
 # PHOTO PAGES
 # Q1, the camp photo: saved under 700 px wide on purpose, so the engine frames it whole on a black page
 # (photos 700 px and wider bleed edge to edge and would lose the kids at each end).
-save(bw(camp, 1.05), "issue19-camp.webp", q=80, width=699)
+# (Nov 7, Kathi) Cropped on purpose: the top used to cut through the upper storey at random, and the bottom showed the
+# white edge of the printed photo. Now: from just above the ground-floor windows down to the grass, the white edge left off.
+save(bw(camp.crop((0, 226, 1412, 1045)), 1.05), "issue19-camp.webp", q=80, width=699)
 # Q2, Dan and his wife: a full-bleed page (816 x 840 slot), cropped to that shape from the top
 save(bw(couple.crop((0, 30, 840, 895))), "issue19-couple.webp", q=80)
 # Q4, the workshop: the "stack" page (Dan's stacked name + the whole photo, 500 wide)
