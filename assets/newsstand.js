@@ -697,6 +697,7 @@
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "cover-btn" + (item.cover ? "" : " placeholder");   // grey stand-in only when there is no cover yet
+        btn.dataset.issue = item.issue || "";                                // each cover remembers which magazine it is (for direct links)
         // The marquee text, three short lines so it fits a phone:
         //   issue 2 -> "Jennifer Hong / Digital Issue / Coming December 2" (the CSS shows it in capitals)
         let soon = `${marqueeName(item.name)}\nDigital Issue\nComing ${RELEASE_MONTH} ${n}`;
@@ -979,6 +980,7 @@
 
     async function showIssue(f, btn) {
       openBtn = btn;
+      history.replaceState(null, "", "#" + f.issue);              // the address bar now shows this magazine's own link
       const is = ISSUES[f.issue];
       document.getElementById("nrns-reader-title").textContent = is.title || `Issue ${two(is.number)} · ${is.name}`;
       const link = document.getElementById("nrns-site-link");
@@ -1019,6 +1021,7 @@
 
     function closeReader() {
       if (reader.hidden) return;
+      history.replaceState(null, "", location.pathname + location.search);   // magazine back on the rack: plain address again
       setZoom(false);
       if (fsElement() === reader) leaveFull();
       const done = () => {
@@ -1184,6 +1187,23 @@
         if (w + "x" + h + (spread ? "s" : "") !== mounted) mountBook(book.getCurrentPageIndex());   // (this also re-fills the zoom box if it is open)
       }, 200);
     });
+
+    /* DIRECT LINKS: .../newsstand/#tbh-s1 lands with that magazine open.
+       The word after # is the magazine's "issue" key from data.js. It runs
+       the same openIssue() a tap runs, so there is only one way to open a book. */
+    function openFromAddress() {
+      const key = decodeURIComponent(location.hash.slice(1));          // "#tbh-s1" -> "tbh-s1"
+      if (!key || !ISSUES[key] || !reader.hidden) return;              // no hash, no such magazine, or one already open: do nothing
+      const n = FEATURES.findIndex(f => f.issue === key) + 1;           // its issue number, or 0 if it is a memoir
+      const tab = n ? tabs.find(t => t.range && n >= t.range[0] && n <= t.range[1]) : tabs.find(t => t.memoirs);
+      if (!tab) return;
+      renderTabs(tab.key); renderShelf(tab);                            // show the shelf that holds it
+      const item = n ? FEATURES[n - 1] : MEMOIRS.find(m => m.issue === key);
+      const btn = pocketsEl.querySelector(`.cover-btn[data-issue="${key}"]`);   // find the cover by its name tag
+      if (item && btn) openIssue(item, btn);
+    }
+    openFromAddress();
+    addEventListener("hashchange", openFromAddress);                    // a link clicked while the stand is already open
 
     /* Pre-build: once the page has loaded and the browser has a quiet moment, lay out
        every interview issue on the rack in the hidden measuring room. The work is the
