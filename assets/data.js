@@ -54,7 +54,17 @@ window.NR = {
     coverPhoto01: "issue01-cover-photo.webp",
     tocPortrait01: "issue01-toc-portrait.webp",
     arch01: "issue01-arch.webp",
-    stage01: "issue01-stage.webp"
+    stage01: "issue01-stage.webp",
+    // Issue 19 · Dan Korus: his magazine's pictures (made from the feature's photos by tools/issue19-images.py)
+    portrait19: "issue19-portrait.webp",      // opener portrait
+    name19: "issue19-name.webp",              // name page (in colour, like Issue 01's)
+    tocDog19: "issue19-toc-dog.webp",         // contents page, small photos
+    tocRun19: "issue19-toc-run.webp",
+    tocLaugh19: "issue19-toc-laugh.webp",
+    camp19: "issue19-camp.webp",              // Q1 photo page (under 700 px wide on purpose: it sits framed, whole, on black)
+    couple19: "issue19-couple.webp",          // Q2 photo page
+    workshop19: "issue19-workshop.webp",      // Q4 photo page (stacked name + photo)
+    dog19: "issue19-dog.webp"                 // Q6 photo page
   },
 
   /* Tabs on the rack. A tab only appears once it holds an issue. */
@@ -127,10 +137,10 @@ window.NR = {
     { name: "Rebecca Wicker", date: "2026-09-27", url: "https://thisisnotrising.org/2026/09/27/thestrategiclinguist/", cover: "cover16" },
     { name: "Marlana", date: "2026-10-11", url: "https://thisisnotrising.org/2026/10/11/marlana/", cover: "cover17" },
     { name: "Pragya", date: "2026-10-25", url: "https://thisisnotrising.org/2026/10/25/pragya/", cover: "cover18" },
-    /* "soon" = this issue's own marquee text (one line per \n), used instead of the
-       automatic "Coming December 19". Add url: "..." once the feature is live.
-       read: false = no READ ONLINE button on its marquee (delete it once the feature is live). */
-    { name: "Dan Korus", date: "2026-11-08", cover: "cover19", soon: "Dan Korus : Issue 19\nArrives in one week", read: false }
+    /* A cover with no "issue" yet shows a "coming soon" marquee instead of a magazine. Its options:
+       soon: "..." = that marquee's own text (one line per \n), used instead of the automatic "Coming December 19";
+       read: false = no READ ONLINE button on it. Both can go once the magazine ("issue") is filled in. */
+    { name: "Dan Korus", date: "2026-11-08", url: "https://thisisnotrising.org/2026/11/08/dan-korus/", cover: "cover19", issue: "dan-korus" }
   ],
 
   /* One magazine per issue. Each question can pick its layout:
@@ -215,6 +225,150 @@ window.NR = {
       kind: "pages", title: "To Be Human · Holiday Special · Episode 1",
       pageDir: "tbh-holiday/", pageCount: 32, pageExt: "webp", back: "memoir02Back",
       insideFront: false, insideBack: false
+    },
+
+    /* Issue 19 · Dan Korus (Nov 7). Built exactly like Issue 01: same page templates, same 11-page preview.
+       Text from the feature on thisisnotrising.org (goes live Nov 8, 11:11 am); photos from the same post.
+       The preview ends on December 19, matching RELEASE_MONTH (Issue 19 -> December 19); on that day the
+       whole issue opens by itself. Add ?full to the Newsstand address to proof the whole issue before then. */
+    "dan-korus": {
+      number: 19, year: 2026,
+      preview: { pages: 11, until: "2026-12-19" },
+      name: "Dan Korus", publication: "The Updraft",
+      photoCredit: "Dan Korus",
+      nameRows: ["DAN", "KO", "RUS"],
+      portrait: "portrait19", namePhoto: "name19",
+      pullQuote: "“I want fewer people spending their evenings recovering from how they were treated at work.”",
+      toc: [
+        { q: 1, x: 67, y: 182, w: 205 },
+        { img: "tocRun19", x: 537, y: 229, w: 187, h: 156 },
+        { q: 5, x: 302, y: 293, w: 225 },
+        { img: "tocDog19", x: 67, y: 448, w: 173, h: 170 },
+        { q: 8, x: 533, y: 488, w: 200 },
+        { q: 7, x: 302, y: 628, w: 230 },
+        { q: 3, x: 67, y: 737, w: 210 },
+        { img: "tocLaugh19", x: 532, y: 780, w: 188, h: 111 }
+      ],
+      sections: [
+        { n: "1", q: "Tell us about you.",
+          contPull: "“The fastest way to give others permission to be themselves is to be outrageously yourself first.”", blocks: [
+          ["p", "I’m from Washington. The Pacific Northwest. Land of trees, strong coffee, and kinda-dirty smiling people in Birkenstocks who have opinions about the right way to compost."],
+          ["p", "My favorite childhood memories are from the mountains. I learned to love endurance sports through nordic ski racing on Mt. Spokane. On Friday nights we’d carpool up after school to train. No headlamps was the rule. We skied by the moon and stars."],
+          ["p", "I had a hard time reading growing up. I couldn’t sit still. Sports taught me more than the classroom ever did, and that’s still how I teach."],
+          ["p", "The mountains are still where I go to play. These days it’s trail running in the Jemez Mountains around my home in New Mexico. If you’ve seen my dorky attempts at filming leadership videos while running, you’ve seen some of my favorite places."],
+          ["p", "One of my first jobs was as a camp counselor. It’s still the most fun I’ve ever had at work."],
+          ["p", "I learned how to help kids get along, get a shy camper to open up, and defuse a fight so they could go back to being friends. I also got to be goofy. A muscular guy in a dress, being ridiculous and genuine, on purpose."],
+          ["p", "The fastest way to give others permission to be themselves is to be outrageously yourself first."],
+          ["p", "Teach ’em young: Know your emotions, take responsibility for how you act, and do cool shit for others."],
+          ["p", "We’d raid the candy store in silly costumes, serious as can be, then take our sugary haul to a field to stargaze and laugh. The next day, still in costume, we’d build massive floating wooden structures and set them on fire with flaming arrows."],
+          ["p", "Many of those campers became counselors themselves. They still write to me about the costumes, the candy raids, and the nights under the stars."],
+          ["p", "I know what leadership looks like. I learned it at summer camp."],
+          ["photoPage", "camp19"],
+          ["p", "I went on to earn my master’s in chemistry and work in startups and government. I met my best friend along the way and settled in New Mexico. Sunshine, green chile, and the beauty of the wide open."],
+          ["p", "Today I run Kestryl Edge, where I teach leadership and emotional intelligence to the people who run high consequence, mission-oriented teams. Places where how you treat people is an operational variable."],
+          ["p", "I’m a husband. A dog walker. A runner. A coach. A scientist. Someone with a good bit to say about leadership. And a camp counselor, still."]
+        ]},
+        { n: "2", q: "What drives you? What gives you energy?",
+          layout: "reading", pull: "“Things could be better, and therefore they shall.”", blocks: [
+          ["photoPage", "couple19", "02 · Rich in life", "“My wife. My dogs. My cat. I’m rich in life.”"],
+          ["p", "My unreasonably strong sense of justice."],
+          ["p", "Things could be better, and therefore they shall."],
+          ["p", "I lived the problem, then I saw the problem, and the fact that it still exists is reason enough."],
+          ["p", "What gives me energy is simpler. My wife. My dogs. My cat. I’m rich in life."],
+          ["p", "And when you already have everything money can’t buy, all that’s left is to make a difference for the people around you."]
+        ]},
+        { n: "3", q: "In one sentence, what are you trying to change?", layout: "statement", blocks: [
+          ["quote", "I want fewer people spending their evenings recovering from how they were treated at work."]
+        ]},
+        { n: "4", q: "What did you notice was broken that made you start writing?", layout: "band-bottom",
+          pull: "“We give people advice about managing their reactions to poor leadership while letting the people responsible carry on.”", blocks: [
+          ["photoPage", "workshop19", "", "", "stack"],
+          ["p", "“You should read The Four Agreements.”"],
+          ["p", "I had just shown a CEO the red lines I’d made in one of his emails. Threats underlined, rudeness circled. I told him I expected more respectful communication. His advice was that I read the book."],
+          ["p", "So I did. I asked him to read it with me. He didn’t."],
+          ["p", "At our next meeting, he turned the conversation into an early performance review. My feedback for the coming year: I needed to work on the second agreement. Don’t take anything personally."],
+          ["p", "Apparently the second agreement applied to me. The first one, be impeccable with your word, didn’t seem to apply to the CEO whose words I’d marked in red."],
+          ["p", "He had turned a lesson about personal accountability into a way to escape his own."],
+          ["p", "I knew enough to speak up. What I didn’t have was the practice or the confidence to hold that boundary with someone who had power over my job. I could tell him his behavior was unacceptable. Figuring out what to do when it continued was harder."],
+          ["p", "That’s the problem I keep coming back to in my writing."],
+          ["p", "We give people advice about managing their reactions to poor leadership while letting the people responsible carry on."],
+          ["p", "I want people to recognize what’s happening and have tools to respond. I also want leaders to be able to hear criticism without making someone regret speaking up."],
+          ["p", "I’m still learning how to do both."]
+        ]},
+        { n: "5", q: "If you could manifest a brighter tomorrow, what would change by 2030?",
+          layout: "callout", callout: "“Emotional Management 101 would be required, just like English 101.”", blocks: [
+          ["p", "By 2030, emotional intelligence would be taught at every level of education. Emotional Management 101 would be required, just like English 101."],
+          ["p", "Students would have an emotion wheel in their backpack alongside their physics equation sheet."],
+          ["p", "That education would show up outside the classroom."],
+          ["p", "High schoolers able to express their feelings. Parents able to listen without immediately jumping in to correct them."],
+          ["p", "Healthier adult relationships. Workplaces with healthy candor. People who understand their values well enough to know when they need to set a boundary."],
+          ["p", "At work, basic EQ skills would be part of onboarding. Managers would lead the way, setting the bar for what it means to listen and put people first."],
+          ["p", "I’d love for Kestryl Edge to partner with schools and universities to help build that curriculum. Teach people how to recognize what they’re feeling, work through disagreements, and take responsibility when they hurt someone."],
+          ["p", "I’d be proud to have a hand in what the next generation learns about treating people well."]
+        ]},
+        { n: "6", q: "How would your closest friends describe you?",
+          layout: "quotes", bandTop: 520,
+          contPull: "“You’re a Belgian Malinois in a human body.”", blocks: [
+          ["p", "I love my friends. I have good ones. Here’s what they sent me:"],
+          ["break"],
+          ["fq", "Daniel is one of the most compassionate people I know. Talking with him is like chatting over a fire late into the night until the embers go out. He has a listening ear and wants to hear every aspect of every story just so he can be as empathetic and understanding as possible. He strives to put others before himself but does not forget who he is in the process. He’s independent and head strong but careful to not harm anyone in his wake. Daniel is someone I envision walking with me through life as a friend, colleague, and mentor.” – Jay"],
+          ["fq", "Dan is one of those people who just gets shit done. He has the vision, but more importantly the discipline and drive to execute, whether it’s starting a business or running an ultramarathon. Not everyone can see the value in the struggle, and even fewer willingly take them on. Dan not only launches into challenges face first, but knows how to have fun when they punch back.” – Mason"],
+          ["fq", "Dan is the most ride-or-die type person I know. I admire the certainty and ferocity with which he approaches his life, and which is evident in his accomplishments and relationships big and small. In all things Dan does, there is this beautiful connecting thread which is his thoughtfulness, intentionality, and desire to do good by his people.” – Emily"],
+          ["fq", "Dan is the most genuinely charismatic person I have ever met. And ‘genuine’ is important in this context, because his charisma, which some people use for their own gain, comes from a place of kindness, warmth, and genuine care for other people. You could be a grocery store clerk, a stranger on the street, or a friend going through a rough patch, and Dan will genuinely want to know how you’re doing. He’ll listen, truly listen, and somehow find the right way to support you, uplift you, or make you laugh. It goes beyond Dan being someone who can make friends with anyone; he has the rare ability to turn those encounters into meaningful connections.” – Nick"],
+          ["fq", "Dan Korus holds every aspect of his life to the highest standard — his performance, his relationships, the quality of his leisure time — and somehow still makes the unrelenting pursuit of excellence a fun time. Every time I talk to him I feel like I just dunked my head in spring water, and remember why he’s been one of my closest friends for many years despite the many miles between us.” – Phil"],
+          ["fq", "You’re a Belgian Malinois in a human body.” – Anna"],
+          ["photoPage", "dog19", "", ""]
+        ]},
+        { n: "7", q: "What’s a challenge that changed how you see the world?", layout: "band-top",
+          pull: "“Surviving was hard. Leaving was harder.”", blocks: [
+          ["p", "Working in a toxic environment."],
+          ["p", "At a startup, years ago, I watched people get frustrated and leave the company, their research, and a dream they’d once believed in."],
+          ["p", "I went to a dark place. I was drinking every night. One to calm down enough to cook and clean. Another to relax and enjoy time with my partner. Sometimes more to sleep without rehearsing defenses and retorts in my head."],
+          ["p", "Any conversation about work became a conversation about how fucked up my day job was. Get a few coworkers together and we’d end up in the same place."],
+          ["p", "Then I’d see friends a few months after they’d left. They’d found new jobs, and it was scary how much happier they looked. They seemed to be living so much more of their lives. I wanted that."],
+          ["p", "But when you’re burned out and everything at work is telling you that you’re not enough, how do you find the energy to look for another job? How do you convince yourself you have something worth offering?"],
+          ["p", "I’d learned how to get through the day where I was. I worried the next place could be just as bad."],
+          ["p", "Surviving was hard. Leaving was harder."],
+          ["p", "What I came to understand was how much a workplace can shrink what you believe is possible for yourself. You can recognize that something is wrong and still struggle to act on it. Finding a way out takes energy and confidence that the job itself may have worn down."],
+          ["p", "That changed how I understand people who stay. Knowing they deserve better doesn’t mean they can see how to get there."],
+          ["p", "I want people to have more options and more power over what happens next. Something beyond finding another way to get through the day."],
+          ["p", "That’s what the free essays and the podcast are for. And for the teams that want to go further, that’s what the workshops and coaching at Kestryl Edge are built to do."]
+        ]},
+        { n: "8", q: "What are you most proud of right now?",
+          layout: "callout", callout: "“Leadership is inviting others to greatness and accepting your own invitation first.”", blocks: [
+          ["p", "I’m proud that people can learn from us without a budget for coaching."],
+          ["p", "We’re building a library of free resources. And the teams and individuals who hire us for workshops and coaching are what make the free stuff possible."],
+          ["p", "I also just really like what we teach."],
+          ["p", "We have run a virtual workshop where I was the only attendee. Tessa, lead facilitator, is teaching, and the two of us are sitting there talking about what we value and why it matters to us. No one was there to witness it."],
+          ["p", "“Okay Dan, what values are we working on here?”"],
+          ["p", "“I’m working on how to be more kind when I’m frustrated.”"],
+          ["p", "We’re doing the work we ask others to do. I’m taking notes. Learning. Laughing."],
+          ["p", "I will never ask someone to do something I’m not already working hard on myself."],
+          ["p", "Leadership is inviting others to greatness and accepting your own invitation first."],
+          ["p", "There’s something satisfying about helping build a workshop and then discovering how much you still have to learn from it. Watching teams grow closer as they work through the material together is a big part of why I love this."],
+          ["p", "It rocks. It rocks hard."]
+        ]},
+        { n: "9", q: "On hard days, what kind of signal from your readers keeps you going?", layout: "band-bottom",
+          pull: "“My writing is me. My company is the manifestation of what I want to bring to the world.”", blocks: [
+          ["p", "When someone I’ve never pitched writes to tell me they learned something."],
+          ["p", "It’s easy to feel invisible."],
+          ["p", "A ‘like’ costs nothing. An email costs something. Somebody had to stop, think about what they read, and decide to reach out."],
+          ["p", "My writing is me. My company is the manifestation of what I want to bring to the world."],
+          ["p", "And when a stranger says it helped them handle a hard conversation with a peer, or finally set a boundary they’d been avoiding, that’s the whole reason I do this."]
+        ]},
+        { n: "10", q: "What article would you want your new readers to read first?", layout: "reading",
+          pull: "“Reach out. Say hi. Let’s chat.”", blocks: [
+          ["p", "“The Leadership Field Has A Bullshit Problem.”"],
+          ["p", "Then to my inbox. Reach out. Say hi. Let’s chat."],
+          ["p", "Every week I record a new Kestryl Edge podcast and sit down with someone who’s thought hard about how we treat people at work."],
+          ["p", "And if you run a team and want to do this work together, that’s kestryledge.com."]
+        ]},
+        { n: "+", q: "Bonus Q: If you could recommend another writer to be featured on Not Rising, who would it be and why?", layout: "callout",
+          feature: { label: "Dan recommends", name: "Sven Brodmerkel" }, blocks: [
+          ["p", "Sven Brodmerkel."],
+          ["p", "I have a school boy crush on him. Awesome writer. So gifted with words. I get smarter reading Sven."]
+        ]}
+      ]
     },
 
     "jennifer-houle": {
