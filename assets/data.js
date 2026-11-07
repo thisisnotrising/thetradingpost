@@ -340,15 +340,15 @@ window.NRSF = {
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library",  // the A-frame floor sign (opens in a new tab)
-    marquee: "https://substack.com/home/post/p-222940546",   // the button under the letter board up close: the press release ("" = no popup)
+    marquee: "https://nebularising.media/thetradingpost/newsstand/#tbh-s3",   // the button under the letter board up close: Amanda's To Be Human S3 on the Newsstand ("" = no popup)
     magazine: "https://thisisnotrising.org/"                 // the button under the NOT RISING sign up close ("" = no popup)
   },
 
   /* The words on the building */
   SIGNS: {
-    marquee: "GRAND OPENING",       // letter board under the upstairs window
-    marqueeSub: "Sunday 11.1 @ 11:11 AM SLC / 1:11 PM NYC",      // the smaller second line under it (leave "" for one line)
-    marqueeButton: "Read Press Release",  // the button under the letter board up close (it opens LINKS.marquee)
+    marquee: "NOW SOARING",       // letter board under the upstairs window
+    marqueeSub: "AMANDA JANE LEE",      // the smaller second line under it (leave "" for one line)
+    marqueeButton: "Read Amanda's Story",  // the button under the letter board up close (it opens LINKS.marquee)
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the cut-metal swinging sign (split over two lines: NOT / RISING)
