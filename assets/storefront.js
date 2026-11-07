@@ -339,7 +339,7 @@
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
     // The letter board: clicking it shows the board up close (the same letters and bulbs, blown up) with a button
-    // under it (SIGNS.marqueeButton) that opens LINKS.marquee, today the press release. LINKS.marquee "" = just a sign.
+    // under it (SIGNS.marqueeButton) that opens LINKS.marquee, today Amanda's To Be Human S3 on the Newsstand. LINKS.marquee "" = just a sign.
     {
       const mq = $("nrsf-marquee-box"), words = [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", ");
       if (LINKS.marquee) upClose(mq, `${words}: see the sign up close`, () => {
