@@ -448,18 +448,17 @@ body {
 /* WHERE EVERYTHING SITS. The four corner groups stack their buttons in a column on a wide screen... */
 .nrns .r-group { position: absolute; z-index: 2; display: flex; flex-direction: column; gap: 10px; transition: opacity .35s; }
 .nrns .r-tl { top: var(--t); left: var(--l); align-items: flex-start; }
-.nrns .r-tr { top: var(--t); right: var(--r); align-items: flex-end; }
+.nrns .r-tr { top: var(--t); right: var(--r); flex-direction: row-reverse; align-items: center; }   /* always a row: × on the right, Online to its left */
 .nrns .r-bl { bottom: var(--b); left: var(--l); align-items: flex-start; }
 .nrns .r-br { bottom: var(--b); right: var(--r); align-items: flex-end; }
 .nrns .r-arrow { position: absolute; z-index: 2; top: 50%; margin-top: -22px; font-size: 20px; transition: opacity .35s, background-color .2s; }
 .nrns .r-prev { left: var(--l); }
 .nrns .r-next { right: var(--r); }
 .nrns .reader.roomy .r-title { display: block; max-width: calc(var(--gutter, 200px) - 30px); }
-.nrns .reader.spread .r-tr .r-btn:not(.r-round) { padding: 0 12px; letter-spacing: .12em; }   /* "Online" squeezes into a narrow strip */
+.nrns .reader.spread .r-tr .r-btn:not(.r-round) { padding: 0 12px; letter-spacing: .12em; }   /* "Online" kept slim on a wide screen */
 
 /* ...and in rows on a tall screen: arrows and page count together at the bottom centre */
 .nrns .reader.single .r-tl { flex-direction: row; }
-.nrns .reader.single .r-tr { flex-direction: row-reverse; }
 .nrns .reader.single .r-br { right: auto; left: 50%; transform: translateX(-50%); }
 .nrns .reader.single .r-arrow { top: auto; bottom: var(--b); margin-top: 0; }
 .nrns .reader.single .r-prev { left: calc(50% - 104px); }
