@@ -191,6 +191,7 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
 .say-dan .tail { left: .9em; top: calc(100% - 1px); width: .84em; height: .7em; }
 @media (hover: hover) { .say-dan .msg.in:hover { background-color: rgba(255,255,255,.12); } }
 .say-dan .msg:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.say-stage { left: 31%; bottom: 55%; width: min(21em, 30%); }        /* on the stage close-up, above Dan's head */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* the marquees' live letters, on the boards Kathi's renders already have (painted blank) */
@@ -367,6 +368,8 @@ dialog.pop::backdrop { background: transparent; }
     <span class="flame" style="left:98%;top:87%;--s:3.5%;--d:3.2s"></span><span class="flame" style="left:35%;top:15%;--s:2%;--d:2.7s"></span><span class="flame" style="left:56%;top:13%;--s:2%;--d:2.9s"></span><span class="flame" style="left:70%;top:15%;--s:2%;--d:2.4s"></span><span class="flame" style="left:29%;top:24%;--s:2%;--d:3s"></span>
     <!-- the spot: the stage (what's playing). BACK TO HALL and THE BAR are the buttons at the top and in the panel -->
     <button class="spot" type="button" data-pop="show" data-name="Now Playing" style="left:4%;top:4%;width:92%;height:92%" aria-label="Now playing on stage"></button>
+    <!-- Dan's bubble on the stage close-up: the same words as in the hall (NRSPEAK.STAGE.says) -->
+    <div class="say-dan say-stage" id="say-dan-stage"></div>
   </div>
 </section>
 
@@ -589,14 +592,15 @@ bKathi.addEventListener("click", () => { if (!chatOn) chatPlay(); });
 bKathi.addEventListener("pointerenter", e => { if (e.pointerType === "mouse" && !chatOn) chatPlay(); });
 bKathi.addEventListener("focus", () => { if (bKathi.matches(":focus-visible") && !chatOn) chatPlay(); });
 
-/* DAN ON THE STAGE, in the hall. What he says: NRSPEAK.STAGE.says. His bubble plays while it's on screen (it stops when you
-   scroll away or leave the hall, and starts again from the top when you come back); tapping it opens NOW PLAYING. */
-const danBox = $("say-dan");
-if (STAGE.says.length) {
-  danBox.innerHTML = `<button class="msg crystal" type="button" data-pop="show" aria-label="Dan: ${esc(STAGE.says.join(" "))} (now playing)">${TAIL_DOWN}${DOTS}</button>`;
-  const danSays = say(danBox.firstChild, STAGE.says);
-  new IntersectionObserver(([e]) => { if (e.isIntersecting && room === "hall") danSays.play(500); else danSays.stop(); }, { threshold: .6 }).observe(danBox);
-}
+/* DAN ON THE STAGE, in the hall and on the stage close-up: the same bubble in both. What he says: NRSPEAK.STAGE.says.
+   Each bubble plays while it's on screen in its own room (it stops when you scroll away or leave, and starts again from
+   the top when you come back); tapping it opens NOW PLAYING, whose button goes to NRSPEAK.STAGE.link. */
+if (STAGE.says.length) [["say-dan", "hall"], ["say-dan-stage", "stage"]].forEach(([id, home]) => {
+  const box = $(id);
+  box.innerHTML = `<button class="msg crystal" type="button" data-pop="show" aria-label="Dan: ${esc(STAGE.says.join(" "))} (now playing)">${TAIL_DOWN}${DOTS}</button>`;
+  const danSays = say(box.firstChild, STAGE.says);
+  new IntersectionObserver(([e]) => { if (e.isIntersecting && room === home) danSays.play(500); else danSays.stop(); }, { threshold: .6 }).observe(box);
+});
 addEventListener("keydown", e => { if (e.key === "Escape" && chatOn && !document.querySelector("dialog[open]")) chatOff(); });
 
 document.addEventListener("click", e => {
