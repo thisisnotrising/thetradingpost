@@ -291,10 +291,10 @@
     /* Signs and letter tiles */
     root.querySelectorAll("[data-sign]").forEach(el => (el.textContent = SIGNS[el.dataset.sign] || ""));
     $("nrsf-sign").innerHTML = hangingSign(SIGNS.hanging);
-    const tiles = word => [...word].map((ch, i) => {
+    // Each letter is its own tile, set straight and level on its track (no hand-placed tilt or bob).
+    const tiles = word => [...word].map(ch => {
       if (ch === " ") return `<span class="lt sp"> </span>`;
-      const a = hash(i, 3.1), b = hash(i, 7.7);
-      return `<span class="lt" aria-hidden="true" style="--rot:${((a - .5) * 3.4).toFixed(2)}deg;--dy:${((b - .5) * .06).toFixed(3)}em">${esc(ch)}</span>`;
+      return `<span class="lt" aria-hidden="true">${esc(ch)}</span>`;
     }).join("");
     // Two rows on the letter board: the big headline, then a smaller line under it (if there is one)
     $("nrsf-marquee").innerHTML = `<span class="row">${tiles(SIGNS.marquee)}</span>` + (SIGNS.marqueeSub ? `<span class="row sub">${tiles(SIGNS.marqueeSub)}</span>` : "");
@@ -339,7 +339,7 @@
     $("nrsf-marquee").setAttribute("aria-label", [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", "));
 
     // The letter board: clicking it shows the board up close (the same letters and bulbs, blown up) with a button
-    // under it (SIGNS.marqueeButton) that opens LINKS.marquee, today Amanda's To Be Human S3 on the Newsstand. LINKS.marquee "" = just a sign.
+    // under it (SIGNS.marqueeButton) that opens LINKS.marquee, today Dan Korus's Issue 19 on the Newsstand. LINKS.marquee "" = just a sign.
     {
       const mq = $("nrsf-marquee-box"), words = [SIGNS.marquee, SIGNS.marqueeSub].filter(Boolean).join(", ");
       if (LINKS.marquee) upClose(mq, `${words}: see the sign up close`, () => {
