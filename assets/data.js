@@ -707,7 +707,9 @@ window.NRSPEAK = {
     link: "https://substack.com/@dankorus/p-215427993",                       // where the card's button and Dan's bubbles go (opens in a new tab)
     button: "Watch",                                                          // the card's button
     says: [                                                                   // Dan's bubble on the stage, in the hall and up close: one line per change of words
-      "Kathi is creating journalism for the people so we can consume and reclaim our critical thinking."
+      "Kathi is creating journalism for the people",
+      "so we can reclaim our critical thinking.",
+      "The negative space is the work."
     ]
   },
   BAR: {
