@@ -695,3 +695,31 @@ window.NRPOST = {
   }
 };
 
+/* ================= PART 4 · THE SPEAK ================= */
+/* THE SPEAK (speakeasy/), behind door 9¾. Every marquee (the hall's, the lounge's, the bar's) and the
+   stage card read STAGE: NOW PLAYING, then the show; the card's button goes to the episode.
+   STAGE.says: Dan's bubble, in the hall and on the stage close-up. BAR: the Old Fashioned (Buy Me a Coffee), and Kathi's bubble at the bar
+   with its FOLLOW button. Each bubble shows one line at a time, at reading pace. */
+window.NRSPEAK = {
+  STAGE: {
+    title: "KESTRYL EDGE PODCAST",                                            // the show (under NOW PLAYING on every marquee and the card)
+    episode: "E13 · The Negative Space Is The Work",                          // the episode, in small letters on the card
+    link: "https://substack.com/@dankorus/p-215427993",                       // where the card's button and Dan's bubbles go (opens in a new tab)
+    button: "Watch",                                                          // the card's button
+    says: [                                                                   // Dan's bubble on the stage, in the hall and up close: one line per change of words
+      "Kathi is creating journalism for the people so we can consume and reclaim our critical thinking."
+    ]
+  },
+  BAR: {
+    oldFashioned: "https://buymeacoffee.com/thisisnotrising",   // Buy Me An Old Fashioned: the glass on the bar, and the bar's OLD FASHIONED button
+    says: [                                                      // what Kathi says at the bar: ONE bubble, its words changing at reading pace, line by line
+      "Hey, Human.",
+      "Welcome to The Bar That Must Not Be Named.",
+      "You didn’t see me here.",
+      "I didn’t see you here.",
+      "Don’t explore the doors. They’re shadowbanned."
+    ],
+    follow: "https://www.instagram.com/thisisnotrising/",       // the button under her bubbles (opens in a new tab)
+    followButton: "Follow on Instagram"                          // the button's words
+  }
+};
