@@ -225,7 +225,8 @@
 .nrsf .nrsf-board { position: relative; z-index: 1; height: 100%; display: grid; place-items: center; container-type: size;
     background: linear-gradient(180deg, rgba(0,0,0,0) calc(100% - 4px), rgba(120,120,120,.55) calc(100% - 4px) calc(100% - 1px), rgba(255,255,255,.95) calc(100% - 1px)) 0 0 / 100% calc(100% / 6) repeat-y, linear-gradient(180deg, rgba(255,255,255,0), rgba(190,190,190,.32) 50%, rgba(255,255,255,0)) 0 0 / 100% calc(100% / 6) repeat-y, radial-gradient(ellipse 70% 120% at 50% 40%, #ffffff, #f8f8f8 70%, #ececec);
   border: 3px solid #050505; box-shadow: inset 0 0 26px rgba(150,120,70,.25), 0 0 30px rgba(255,236,200,.22); }
-.nrsf .nrsf-tiles { display: flex; flex-direction: column; align-items: center; gap: .1em; margin: 0; white-space: nowrap; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; font-size: min(8.6cqw, 56cqh); line-height: 1; color: #111; }
+.nrsf .nrsf-tiles { display: flex; flex-direction: column; align-items: center; gap: .1em; margin: 0; white-space: nowrap; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 700; font-size: min(8.6cqw, 56cqh); line-height: 1; color: #111;
+  -webkit-text-stroke: .03em #111; paint-order: stroke fill; }   /* boldest Oswald, plus a thin outline in the same black so every letter reads thicker */
 .nrsf .nrsf-tiles .row { display: flex; justify-content: center; gap: .06em; }
 /* with a second line: shrink the headline a little so both rows fit inside the board, and set the second row at about half size */
 .nrsf .nrsf-tiles:has(.sub) { font-size: min(8cqw, 46cqh); }
