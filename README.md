@@ -11,7 +11,18 @@ Live address: **https://nebularising.media/thetradingpost/**
 ```
 index.html              the street: the Trading Post storefront (the front door)
 newsstand/index.html    the Newsstand (through the magazine window)
-speakeasy/index.html    THE SPEAK, opening soon (behind door 9¾)
+speakeasy/index.html    THE SPEAK (behind door 9¾), as a STAGE SET like THE POST: four of Kathi's renders, one per room
+                        (the passage, the hall, the stage, the bar) plus THE CELLAR through the red door, with everything live laid on top in percentages of each
+                        picture. Its look, bones and behaviour are all in this one file. What's on the stage, what Dan says
+                        on it, and what Kathi says at the bar: assets/data.js, PART 4.
+assets/img/speak/       THE SPEAK's four rooms, each in three or four widths (the browser downloads only the size the screen needs).
+                        Sharpened 4x with Real-ESRGAN (realesr-general-x4v3) before sizing. The marquee boards are painted blank:
+                        their letters are live. Kathi's and Dan's faces are their real likeness; the stage is the set designer's
+                        close-up of the hall's own stage; restroom-dark.webp is
+                        the hall's RESTROOM sign with REST dark, flickered on top of the hall (the blink). Made by
+                        tools/speak-faces/hall_bar.py (the recipe, explained at its top; faces.py holds the faces), then the
+                        opening-day finish: faces_nov8.py (the faces, from one podcast frame), shadow_banned.py (the red door's
+                        SHADOW / BANNED plaque), hair_texture.py (Dan's hair), speak_grade.py (every room's warmth held to 5-10) and cellar_screen.py (THE CELLAR's TV screen).
 post/cafe.html          THE POST, the room inside, as a STAGE SET: the same 3D box and camera as the original
                         room, but every wall, the floor, the roof and everything standing in the room is one
                         finished photo. Four clickable spots on the walls open four popups. (Its look, bones
@@ -23,7 +34,7 @@ post/recipe.html        the live room THE POST is photographed from (post.js, po
 post/index.html         points to post/cafe.html (THE POST's old address, .../post/, so old links still land in the room)
 post/preview.html       points to post/cafe.html (it was the preview while THE POST was being rebuilt)
 assets/post-stage.js    the stage set's list: every photo and where it stands, in metres (written by bake-stage.js)
-tools/                  the recipes for the pictures: cut-lounge.py (the lounge, cut from Kathi's photo),
+tools/                  the recipes for the pictures: speak-faces/ (THE SPEAK's real faces), cut-lounge.py (the lounge, cut from Kathi's photo),
                         render-monstera.py (the pink plant, a 3D render), bake-stage.js, bake-post.js, and others
 
 assets/data.js          ← THE ONE FILE YOU EDIT
