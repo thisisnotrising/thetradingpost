@@ -232,16 +232,21 @@ window.NR = {
     },
     /* Holiday Special teaser (Nov 10), from TBH_HolidaySpecial_Teaser.pdf (13 pages): the PDF's first page is
        the cover (memoir02Teaser), its pages 2-12 are p01-p11 here (1400 px wide, like S1), and its last page is
-       the back cover (memoir02TeaserBack). Same spreads as the full Episode 1: CHAPTER 1 faces OH SHIT., PROLOGUE
-       faces its photo. One inside back cover in the PDF's own red (#a70804) evens the page count, so the last
-       page of text faces red and the back cover sits alone. The contents row for Episode 1 (p03) jumps to its
+       the back cover (memoir02TeaserBack). Same spreads as the full Episode 1: EPISODE 1 faces OH SHIT., PROLOGUE
+       faces its photo. (Nov 10, later) p05 now reads EPISODE 1 instead of CHAPTER 1 (redrawn in the same Sora Light,
+       same size and spot), and two closing pages from Kathi's holiday designs come after the last page of text:
+       p12 THIS IS NOT HALLMARK. (it faces that last page) and p13 TEA TIME STARTS WED 11:11 AM SLC, whose bottom
+       line reads READ ON SUBSTACK. and is a link. Her 1080 x 1350 designs are scaled to the page width with their
+       own background extended top and bottom. One inside back cover in the PDF's own red (#a70804) evens the page
+       count, so TEA TIME faces red and the back cover sits alone. The contents row for Episode 1 (p03) jumps to its
        opener (p05); Episodes 2-5 aren't in the teaser, so their rows aren't buttons. */
     "to-be-human-holiday-special": {
       kind: "pages", title: "To Be Human · Holiday Special · Kathi Eric Dalguntas",
-      pageDir: "tbh-holiday-teaser/", pageCount: 11, pageExt: "webp", back: "memoir02TeaserBack",
+      pageDir: "tbh-holiday-teaser/", pageCount: 13, pageExt: "webp", back: "memoir02TeaserBack",
       insideFront: false, insideBack: "#a70804",
       links: [
-        { page: 3, to: 5, label: "Episode 1: Oh Shit.", x: 268, y: 166, w: 410, h: 138 }
+        { page: 3, to: 5, label: "Episode 1: Oh Shit.", x: 268, y: 166, w: 410, h: 138 },
+        { page: 13, href: "https://chiefabsurdistofficer.substack.com/", label: "Read on Substack (opens a new tab)", x: 69, y: 920, w: 234, h: 42 }
       ]
     },
 
