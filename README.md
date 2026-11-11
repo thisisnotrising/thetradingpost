@@ -50,7 +50,8 @@ assets/img/storefront/  the storefront, baked: the building, ivy, doors and shop
 assets/img/             every photo, as WebP files
 assets/img/thumbs/      small copies of the covers, for the rack and the shop window
 assets/img/tbh-s2/      To Be Human Season 2, page by page
-assets/img/tbh-holiday/ To Be Human Holiday Special, page by page
+assets/img/tbh-holiday/ To Be Human Holiday Special, Episode 1 in full, page by page (kept off the shelf for now)
+assets/img/tbh-holiday-teaser/  To Be Human Holiday Special teaser, page by page (the one on the Memoirs shelf)
 ```
 
 **How the pieces fit.** Each page is a skeleton (the `.html` file). It loads its look (`.css`), its content (`data.js`), and its engine (`.js`). The engine reads the content and builds what you see. To change *what* is on the site, you only touch `data.js` and add pictures. The engines and stylesheets stay the same.

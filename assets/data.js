@@ -39,7 +39,9 @@ window.NR = {
     memoir01Back: "memoir01-back.webp",
     memoir02: "memoir02-cover.webp",
     memoir02Back: "memoir02-back.webp",
-    memoir03: "memoir03-cover.webp",          // To Be Human: Season 1 (Kathi)
+    memoir02Teaser: "memoir02-teaser-cover.webp",        // To Be Human: Holiday Special teaser (Nov 10), its own cover
+    memoir02TeaserBack: "memoir02-teaser-back.webp",     // its back cover (the last page of the teaser PDF)
+    memoir03:"memoir03-cover.webp",          // To Be Human: Season 1 (Kathi)
     memoir03Back: "memoir03-back.webp",       // its back cover (the last page of the S1 ebook PDF)
     memoir04: "memoir04-cover.webp",          // To Be Human: Season 3 (Amanda Jane Lee)
     memoir04Back: "memoir04-back.webp",       // its back cover
@@ -86,12 +88,14 @@ window.NR = {
      "url" = the memoir's web home; when it's there, the open book shows the Online button (same as the issues' "url").
      "paper" = the colour of the copies stacked behind the cover, so they match the cover's own paper
      (leave it out and the copies stay black, like TBH S2).
-     (The Holiday Special, memoir02 / "tbh-holiday", is off the shelf until its teaser drops; its book
-     is still kept in ISSUES below, so putting it back is just adding its line here again.) */
+     (The Holiday Special is back on the shelf as its teaser, "tbh-holiday-teaser" (Nov 10). Its full
+     Episode 1 book, "tbh-holiday", is still kept in ISSUES below: to show it instead, change the
+     line's issue to "tbh-holiday" and its cover to "memoir02".) */
   MEMOIRS: [
     { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", issue: "tbh-s1", url: "https://thisisnotrising.org/to-be-human/", paper: "#e3e2dc" },
     { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2", url: "https://thisisnotrising.org/to-be-human/" },
-    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", issue: "tbh-s3", url: "https://thisisnotrising.org/to-be-human/", paper: "#fafbf8" }
+    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", issue: "tbh-s3", url: "https://thisisnotrising.org/to-be-human/", paper: "#fafbf8" },
+    { name: "To Be Human: Holiday Special · Kathi Eric Dalguntas", tag: "TBH · HOLIDAY", cover: "memoir02Teaser", issue: "tbh-holiday-teaser", url: "https://chiefabsurdistofficer.substack.com/", paper: "#a70804" }
   ],
 
   /* The masthead, shared by every issue. x and y place each group
@@ -225,6 +229,20 @@ window.NR = {
       kind: "pages", title: "To Be Human · Holiday Special · Episode 1",
       pageDir: "tbh-holiday/", pageCount: 32, pageExt: "webp", back: "memoir02Back",
       insideFront: false, insideBack: false
+    },
+    /* Holiday Special teaser (Nov 10), from TBH_HolidaySpecial_Teaser.pdf (13 pages): the PDF's first page is
+       the cover (memoir02Teaser), its pages 2-12 are p01-p11 here (1400 px wide, like S1), and its last page is
+       the back cover (memoir02TeaserBack). Same spreads as the full Episode 1: CHAPTER 1 faces OH SHIT., PROLOGUE
+       faces its photo. One inside back cover in the PDF's own red (#a70804) evens the page count, so the last
+       page of text faces red and the back cover sits alone. The contents row for Episode 1 (p03) jumps to its
+       opener (p05); Episodes 2-5 aren't in the teaser, so their rows aren't buttons. */
+    "tbh-holiday-teaser": {
+      kind: "pages", title: "To Be Human · Holiday Special · Kathi Eric Dalguntas",
+      pageDir: "tbh-holiday-teaser/", pageCount: 11, pageExt: "webp", back: "memoir02TeaserBack",
+      insideFront: false, insideBack: "#a70804",
+      links: [
+        { page: 3, to: 5, label: "Episode 1: Oh Shit.", x: 268, y: 166, w: 410, h: 138 }
+      ]
     },
 
     /* Issue 19 · Dan Korus (Nov 7). Built exactly like Issue 01: same page templates, same 11-page preview.
