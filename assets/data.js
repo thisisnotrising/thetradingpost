@@ -72,7 +72,8 @@ window.NR = {
   /* Tabs on the rack. A tab only appears once it holds an issue. */
   TABS: [[1, 20], [21, 40], [41, 60]],      // 20 issues per tab
   /* READ ONLINE button under every "coming soon" marquee: where it goes.
-     (A memoir with its own "read" link uses that one instead.) */
+     (Nov 20) Each cover's own "url" comes first, so Issue 02's button opens Jennifer Hong's article, and so on;
+     a "read" link beats both. This features page is only the fallback for a cover with neither. */
   READ_ONLINE: "https://thisisnotrising.org/features/",
   /* The first tab with no issues yet still shows, with this placard on it. */
   UPCOMING_NOTE: "New issues arrive in 2027",
@@ -85,17 +86,17 @@ window.NR = {
      No "issue" yet? Clicking the cover puts up the marquee with the "soon" text
      (each \n starts a new line; keep lines short so they fit on a phone; the board shows it in capitals).
      "read" = a web link; when it's there, the marquee gets a READ ONLINE button that opens it in a new tab.
-     "url" = the memoir's web home; when it's there, the open book shows the Online button (same as the issues' "url").
+     "url" = where the memoir lives online (Nov 20: each one's first episode on Substack); the open book's Online button opens it (same as the issues' "url").
      "paper" = the colour of the copies stacked behind the cover, so they match the cover's own paper
      (leave it out and the copies stay black, like TBH S2).
      (The Holiday Special is back on the shelf as its teaser, "to-be-human-holiday-special" (Nov 10). Its full
      Episode 1 book, "tbh-holiday", is still kept in ISSUES below: to show it instead, change the
      line's issue to "tbh-holiday" and its cover to "memoir02".) */
   MEMOIRS: [
-    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", issue: "tbh-s1", url: "https://thisisnotrising.org/to-be-human/", paper: "#e3e2dc" },
-    { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2", url: "https://thisisnotrising.org/to-be-human/" },
-    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", issue: "tbh-s3", url: "https://thisisnotrising.org/to-be-human/", paper: "#fafbf8" },
-    { name: "To Be Human: Holiday Special · Kathi Eric Dalguntas", tag: "TBH · HOLIDAY", cover: "memoir02Teaser", issue: "to-be-human-holiday-special", url: "https://chiefabsurdistofficer.substack.com/", paper: "#a70804" }
+    { name: "To Be Human: Season 1 · Kathi Eric Dalguntas", tag: "TBH · S1", cover: "memoir03", issue: "tbh-s1", url: "https://chiefabsurdistofficer.substack.com/p/what-it-is-to-be-human", paper: "#e3e2dc" },
+    { name: "To Be Human: Season 2 · Garrett Rees", tag: "TBH · S2", cover: "memoir01", issue: "tbh-s2", url: "https://chiefabsurdistofficer.substack.com/p/s2-e1-fear-and-loathing-in-lake-powell" },
+    { name: "To Be Human: Season 3 · Amanda Jane Lee", tag: "TBH · S3", cover: "memoir04", issue: "tbh-s3", url: "https://chiefabsurdistofficer.substack.com/p/s3-e1-shraddha", paper: "#fafbf8" },
+    { name: "To Be Human: Holiday Special · Kathi Eric Dalguntas", tag: "TBH · HOLIDAY", cover: "memoir02Teaser", issue: "to-be-human-holiday-special", url: "https://chiefabsurdistofficer.substack.com/p/episode-1-oh-shit", paper: "#a70804" }
   ],
 
   /* The masthead, shared by every issue. x and y place each group
@@ -246,7 +247,7 @@ window.NR = {
       insideFront: false, insideBack: "#a70804",
       links: [
         { page: 3, to: 5, label: "Episode 1: Oh Shit.", x: 268, y: 166, w: 410, h: 138 },
-        { page: 13, href: "https://chiefabsurdistofficer.substack.com/", label: "Read on Substack (opens a new tab)", x: 69, y: 920, w: 234, h: 42 }
+        { page: 13, href: "https://chiefabsurdistofficer.substack.com/p/episode-1-oh-shit", label: "Read Episode 1 on Substack (opens a new tab)", x: 69, y: 920, w: 234, h: 42 }
       ]
     },
 
