@@ -16,7 +16,7 @@ screens and a lighter one for phones.
   4. The Speakeasy sign: only SPEAK is lit; EASY has almost worn away (the shop's look since it opened).
      (The Best Storyteller poster isn't changed here: the live poster from POSTERS in data.js hangs over it.)
   5. Saved as assets/img/storefront/winter-desk-stage.webp (1.5 times the picture's size, sharpened
-     a little) and winter-phone-stage.webp (860 pixels wide).
+     a little). Phones have their own tall picture, made by tools/make-phone-stage.py.
 
 All positions are in the reference picture's own pixels (1295 x 1215), the same numbers as the
 STAGES plan in storefront.js.
@@ -93,7 +93,5 @@ print("4. Speakeasy sign: SPEAK lit, EASY worn away")
 pic = Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
 desk = pic.resize((round(1295 * 1.5), round(1215 * 1.5)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(1.2, 45, 2))
 desk.save(os.path.join(OUT, "winter-desk-stage.webp"), "WEBP", quality=80, method=6)
-phone = pic.resize((860, round(1215 * 860 / 1295)), Image.LANCZOS)
-phone.save(os.path.join(OUT, "winter-phone-stage.webp"), "WEBP", quality=78, method=6)
-for f in ("winter-desk-stage.webp", "winter-phone-stage.webp"):
+for f in ("winter-desk-stage.webp",):           # (phones have their own picture: tools/make-phone-stage.py)
     print("5.", f, os.path.getsize(os.path.join(OUT, f)) // 1024, "KB")

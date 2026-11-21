@@ -360,7 +360,7 @@
    ============================================================ */
 /* the street takes the picture's shape (1295 x 1215) on every screen, decided before anything loads */
 .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 1295 / 1215; }
-@media (max-width: 639px) { .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 1295 / 1215; } }
+@media (max-width: 639px) { .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 941 / 1672; } }   /* phones: their own tall picture */
 /* painted pieces the picture already has */
 .nrsf--stage .nrsf-scene .nrsf-ivy, .nrsf--stage .nrsf-scene .nrsf-fascia, .nrsf--stage .nrsf-scene .nrsf-glassbox,
 .nrsf--stage .nrsf-scene .nrsf-opensign, .nrsf--stage .nrsf-scene .nrsf-interior, .nrsf--stage .nrsf-scene .nrsf-win .nrsf-glass,
@@ -381,15 +381,15 @@
 .nrsf--stage .nrsf-scene .nrsf-board { background: none; border: 0; box-shadow: none; }
 .nrsf--stage .nrsf-scene .nrsf-tiles:has(.sub) { font-size: min(7.4cqw, 51cqh); gap: .16em; }
 .nrsf--stage .nrsf-scene .nrsf-marquee[role=button]:hover { filter: brightness(1.06); }
-/* Phones: the picture is wider than a phone is tall, so it hangs like a postcard in a snowy night that fills the
-   screen. Its top and bottom fade into the night, the snow falls over the whole screen (the sky layer), and the
+/* Phones: their own tall picture (STAGES.winter.phone), centred in a snowy night that fills whatever screen height is
+   left. Its top and bottom fade into the night, the snow falls over the whole screen (the sky layer), and the
    small things to tap (the hanging sign, the A-frame, the poster) get a bigger invisible edge, so a finger finds them. */
 @media (max-width: 639px) {
   .nrsf[data-season="winter"] { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center;
     background: radial-gradient(ellipse 120% 70% at 50% 50%, #1a1f2d 0%, #0e121b 55%, #080a10 100%); }
-  .nrsf[data-season="winter"] .nrsf-scene { flex: none; -webkit-mask-image: linear-gradient(transparent 0, #000 6%, #000 92%, transparent 100%); mask-image: linear-gradient(transparent 0, #000 6%, #000 92%, transparent 100%); }
+  .nrsf[data-season="winter"] .nrsf-scene { flex: none; -webkit-mask-image: linear-gradient(transparent 0, #000 3%, #000 96%, transparent 100%); mask-image: linear-gradient(transparent 0, #000 3%, #000 96%, transparent 100%); }
   .nrsf[data-season="winter"] .nrsf-teleport { background-position: center; background-color: #0e121b; }
-  .nrsf[data-season="winter"] .nrsf-tp-sign { top: calc(50% - 32vw); }      /* still over the upstairs window: the picture is 94vw tall, centred */
+  .nrsf[data-season="winter"] .nrsf-tp-sign { top: calc(50% - 46.4vw); }    /* over the upstairs window: the picture is 178vw tall, centred */
   .nrsf--stage .nrsf-scene .nrsf-signbox::after, .nrsf--stage .nrsf-scene .nrsf-floorsign::after, .nrsf--stage .nrsf-scene .nrsf-poster::after {
     content: ""; position: absolute; inset: -10px; }
 }

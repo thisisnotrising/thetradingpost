@@ -93,7 +93,21 @@
       floorSign: { x: 218, y: 992, w: 90, h: 138 },           // the RAMH Library A-frame
       poster: { x: 376, y: 736, w: 199, h: 250 },             // the Best Storyteller poster
       // the real covers, inside the Newsstand window (measured from the window's top left): all 20 of Vol. 1, 5 across and 4 high
-      news: { x0: 24, x1: 292, y0: 64, cols: 5, coverW: 31, rowH: 53, tag: 3.6, tagGap: 3.5, ring: 0 }
+      news: { x0: 24, x1: 292, y0: 64, cols: 5, coverW: 31, rowH: 53, tag: 3.6, tagGap: 3.5, ring: 0 },
+      // PHONES (screens under 640 wide) get their own picture, made for a phone held upright: Kathi's tall winter
+      // picture (winter-phone-stage.webp, made ready by tools/make-phone-stage.py). Its numbers are its own pixels (941 x 1672).
+      phone: {
+        stage: "winter", ref: 941, h: 1672, ground: 1322,
+        sign: { x: 612, y: 332, w: 152, h: 116 },
+        marquee: { x: 180, y: 556, w: 585, h: 156 }, pad: [36, 43, 40, 44],   // pad: frame to board (top, right, bottom, left)
+        fascia: { x: 40, y: 735, w: 810, h: 128 },
+        neon: { x: 45, y: 905, w: 122, h: 95 }, num: { x: 758, y: 950, w: 90, h: 52 },
+        front: { glass: [{ x: 232, y: 915, w: 222, h: 280 }, { x: 466, y: 915, w: 238, h: 280 }] },
+        doors: [{ side: "l", leaf: { x: 54, y: 1012, w: 106, h: 288 } }, { side: "r", leaf: { x: 764, y: 1006, w: 80, h: 283 } }],
+        floorSign: { x: 144, y: 1198, w: 90, h: 146 },
+        poster: { x: 257, y: 946, w: 170 },
+        news: { x0: 16, x1: 224, y0: 66, cols: 5, coverW: 30, rowH: 49, tag: 3.8, tagGap: 3, ring: 0 }
+      }
     }
   };
 
@@ -1791,7 +1805,8 @@
     function build() {
       W = root.clientWidth;
       if (!W) return;
-      G = ST ? Object.assign({}, ST, { phone: W < 640 }) : W < 640 ? PHONE : DESK;   // a stage: the same picture on every screen
+      G = ST ? Object.assign({}, W < 640 && ST.phone ? ST.phone : ST, { phone: W < 640 })   // a stage: its phone picture on phones
+            : W < 640 ? PHONE : DESK;
       root.classList.toggle("nrsf--phone", !!G.phone);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       u = W / G.ref; H = G.h * u;
@@ -1802,6 +1817,7 @@
 
       place($("nrsf-sign"), G.sign);
       place($("nrsf-marquee-box"), G.marquee);
+      $("nrsf-marquee-box").style.padding = G.pad ? G.pad.map(v => v * u + "px").join(" ") : "";   // a stage's frame-to-board gap
       place($("nrsf-fascia"), G.fascia);
       place($("nrsf-neon"), G.neon);
       place($("nrsf-num"), G.num);

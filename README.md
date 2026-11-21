@@ -47,9 +47,11 @@ assets/vendor/          the page-flip library (hosted here, so no outside servic
 assets/img/storefront/  the storefront, baked: the building, ivy, doors and shop windows as finished pictures
                         (one set for phones, one for bigger screens) plus the black-and-white "Teleporting" picture.
                         Made by: node tools/bake-storefront.js  (run it again after changing the building or the ivy)
-                        WINTER is different: the whole street is one finished picture, Kathi's snowy holiday picture
-                        (winter-desk-stage.webp, winter-phone-stage.webp), made ready by tools/make-stage.py from
-                        tools/ref/winter-stage-ref.webp. STAGES in storefront.js says where each sign, door and window sits on it.
+                        WINTER is different: the whole street is one finished picture, Kathi's snowy holiday picture.
+                        Bigger screens: winter-desk-stage.webp (made by tools/make-stage.py from tools/ref/winter-stage-ref.webp).
+                        Phones: their own tall picture, winter-phone-stage.webp (made by tools/make-phone-stage.py from
+                        tools/ref/winter-phone-stage-ref.webp). STAGES in storefront.js says where each sign, door and window
+                        sits on each picture (STAGES.winter, and STAGES.winter.phone for phones).
 assets/season.js        ← THE WEATHER DIAL: one word picks the season for the street and THE POST ("fall" or "winter")
 assets/snowfall.js      the falling snow (the street, and outside THE POST's glass roof); its settings are at the top
 assets/img/post/room2/  THE POST's room picture: room-2400/1600/phone (autumn) and room-*-winter (winter: the roof from

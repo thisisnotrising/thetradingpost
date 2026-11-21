@@ -8,7 +8,7 @@ and never touches the lettering listed in KEEP.
 """
 import sys, numpy as np, cv2
 
-ZONES = [  # x0, y0, x1, y1 in picture pixels (the 1295 x 1215 reference)
+ZONES = [  # x0, y0, x1, y1 in picture pixels (the desktop picture, 1295 x 1215; the phone picture passes its own)
     (60, 545, 1185, 700),     # the black fascia band (THE POST)
     (80, 690, 240, 1118),     # the red door, its frame and the Speakeasy transom
     (1060, 690, 1200, 1125),  # the black door and the 10 transom
@@ -28,7 +28,10 @@ KEEP = [   # lettering and pictures never touched
     (1100, 840, 1170, 960),   # the OPEN sign
 ]
 
-def find(im):
+def find(im, zones=None, keep=None):
+    """zones: where to look (x0, y0, x1, y1); keep: lettering never touched. Defaults: the desktop picture's."""
+    zones = ZONES if zones is None else zones
+    keep = KEEP if keep is None else keep
     L = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY).astype(np.float32)
     k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9))
     tophat = L - cv2.morphologyEx(L, cv2.MORPH_OPEN, k)           # bright specks smaller than 9 px across
@@ -36,8 +39,8 @@ def find(im):
     b, g, r = [im[..., i].astype(np.int32) for i in range(3)]
     neutral = (b >= r - 22) & (np.abs(g - b) < 36)                 # white or bluish, not orange or gold
     zone = np.zeros(L.shape, bool)
-    for x0, y0, x1, y1 in ZONES: zone[y0:y1, x0:x1] = True
-    for x0, y0, x1, y1 in KEEP: zone[y0:y1, x0:x1] = False
+    for x0, y0, x1, y1 in zones: zone[y0:y1, x0:x1] = True
+    for x0, y0, x1, y1 in keep: zone[y0:y1, x0:x1] = False
     cand = (tophat > 34) & neutral & (L > 110) & (bg < 140) & zone
     n, lab, st, _ = cv2.connectedComponentsWithStats(cand.astype(np.uint8), 8)
     mask = np.zeros(L.shape, np.uint8)
