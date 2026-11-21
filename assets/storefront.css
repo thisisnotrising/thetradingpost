@@ -360,7 +360,7 @@
    ============================================================ */
 /* the street takes the picture's shape (1295 x 1215) on every screen, decided before anything loads */
 .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 1295 / 1215; }
-@media (max-width: 639px) { .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 941 / 1672; } }   /* phones: their own tall picture */
+@media (max-width: 639px) { .nrsf[data-season="winter"] .nrsf-scene { aspect-ratio: 810 / 1672; } }   /* phones: their own tall picture, zoomed in */
 /* painted pieces the picture already has */
 .nrsf--stage .nrsf-scene .nrsf-ivy, .nrsf--stage .nrsf-scene .nrsf-fascia, .nrsf--stage .nrsf-scene .nrsf-glassbox,
 .nrsf--stage .nrsf-scene .nrsf-opensign, .nrsf--stage .nrsf-scene .nrsf-interior, .nrsf--stage .nrsf-scene .nrsf-win .nrsf-glass,
@@ -389,7 +389,7 @@
     background: radial-gradient(ellipse 120% 70% at 50% 50%, #1a1f2d 0%, #0e121b 55%, #080a10 100%); }
   .nrsf[data-season="winter"] .nrsf-scene { flex: none; -webkit-mask-image: linear-gradient(transparent 0, #000 3%, #000 96%, transparent 100%); mask-image: linear-gradient(transparent 0, #000 3%, #000 96%, transparent 100%); }
   .nrsf[data-season="winter"] .nrsf-teleport { background-position: center; background-color: #0e121b; }
-  .nrsf[data-season="winter"] .nrsf-tp-sign { top: calc(50% - 46.4vw); }    /* over the upstairs window: the picture is 178vw tall, centred */
+  .nrsf[data-season="winter"] .nrsf-tp-sign { top: calc(50% - 53.8vw); }    /* over the upstairs window: the picture is 206vw tall, centred */
   .nrsf--stage .nrsf-scene .nrsf-signbox::after, .nrsf--stage .nrsf-scene .nrsf-floorsign::after, .nrsf--stage .nrsf-scene .nrsf-poster::after {
     content: ""; position: absolute; inset: -10px; }
 }
