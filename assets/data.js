@@ -520,15 +520,15 @@ window.NRSF = {
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library",  // the A-frame floor sign (opens in a new tab)
-    marquee: "https://nebularising.media/thetradingpost/newsstand/#dan-korus",   // the button under the letter board up close: Dan Korus's Issue 19 on the Newsstand ("" = no popup)
+    marquee: "https://nebularising.media/thetradingpost/newsstand/",   // the button under the letter board up close: Issue 20 (Machine Poet) on the Newsstand ("" = no popup)
     magazine: "https://thisisnotrising.org/"                 // the button under the NOT RISING sign up close ("" = no popup)
   },
 
   /* The words on the building */
   SIGNS: {
     marquee: "NOW SOARING",       // letter board under the upstairs window
-    marqueeSub: "DAN KORUS",      // the smaller second line under it (leave "" for one line)
-    marqueeButton: "Read Dan's Story",  // the button under the letter board up close (it opens LINKS.marquee)
+    marqueeSub: "MACHINE POET",   // the smaller second line under it (leave "" for one line)
+    marqueeButton: "Read Machine Poet's Story",  // the button under the letter board up close (it opens LINKS.marquee)
     shop: "The Post",               // the black fascia
     address: "777 Daydream St.",
     hanging: "NOT RISING",          // the cut-metal swinging sign (split over two lines: NOT / RISING)
@@ -537,17 +537,27 @@ window.NRSF = {
     rightDoor: "10"
   },
 
-  /* Seasons. "auto" picks by today's date:
-       fall = Sep–Nov, winter = Dec–Feb, spring = Mar–May, summer = Jun–Aug.
-     A season that isn't built yet falls back to the one named in FALLBACK_SEASON. */
-  SEASON: "auto",
+  /* Seasons. WHICH season shows is set in assets/season.js (the weather dial), not here:
+     this line just reads that word. If the dial file ever fails to load, it follows the calendar ("auto").
+     Below are the recipes, one per season. A season that isn't built yet falls back to FALLBACK_SEASON. */
+  SEASON: String(window.NR_SEASON || "auto").trim().toLowerCase(),
   SEASONS: {
     fall: {
       // Colours of the Boston ivy: the leaves on the walls, the ones lying on the cobbles and the ones falling.
       // Crimson to plum-red, picked from your red-ivy photo.
       leaves: ["#c41a2c", "#d62a3a", "#a8182a", "#cc2c3a", "#e2365a", "#8f2448", "#b81c3a", "#851432", "#d6343f", "#a82850"],
-      falling: true,
+      falling: "leaves",    // what drifts down past the shop: "leaves", "snow", or false for nothing
       pumpkins: false       // the white pumpkins on the step (true = show them)
+    },
+    winter: {
+      // The same Boston ivy after every leaf has fallen, after your bare-ivy photo: only the vines are left.
+      bare: true,
+      leaves: [],
+      // Colours of the bare vines: the old trunks, the main stems, the finest twigs (dark plum-grey, like the photo)
+      vines: ["#2a2024", "#3a2c33", "#4d3c45"],
+      snow: true,           // snow lying on the ledges, the vines, the awning, the steps and the street
+      falling: "snow",      // big soft flakes drifting slowly down
+      pumpkins: false
     }
   },
   FALLBACK_SEASON: "fall",
@@ -555,7 +565,7 @@ window.NRSF = {
   /* Seasons whose building, ivy, doors and shop windows are baked into pictures (assets/img/storefront/),
      so they load fast. A season not listed here is painted live on the visitor's device (slow on phones).
      Changed the building, the ivy colours or a season? Run tools/bake-storefront.js to bake it again. */
-  BAKED: ["fall"],
+  BAKED: ["fall", "winter"],
 
   /* The poster window: one poster, styled like a best-seller poster.
      (The Now Playing bills for the Speakeasy come back when it opens.) */
@@ -563,10 +573,10 @@ window.NRSF = {
     {
       kind: "bestseller",
       rank: "#1",
-      book: "Poetic Drift",
-      author: "Joel Lymneos",
-      cover: "poetic-drift.jpg",
-      link: "https://www.amazon.com/dp/B0HMFJL61C"
+      book: "Come Here, Little Lamb",
+      author: "Mat Bryant",
+      cover: "come-here-little-lamb.jpg",
+      link: "https://www.amazon.com/Come-Here-Little-Lamb-Horror-ebook/dp/B0HQ2DCM7X?ref_=ast_author_mpb"
     }
   ]
 };
@@ -713,7 +723,7 @@ window.NRPOST = {
     wall:  "post/poster-best-storyteller-wall.webp",
     closeup: "post/poster-best-storyteller-phone.webp",
     shape: 864 / 1102,                                  // width : height
-    alt: "A towering poster: #1 NOT RISING Magazine, Best Storyteller. New book by Joel Lymneos, Poetic Drift.",
+    alt: "A towering poster: #1 NOT RISING Magazine, Best Storyteller. New book by Mat Bryant, Come Here, Little Lamb.",
     wide:   { from: 1.9, to: 6.35, bottom: 0.25, top: 5.8 },
     narrow: { from: 2.4, to: 6.86, bottom: 0.25, top: 5.8 }
   }

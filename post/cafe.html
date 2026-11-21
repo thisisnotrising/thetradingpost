@@ -15,14 +15,20 @@
 <meta property="og:image" content="https://nebularising.media/thetradingpost/assets/img/share-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Post at 777 Daydream St.: a black-and-gold shopfront wrapped in red Boston ivy, with a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
+<meta property="og:image:alt" content="The Post at 777 Daydream St.: a black-and-gold shopfront with a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
 <meta name="twitter:card" content="summary_large_image">
 <!-- START THE BIG DOWNLOAD AT ONCE: the room's picture, fetched while the page is still arriving. Each screen fetches
      only its own copy (the same choice as the <picture> in PART 2): phones held upright get the phone slice, laptops
      the 1600 px room, big sharp screens the 2400 px room. -->
-<link rel="preload" as="image" href="../assets/img/post/room2/room-phone.webp" media="(max-aspect-ratio: 9/10)">
-<link rel="preload" as="image" href="../assets/img/post/room2/room-1600.webp" media="(min-aspect-ratio: 9/10) and (max-width: 1500px)">
-<link rel="preload" as="image" href="../assets/img/post/room2/room-2400.webp" media="(min-aspect-ratio: 9/10) and (min-width: 1501px)">
+<!-- THE WEATHER: the same dial as the street (assets/season.js). In winter the room's pictures are the -winter copies
+     (snow seen through the glass roof, made by tools/make-post-winter.py); every other season shows the usual ones. -->
+<script src="../assets/season.js"></script>
+<script>window.NRP_ROOM = String(window.NR_SEASON || "").trim().toLowerCase() === "winter" ? "-winter" : "";
+[["room-phone", "(max-aspect-ratio: 9/10)"], ["room-1600", "(min-aspect-ratio: 9/10) and (max-width: 1500px)"],
+ ["room-2400", "(min-aspect-ratio: 9/10) and (min-width: 1501px)"]].forEach(([f, m]) => {
+  const l = document.createElement("link"); l.rel = "preload"; l.as = "image"; l.media = m;
+  l.href = "../assets/img/post/room2/" + f + window.NRP_ROOM + ".webp"; document.head.appendChild(l);
+});</script>
 <!--
   NOT RISING · THE POST, the room inside 777 Daydream St.
   ------------------------------------------------------------------
@@ -86,6 +92,15 @@ html.locked, html.locked body { overflow: hidden; }
 @media (max-aspect-ratio: 9/10) { .art > picture > img { left: calc(100% * var(--x0)); width: calc(100% * (var(--x1) - var(--x0))); } }
 .stage:not(.ready) .art { opacity: 0; }                       /* hidden until the picture has arrived... */
 .stage.ready .art { opacity: 1; transition: opacity .6s; }    /* ...then it fades in */
+
+/* winter: the snow over the roof, seen only through the glass. It covers the roof (the picture's top 1060 of 2624 pixels);
+   the mask (white where the glass is) hides it behind the frames, the fans and the ivy. Phones get the slice's own mask. */
+.roof-snow { position: absolute; left: 0; top: 0; width: 100%; height: 40.4%; pointer-events: none;
+  -webkit-mask: url("../assets/img/post/room2/roof-glass-desk.webp") 0 0 / 100% 100% no-repeat;
+          mask: url("../assets/img/post/room2/roof-glass-desk.webp") 0 0 / 100% 100% no-repeat; }
+@media (max-aspect-ratio: 9/10) { .roof-snow { left: calc(100% * var(--x0)); width: calc(100% * (var(--x1) - var(--x0)));
+  -webkit-mask-image: url("../assets/img/post/room2/roof-glass-phone.webp"); mask-image: url("../assets/img/post/room2/roof-glass-phone.webp"); } }
+.roof-snow:empty { display: none; }
 
 /* where each button sits, in percent of the whole picture (2398 x 2624) */
 .s-newsstand { left: 1.5%;   top: 32.01%; width: 20.35%; height: 58.3%; }
@@ -446,11 +461,19 @@ body.leaving::before { opacity: 1; }
      <picture> lets each screen fetch only its own copy: the phone slice, the 1600 px room or the 2400 px room. -->
 <main class="stage" id="stage" aria-label="THE POST: a tall hall under a pitched glass roof scattered with red leaves, red Boston ivy trailing down both walls. On the left, white brick: the Newsstand, NOW SOARING on a bulb-lit marquee with a black-and-white awning over a crystal-glass stand of NOT RISING covers, framed by Edison bulbs, then the Wishing Wall, a stencilled cowboy with every wish painted around him. Ahead, through an arch hung with flowering vines, Nebula Cafe glowing, with Kathi behind the bar. In front of it a lounge: a low green L-shaped sofa, a jute rug and pouf, and a pink plant in a white pot. On the right, black brick: the Best Storyteller poster, LIFE, sixteen black-and-white canvas prints in a 4 by 4 grid, and GALLERY at floor level.">
   <div class="art" id="room">
-    <picture>
-      <source media="(max-aspect-ratio: 9/10)" srcset="../assets/img/post/room2/room-phone.webp">
-      <source media="(max-width: 1500px)" srcset="../assets/img/post/room2/room-1600.webp">
-      <img id="room-img" src="../assets/img/post/room2/room-2400.webp" width="2398" height="2624" alt="" decoding="async" fetchpriority="high">
+    <picture id="room-pic">
+      <source media="(max-aspect-ratio: 9/10)" data-srcset="room-phone">
+      <source media="(max-width: 1500px)" data-srcset="room-1600">
+      <img id="room-img" data-src="room-2400" width="2398" height="2624" alt="" decoding="async" fetchpriority="high">
     </picture>
+    <script>/* the season's copy of the room (see the weather note in the head) */
+    document.querySelectorAll("#room-pic [data-srcset], #room-pic [data-src]").forEach(el => {
+      const url = "../assets/img/post/room2/" + (el.dataset.srcset || el.dataset.src) + window.NRP_ROOM + ".webp";
+      if (el.dataset.srcset) el.srcset = url; else el.src = url;
+    });</script>
+    <!-- winter: snow falling outside, seen through the glass of the roof (assets/snowfall.js; the mask lets it show only
+         through the panes, so it passes behind the frames, the fans and the ivy) -->
+    <div class="roof-snow" id="roof-snow" aria-hidden="true"></div>
     <button class="spot s-newsstand" type="button" data-pop="newsstand" data-label="Newsstand" aria-label="Open the Newsstand"></button>
     <button class="spot s-wall" type="button" data-pop="wall" data-label="Wishing Wall" aria-label="Open the Wishing Wall"></button>
     <button class="spot s-cafe" type="button" data-pop="cafe" data-label="Nebula Cafe" aria-label="Open Nebula Cafe"></button>
@@ -660,6 +683,18 @@ body.leaving::before { opacity: 1; }
 
 <!-- The words and photo lists (data.js), then PART 3 -->
 <script src="../assets/data.js"></script>
+<script src="../assets/snowfall.js"></script>
+<script>/* WINTER: snow outside the glass roof. Smaller and further away than on the street (no flakes close to you: you're
+   indoors), and it settles on the glass all over the roof. On a phone the roof is the screen's width (400 units);
+   on a bigger screen 1200 units, the same as the street. */
+if (window.NRP_ROOM === "-winter" && window.NRSnowfall) {
+  const sky = document.getElementById("roof-snow"), phone = () => matchMedia("(max-aspect-ratio: 9/10)").matches;
+  NRSnowfall.start(sky, { unit: () => sky.clientWidth / (phone() ? 400 : 1200), phone, ground: () => 0, roof: true, thick: 2,
+    still: matchMedia("(prefers-reduced-motion: reduce)").matches });
+  document.getElementById("stage").setAttribute("aria-label", document.getElementById("stage").getAttribute("aria-label")
+    .replace("scattered with red leaves", "with snow falling on the branches outside and red leaves on the glass"));
+}
+</script>
 <script>
 /* ================================================================
    PART 3 · THE BEHAVIOUR

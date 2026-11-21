@@ -15,7 +15,7 @@
 <meta property="og:image" content="https://nebularising.media/thetradingpost/assets/img/share-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="The Post at 777 Daydream St.: a black-and-gold shopfront wrapped in red Boston ivy, with a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
+<meta property="og:image:alt" content="The Post at 777 Daydream St. in winter: a snowy black-and-gold shopfront with pine garlands and red bows, a lit Newsstand window, a red door marked 9¾ and a black door marked 10.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@600;700&family=Arimo:ital,wght@0,400..700;1,400..700&family=Cinzel:wght@400;700&family=Sacramento&family=Sancreek&display=swap">
@@ -26,14 +26,17 @@ body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<link rel="stylesheet" href="assets/storefront.css">
+<link rel="stylesheet" href="assets/storefront.css?v=20261122b">
+<script src="assets/season.js"></script><!-- the weather dial: the one word that picks the season -->
 </head>
 <body>
 <!-- NOT RISING · The Trading Post, 777 Daydream St.
      The building is painted by the script onto the canvas below. The doors,
      windows, signs and lights on top are real page elements, so they can be
      clicked, read by screen readers, and changed in storefront-data.js. -->
-<div class="nrsf alignfull" id="nrsf" data-season="fall" lang="en">
+<div class="nrsf alignfull" id="nrsf" lang="en">
+<script>/* read the weather dial before anything is drawn, so the "Teleporting" picture is the right season from the first instant */
+document.getElementById("nrsf").dataset.season = String(window.NR_SEASON || "fall").trim().toLowerCase();</script>
   <div class="nrsf-scene" id="nrsf-scene">
     <canvas class="nrsf-paint" id="nrsf-paint" aria-hidden="true"></canvas>
 
@@ -103,7 +106,8 @@ img { max-width: 100%; }
      uses it (for the wood grain), and a stylesheet reads short addresses
      from its own folder, not from this page. -->
 <script>window.NRSF_BASE = new URL("assets/img/", location.href).href; window.NRNS_BASE = "assets/img/";</script>
-<script src="assets/data.js?v=20261107c"></script>
-<script src="assets/storefront.js"></script>
+<script src="assets/data.js?v=20261122b"></script>
+<script src="assets/snowfall.js?v=20261122b"></script><!-- the falling snow (winter) -->
+<script src="assets/storefront.js?v=20261122b"></script>
 </body>
 </html>

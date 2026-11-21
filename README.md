@@ -47,6 +47,14 @@ assets/vendor/          the page-flip library (hosted here, so no outside servic
 assets/img/storefront/  the storefront, baked: the building, ivy, doors and shop windows as finished pictures
                         (one set for phones, one for bigger screens) plus the black-and-white "Teleporting" picture.
                         Made by: node tools/bake-storefront.js  (run it again after changing the building or the ivy)
+                        WINTER is different: the whole street is one finished picture, Kathi's snowy holiday picture
+                        (winter-desk-stage.webp, winter-phone-stage.webp), made ready by tools/make-stage.py from
+                        tools/ref/winter-stage-ref.webp. STAGES in storefront.js says where each sign, door and window sits on it.
+assets/season.js        ← THE WEATHER DIAL: one word picks the season for the street and THE POST ("fall" or "winter")
+assets/snowfall.js      the falling snow (the street, and outside THE POST's glass roof); its settings are at the top
+assets/img/post/room2/  THE POST's room picture: room-2400/1600/phone (autumn) and room-*-winter (winter: the roof from
+                        Kathi's winter mockup, made by tools/make-post-winter.py), plus roof-glass-*.webp, the shape of the
+                        glass, so the snow only shows through the panes. The poster on its wall: tools/post-poster.py
 assets/img/             every photo, as WebP files
 assets/img/thumbs/      small copies of the covers, for the rack and the shop window
 assets/img/tbh-s2/      To Be Human Season 2, page by page
@@ -116,8 +124,9 @@ The issue appears on the rack and in the storefront window together, and the "Co
 | The NOT RISING sign up close | `LINKS` → `magazine` (Part 2) | `"https://thisisnotrising.org/"`. Clicking the sign shows the newest issue in `FEATURES` that has a `url` (so it follows the Newsstand by itself), with a READ THE MAGAZINE button |
 
 **Signs never leave the street by themselves.** The letter board, the NOT RISING sign, the A-frame sign and the poster in the window only open their popup. The button in the popup is the one way out, and it opens in a new tab, so the street stays open behind it.
-| Seasons with baked pictures | `BAKED` (Part 2) | `["fall"]`; a season not listed is painted live (slow on phones) |
-| Posters in the window | `POSTERS` (Part 2) | |
+| Which season shows | `assets/season.js` (not data.js) | `window.NR_SEASON = "winter";` change the word, commit; the street and THE POST both follow it |
+| Seasons with baked pictures | `BAKED` (Part 2) | `["fall", "winter"]`; a season not listed is painted live (slow on phones). Winter uses its stage picture |
+| Posters in the window | `POSTERS` (Part 2) | book, author, cover, link. THE POST's wall poster is a picture: after a change run `tools/render-poster.js` then `tools/post-poster.py` |
 
 **Check the full Issue 01 before Dec 1:** add `?full` to the newsstand address: `.../thetradingpost/newsstand/?full`
 

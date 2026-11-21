@@ -39,6 +39,7 @@
       pumpkins: { x: 1004, y: 1037, w: 116 },
       floorSign: { x: 210, y: 922, w: 82 },     // A-frame on the pavement in front of the pier between the red door and the poster window
       awning: { x0: 34, x1: 1166, wall: 624, front: 650, spread: .02, lamps: [251, 600, 949] },
+      roof: { y: 26, h: 14 },                   // winter: the stone coping along the top of the wall, under the roof's snow
       ivy: { side: 84, canopy: 64, droop: 170, keepClear: [{ x: 452, y: 56, w: 296, h: 262 }, { x: 272, y: 330, w: 656, h: 156 }, { x: 790, y: 100, w: 220, h: 220 }, { x: 84, y: 600, w: 1032, h: 520 }] }
     };
   })();
@@ -67,9 +68,34 @@
       pumpkins: { x: 344, y: 889, w: 48 },
       floorSign: { x: 47, y: 890, w: 92 },      // poster-sized on the pavement, below the red door and the window, so it covers nothing you tap
       awning: { x0: 6, x1: 394, wall: 530, front: 546, spread: .02, lamps: [94, 306] },
+      roof: { y: 18, h: 10 },
       ivy: { side: 34, canopy: 46, droop: 90, keepClear: [{ x: 62, y: 80, w: 176, h: 214 }, { x: 8, y: 302, w: 384, h: 126 }, { x: 230, y: 112, w: 162, h: 166 }, { x: 0, y: 520, w: 400, h: 460 }] }
     };
   })();
+
+  /* STAGES: a season can use one finished picture as its whole street (its "stage") instead of painting the
+     building. Winter's stage is Kathi's snowy holiday picture, made ready by tools/make-stage.py and saved as
+     assets/img/storefront/winter-desk-stage.webp (bigger screens) and winter-phone-stage.webp (phones).
+     The picture is the set. Everything that does something sits on its own spot in the picture, see-through,
+     so clicking the picture's marquee opens the marquee, its doors open, and so on. Only three things are set
+     on top of it live: the marquee's words (SIGNS in data.js), the real covers in the Newsstand window, and the
+     falling snow (assets/snowfall.js). All numbers are the picture's own pixels (it is 1295 x 1215).
+     A season without a stage here is painted as before, from the DESK and PHONE plans. */
+  const STAGES = {
+    winter: {
+      stage: "winter", ref: 1295, h: 1215, ground: 1125,      // ground: where the pavement starts (where far snowflakes land)
+      sign: { x: 858, y: 108, w: 132, h: 122 },               // the NOT RISING hanging sign
+      marquee: { x: 290, y: 352, w: 720, h: 168 },            // the marquee, frame and bulbs included (the words go on its board)
+      fascia: { x: 60, y: 545, w: 1120, h: 140 },             // THE POST (in the picture)
+      neon: { x: 88, y: 700, w: 140, h: 104 }, num: { x: 1072, y: 700, w: 120, h: 104 },   // SPEAKEASY 9 3/4 and 10 (in the picture)
+      front: { glass: [{ x: 318, y: 712, w: 312, h: 288 }, { x: 668, y: 712, w: 316, h: 288 }] },   // the poster window, the Newsstand window
+      doors: [{ side: "l", leaf: { x: 91, y: 815, w: 129, h: 291 } }, { side: "r", leaf: { x: 1076, y: 825, w: 104, h: 293 } }],   // red door, black door
+      floorSign: { x: 218, y: 992, w: 90, h: 138 },           // the RAMH Library A-frame
+      poster: { x: 376, y: 736, w: 199, h: 250 },             // the Best Storyteller poster
+      // the real covers, inside the Newsstand window (measured from the window's top left): all 20 of Vol. 1, 5 across and 4 high
+      news: { x0: 24, x1: 292, y0: 64, cols: 5, coverW: 31, rowH: 53, tag: 3.6, tagGap: 3.5, ring: 0 }
+    }
+  };
 
   /* ============================================================
      B. PAINT KIT
@@ -287,6 +313,8 @@
     if (!D.SEASONS[season]) season = D.FALLBACK_SEASON;
     const S = D.SEASONS[season];
     root.dataset.season = season;
+    const ST = STAGES[season] || null;                 // this season's stage picture, if it has one
+    root.classList.toggle("nrsf--stage", !!ST);
 
     /* Signs and letter tiles */
     root.querySelectorAll("[data-sign]").forEach(el => (el.textContent = SIGNS[el.dataset.sign] || ""));
@@ -322,10 +350,12 @@
         <circle cx="50" cy="90" r=".8" fill="#f4f1ea"/>
         <rect x="${LX - 1}" y="${LY - 2}" width="${LW + 2}" height="${(LH + 4).toFixed(2)}" rx="1.6" fill="#fff"/>
         <image href="${img("ramh-logo.webp")}" x="${LX}" y="${LY}" width="${LW}" height="${LH.toFixed(2)}"/>`;
-      fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">
-        <ellipse cx="50" cy="168" rx="50" ry="4" fill="rgba(0,0,0,.45)"/>
+      // Winter: its shadow on the snow is soft and blue, and snow lies along the top of the frame and the cross bar
+      fs.innerHTML = `<svg viewBox="0 0 100 172" aria-hidden="true">${S.snow ? `<defs>${snowColours("nrsf-snow-aframe")}</defs>` : ""}
+        <ellipse cx="50" cy="168" rx="50" ry="4" fill="${S.snow ? "rgba(40,50,96,.22)" : "rgba(0,0,0,.45)"}"/>
         <path d="M15 6 L23 165 M85 6 L77 165" stroke="#8f8f8b" stroke-width="3" stroke-linecap="round"/>
         <g stroke="#f2f1ec" stroke-linecap="round"><path d="M9 5 L3 166 M91 5 L97 166" stroke-width="5"/><path d="M7 5 H93" stroke-width="6"/><path d="M5 138 H95" stroke-width="4"/></g>
+        ${S.snow ? svgCap(2, 98, 2.4, 8, 901, "nrsf-snow-aframe", .35, .3) + svgCap(4, 96, 136.4, 5, 902, "nrsf-snow-aframe", .35, .2) : ""}
         <path d="M11 9 L5.6 166" stroke="#c9c8c2" stroke-width="1.4"/>
         ${FLOOR_POSTER}
         <g fill="#2b2b2b"><rect x="25" y="7" width="7" height="12" rx="1"/><rect x="68" y="7" width="7" height="12" rx="1"/></g>
@@ -627,6 +657,12 @@
       }
       ledgeShadow(ctx, ws.x + 4, ws.y + ws.h, ws.w - 8, 22, .5);
       ctx.fillStyle = vgrad(ctx, ws.y + ws.h, ws.y + ws.h + 90, [[0, "rgba(70,70,74,.16)"], [1, "rgba(70,70,74,0)"]]); ctx.fillRect(ws.x + 20, ws.y + ws.h, ws.w - 40, 90);  // rain stains
+      if (S.snow) {                                                                                       // winter: snow drifted into the bottom
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {                                   // of every pane (the ledges get theirs in 9b)
+          const px = gx + c * (pw + bar), py = gy0 + r * (ph + bar) + ph;
+          snowCap(ctx, px, px + pw, py, G.phone ? 3 : 5, 100 + r * 10 + c, { lip: .1, shadow: false });
+        }
+      }
 
       // 3. Shadow of the marquee on the wall
       ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = sh(22); ctx.shadowOffsetY = sh(12);
@@ -768,8 +804,9 @@
         }
         grain(ctx, -10, gy, ref + 20, G.h - gy, .3, .6);
       }
-      ctx.fillStyle = vgrad(ctx, gy, gy + 16, [[0, "rgba(0,0,0,.55)"], [1, "rgba(0,0,0,0)"]]); ctx.fillRect(0, gy, ref, 16);   // shadow at the foot of the wall
-      G.steps.forEach(st => {
+      if (S.snow) paintSnowGround(ctx);                                                                              // winter: the street under snow (D2)
+      else { ctx.fillStyle = vgrad(ctx, gy, gy + 16, [[0, "rgba(0,0,0,.55)"], [1, "rgba(0,0,0,0)"]]); ctx.fillRect(0, gy, ref, 16); }   // shadow at the foot of the wall
+      G.steps.forEach((st, i) => {
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = sh(8); ctx.shadowOffsetY = sh(5);
         ctx.fillStyle = "#9d998f"; ctx.fillRect(st.x, st.y, st.w, st.h); ctx.restore();
         ctx.fillStyle = vgrad(ctx, st.y, st.y + st.h * .4, [[0, "#d9d5cb"], [1, "#b3afa4"]]); ctx.fillRect(st.x, st.y, st.w, st.h * .4);      // worn top, paler in the middle
@@ -778,12 +815,19 @@
         ctx.fillStyle = wg; ctx.fillRect(st.x, st.y, st.w, st.h * .4);
         ctx.fillStyle = "#3c3b39"; ctx.beginPath(); ctx.moveTo(st.x + st.w, st.y); ctx.lineTo(st.x + st.w - 7, st.y); ctx.lineTo(st.x + st.w - 3, st.y + 5); ctx.lineTo(st.x + st.w, st.y + 7); ctx.fill();   // a chipped corner
         grain(ctx, st.x, st.y, st.w, st.h, .4);
+        if (S.snow) snowCap(ctx, st.x - 4, st.x + st.w + 4, st.y + 4, G.phone ? 11 : 17, 40 + i, { lip: .7, sag: .2 });   // the step, buried in a pillow of snow
       });
 
       // 9. Two small white pumpkins on the step
 
+      // 9b. Winter (D2): the bare ivy on the wall, then the roof's snow hanging over the top of it, then real
+      //     clumps of snow stuck to the brick and the joinery
+      if (S.bare) TEX.ivy ? paintPhotoIvy(ctx) : paintBareVines(ctx);     // (drawn vines only if her ivy picture can't load)
+      if (S.snow) { paintLedgeSnow(ctx); paintRoof(ctx); paintStuckSnow(ctx); }
+
       // 10. Light: blue-hour dusk over everything, then warm light spilling out of the shop
-      ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, "rgba(14,20,40,.22)"], [.45, "rgba(14,20,40,.04)"], [1, "rgba(14,20,40,.16)"]]); ctx.fillRect(0, 0, ref, G.h);
+      const dusk = S.snow ? .45 : 1;                     // winter: fresh snow throws the evening light back up, so dusk sits lighter
+      ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, `rgba(14,20,40,${.22 * dusk})`], [.45, `rgba(14,20,40,${.04 * dusk})`], [1, `rgba(14,20,40,${.16 * dusk})`]]); ctx.fillRect(0, 0, ref, G.h);
       ctx.globalCompositeOperation = "screen";
       const glow = (x, y, r, col, a) => { const g = ctx.createRadialGradient(x, y, 1, x, y, r); g.addColorStop(0, `rgba(${col},${a})`); g.addColorStop(1, `rgba(${col},0)`); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); };
       ctx.save(); ctx.beginPath(); ctx.rect(-10, gy, ref + 20, G.h - gy); ctx.clip();          // shop light falls on the pavement, not the black joinery
@@ -795,8 +839,11 @@
       glow(G.marquee.x + G.marquee.w / 2, G.marquee.y + G.marquee.h / 2, G.marquee.w * .75, "255,226,180", .2);
       glow(w.x + w.w / 2, ws.y, w.w * .35, "255,190,120", .14);
       ctx.globalCompositeOperation = "source-over";
-      const vg = ctx.createRadialGradient(ref / 2, G.h * .58, G.h * .3, ref / 2, G.h * .55, G.h * .85); vg.addColorStop(0, "rgba(8,10,18,0)"); vg.addColorStop(1, "rgba(8,10,18,.42)");
+      const vg = ctx.createRadialGradient(ref / 2, G.h * .58, G.h * .3, ref / 2, G.h * .55, G.h * .85); vg.addColorStop(0, "rgba(8,10,18,0)"); vg.addColorStop(1, `rgba(8,10,18,${S.snow ? .3 : .42})`);
       ctx.fillStyle = vg; ctx.fillRect(0, 0, ref, G.h);
+      if (S.snow) {                                       // snow-light: fresh snow throws light back up, and the falling snow hazes the air
+        ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, "rgba(214,222,240,.12)"], [.55, "rgba(214,222,240,.04)"], [1, "rgba(214,222,240,.08)"]]); ctx.fillRect(0, 0, ref, G.h);
+      }
     }
 
     /* ============================================================
@@ -817,8 +864,13 @@
       // two chains from the iron arm down to the plate, ten links each, the last one hooked through a hole drilled in the plate
       const chainX = [168, 472], links = chainX.map(x => [159, 177, 195, 213, 231, 249, 267, 285, 303, 321].map((y, i) => `<ellipse cx="${x}" cy="${y}" rx="${i % 2 ? 5 : 8}" ry="${i % 2 ? 8 : 5}" fill="none" stroke="#242019" stroke-width="3"/>`).join("")).join("");
       const letters = `font-family="Cinzel, 'Trajan Pro', Georgia, serif" font-weight="700" text-anchor="middle" fill="#000"`;
-      return `<img class="nrsf-hs-bracket" src="${img("sign-bracket.webp")}" alt="">` +
-        `<svg class="nrsf-hs-board" viewBox="0 0 640 666" aria-hidden="true"><defs>` +
+      // Winter: snow along the iron arm (its own picture, so it stays still while the sign swings) and along the
+      // top edge of the plate, which is flat, then rises in the arch (300 at its peak), then flat again.
+      const plateTop = x => x < 200 || x > 440 ? 324 : 324 - 108 * ((x - 200) / 240) * (1 - (x - 200) / 240);
+      const armSnow = S.snow ? `<svg class="nrsf-hs-snow" viewBox="0 0 640 666" aria-hidden="true"><defs>${snowColours("nrsf-snow-arm")}</defs>${svgCap(140, 600, 140, 30, 801, "nrsf-snow-arm", .4, .3)}</svg>` : "";
+      const plateSnow = S.snow ? svgCap(34, 606, plateTop, 58, 802, "nrsf-snow-sign", .35, .3) : "";
+      return `<img class="nrsf-hs-bracket" src="${img("sign-bracket.webp")}" alt="">` + armSnow +
+        `<svg class="nrsf-hs-board" viewBox="0 0 640 666" aria-hidden="true"><defs>` + (S.snow ? snowColours("nrsf-snow-sign") : "") +
         // the metal: lit from the top left, darker toward the bottom
         `<linearGradient id="nrsf-hs-steel" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#5f5a55"/><stop offset=".5" stop-color="#433f3b"/><stop offset="1" stop-color="#2a2725"/></linearGradient>` +
         // hammered finish: a bumpy surface lit from one side, multiplied onto the metal, plus a fine speckle
@@ -835,6 +887,7 @@
         `<text x="320" y="560" font-size="96" letter-spacing="6" textLength="${bottom.length > 6 ? 500 : bottom.length * 82}" lengthAdjust="spacingAndGlyphs" ${letters}>${esc(bottom.toUpperCase())}</text></mask></defs>` +
         `<g mask="url(#nrsf-hs-cut)"><path d="${plate}" fill="url(#nrsf-hs-steel)" filter="url(#nrsf-hs-hammer)"/>` +
         `<path d="${plate}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="3"/></g>` +   // a bright rim where the cut edge catches the light
+        plateSnow +
         links +                     // chains drawn last, so the bottom link sits in its hole in front of the plate
         `</svg>`;
     }
@@ -920,17 +973,25 @@
       return IVYSP;
     }
 
-    function growIvy() {
-      const R = rng(2026), ref = G.ref, I = G.ivy, gy = G.ground, k = G.phone ? .55 : 1, band = I.side;
-      const vines = [], leaves = [];
+    /* Where the ivy may grow (the same for the leafy autumn ivy and the bare winter vines):
+       clear(x, y) = true over the window, the letter board and the hanging sign, which stay uncovered;
+       allowed(x, y) = true in the top band, and in a band down each side that narrows toward the street. */
+    function ivyZone() {
+      const ref = G.ref, I = G.ivy, gy = G.ground, band = I.side;
       const clear = (x, y) => I.keepClear.some(c => x > c.x + 4 && x < c.x + c.w - 4 && y > c.y + 4 && y < c.y + c.h - 4);
-      // where ivy may grow: the top band, and a band down each side that narrows toward the street
       const allowed = (x, y) => {
         if (y < I.canopy * 1.5) return true;
         if (G.phone && y > G.cornice.y) return false;                    // phones: no ivy below the cornice, so both doors show
         const w = y < G.shopTop ? band * 1.25 : band * (G.phone ? .5 : 1) * (1 - Math.max(0, (y - G.shopTop) / (gy - G.shopTop)) * .25);   // on phones, leave the door edges showing
         return x < w || x > ref - w;
       };
+      return { clear, allowed };
+    }
+
+    function growIvy() {
+      const R = rng(2026), ref = G.ref, I = G.ivy, gy = G.ground, k = G.phone ? .55 : 1, band = I.side;
+      const vines = [], leaves = [];
+      const { clear, allowed } = ivyZone();
       const addLeaf = (x, y, size, dense = 1) => {
         if (clear(x, y) || y > gy + 4) return;
         leaves.push({ x, y, s: size, rot: Math.PI + (R() - .5) * 2, depth: R() * dense });
@@ -1033,6 +1094,9 @@
     function paintIvy() {
       const c = $("nrsf-ivy"), ctx = sizeCanvas(c, W, H, dpr);
       ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
+      if (S.bare) {                          // winter: the bare vines are already on the building (D2); here, what lies over it
+        paintAwning(ctx); if (S.snow) paintSnowFront(ctx); duskOverIvy(ctx); paintLanterns(ctx); return;
+      }
       const { vines, leaves } = growIvy(), pal = S.leaves.map(hex), SP = leafSprites();
       paintAwning(ctx);                                       // the clear awning sits under the ivy
       // Shadows first: draw every leaf as a silhouette at low resolution, then lay it back blurred
@@ -1068,11 +1132,14 @@
           ctx.drawImage(IV[(hash(i, 5) * IV.length) | 0], -z / 2, -z / 2, z, z); ctx.restore();
         } else drawLeaf(ctx, l.x, l.y, l.s, l.rot, col, shade, i % 3, i);   // Boston ivy on the walls
       });
-      // Dusk settles over the ivy too
+      duskOverIvy(ctx);
+      paintLanterns(ctx);
+    }
+    // Dusk settles over the ivy too (only over what is already painted on the ivy layer: source-atop)
+    function duskOverIvy(ctx) {
       ctx.globalCompositeOperation = "source-atop";
       ctx.fillStyle = vgrad(ctx, 0, G.h, [[0, "rgba(10,14,30,.22)"], [.5, "rgba(10,14,30,.06)"], [1, "rgba(10,14,30,.16)"]]); ctx.fillRect(0, 0, G.ref, G.h);
       ctx.globalCompositeOperation = "source-over";
-      paintLanterns(ctx);
     }
 
     /* The clear corrugated awning over the shopfront (after the café photo): glass panels on thin
@@ -1089,6 +1156,13 @@
       const R = rng(12);
       for (let i = 0; i < (G.phone ? 40 : 120); i++) { ctx.fillStyle = `rgba(235,240,245,${.05 + R() * .12})`; const x = x0 + R() * (x1 - x0), y = wall + R() * (front - wall); ctx.beginPath(); ctx.ellipse(x, y, 1 + R() * 3, .6 + R(), 0, 0, 7); ctx.fill(); }
       ctx.fillStyle = hgrad(ctx, x0, x1, [[0, "rgba(255,255,255,0)"], [.3, "rgba(255,255,255,.10)"], [.36, "rgba(255,255,255,0)"], [.7, "rgba(255,255,255,0)"], [.74, "rgba(255,255,255,.07)"], [1, "rgba(255,255,255,0)"]]); ctx.fillRect(x0 - 40, wall, x1 - x0 + 80, front - wall);
+      if (S.snow) {                                                       // snow lying on top of the glass, seen through it from below:
+        for (let i = 0; i < (G.phone ? 50 : 140); i++) {                  // soft white drifts, thicker toward the gutter where it slides to
+          const x = x0 + R() * (x1 - x0), y = wall + Math.pow(R(), .6) * (front - wall), r = (8 + R() * 30) * (G.phone ? .6 : 1);
+          const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(226,232,244,${.18 + R() * .25})`); g.addColorStop(1, "rgba(226,232,244,0)");
+          ctx.fillStyle = g; ctx.save(); ctx.translate(x, y); ctx.scale(1, .3); ctx.translate(-x, -y); ctx.fillRect(x - r, y - r, r * 2, r * 2); ctx.restore();
+        }
+      }
       ctx.restore();
       // the rafters, the corrugations, and the gutter along the front
       for (let i = 0; i <= n; i++) {
@@ -1100,6 +1174,7 @@
       for (let x = x0; x < x1; x += G.phone ? 4 : 6) { ctx.beginPath(); ctx.moveTo(x, wall); ctx.lineTo(fx(x), front); ctx.stroke(); }
       ctx.fillStyle = vgrad(ctx, front - 2, front + (G.phone ? 3 : 5), [[0, "#3a3a3c"], [.3, "#141415"], [1, "#050505"]]); ctx.fillRect(fx(x0), front - 2, fx(x1) - fx(x0), G.phone ? 5 : 7);
       ctx.fillStyle = "#0b0b0c"; ctx.fillRect(x0, wall - 2, x1 - x0, 3);
+      if (S.snow) snowCap(ctx, fx(x0) - 4, fx(x1) + 4, front - 1, G.phone ? 8 : 13, 433, { lip: .8, sag: .45, shadow: false });   // and a heavy lip of it curling over the gutter
     }
 
     /* Warm globe lanterns hanging from the front of the awning */
@@ -1110,6 +1185,7 @@
         const top = A.front + 3, cy = top + r * 1.15 + (G.phone ? 4 : 8);
         ctx.strokeStyle = "#0b0b0c"; ctx.lineWidth = G.phone ? 1.4 : 2; ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, cy - r); ctx.stroke();
         ctx.fillStyle = "#151515"; ctx.fillRect(x - r * .35, cy - r - r * .3, r * .7, r * .35);       // the brass-black fitter
+        if (S.snow) snowCap(ctx, x - r * .5, x + r * .5, cy - r - r * .3, r * .4, 700 + x, { lip: .3, shadow: false });   // a little cap of snow on it
         ctx.save(); ctx.globalCompositeOperation = "lighter";
         const halo = ctx.createRadialGradient(x, cy, r * .5, x, cy, r * 6);
         halo.addColorStop(0, "rgba(255,190,110,.35)"); halo.addColorStop(.35, "rgba(255,160,80,.12)"); halo.addColorStop(1, "rgba(255,140,60,0)");
@@ -1118,6 +1194,435 @@
         g.addColorStop(0, "#fffbea"); g.addColorStop(.5, "#ffe3a6"); g.addColorStop(.85, "#f5b862"); g.addColorStop(1, "#c98236");
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, cy, r, 0, 7); ctx.fill();
         ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.beginPath(); ctx.ellipse(x - r * .35, cy - r * .4, r * .22, r * .14, -.5, 0, 7); ctx.fill();
+      });
+    }
+
+    /* ============================================================
+       D2. WINTER: BARE IVY AND SNOW
+       Switched on by the season in data.js: bare: true paints the ivy without its leaves, snow: true lays snow
+       on the ledges, the awning, the steps and the street. The bare vines and the snow that belongs to the
+       building (the ledges, the steps, the street) are painted with the building in paintBuilding. (The bare
+       vines never cross a door, a window or a sign, so nothing needs to lie over them, and keeping them in the
+       building's own picture keeps the pictures light: a web of fine lines costs far more in a see-through one.)
+       The awning's snow, the caps on the lanterns and the letter board, and the snow round the A-frame's and the
+       trunks' feet are painted on the ivy layer, which lies over everything else. All of it is baked.
+       ============================================================ */
+
+    // A smooth line through a list of points: each corner is rounded off by a curve through the midpoints.
+    // move = false carries on from where the pen already is (used to close a shape).
+    function smooth(ctx, pts, move = true) {
+      ctx[move ? "moveTo" : "lineTo"](pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length - 1; i++) ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+      const L = pts[pts.length - 1]; ctx.lineTo(L[0], L[1]);
+    }
+
+    // The outline of a pillow of snow: its top edge and its bottom edge, as two lists of points from left to right.
+    // y can be a number (a flat ledge) or a function of x (a curved one, like the top of the hanging sign); on a
+    // slope the snow lies thinner. lip = how far its front curls down over the edge (a share of t); sag = how far
+    // it droops lower here and there. Fresh powder isn't smooth: its top and its curl are made of soft rounded
+    // lumps, like a cauliflower (two sets of little bumps, |sin| to a small power = round tops meeting in soft
+    // dips). n = how many points along it.
+    function capPoints(x0, x1, y, t, seed, lip, n, sag = 0) {
+      const R = rng(seed), len = x1 - x0, at = typeof y === "function" ? y : () => y;
+      const ph = [R() * 6.3, R() * 6.3, R() * 6.3, R() * 6.3, R() * 6.3, R() * 6.3], fq = [1 + R(), 3 + R() * 2, 7 + R() * 5], drapes = Math.max(1, len / (t * 3.2));
+      const b1 = Math.max(6, t * (.5 + R() * .15)), b2 = Math.max(4, t * (.28 + R() * .06));                // the widths of the two sets of lumps
+      const lumpy = (x, p) => .65 * Math.pow(Math.abs(Math.sin(x / b1 * 3.14 + ph[4 + p])), .8) + .35 * Math.pow(Math.abs(Math.sin(x / b2 * 3.14 + ph[5 - p])), .8);
+      const lobes = x => .6 * Math.pow(Math.abs(Math.sin(x / (b1 * 1.3) * 3.14 + ph[5])), .7) + .4 * Math.pow(Math.abs(Math.sin(x / (b1 * .75) * 3.14 + ph[2])), .7);   // the curl underneath: soft, round, uneven lobes
+      const top = [], bot = [];
+      for (let i = 0; i <= n; i++) {
+        const s = i / n, x = x0 + len * s, yy = at(x), slope = Math.abs(at(x + 1) - yy);
+        const end = Math.sqrt(Math.min(1, Math.min(s, 1 - s) * len / (t * 2.4)));                      // 0 at each end, 1 in the middle: rounded ends
+        const lump = .76 + .09 * Math.sin(s * fq[0] * 6.28 + ph[0]) + .06 * Math.sin(s * fq[1] * 6.28 + ph[1]) + .09 * lumpy(x - x0, 0);
+        const th = t * end * (1 - Math.min(.7, slope * 1.2));
+        const droop = sag * Math.pow(Math.max(0, Math.sin(s * drapes * 3.14 + ph[3])), 4);               // now and then the front sags lower
+        top.push([x, yy - th * lump]);
+        bot.push([x, yy + th * (lip * (.8 + .2 * lobes(x - x0)) + droop)]);
+      }
+      return { top, bot, R };
+    }
+    // The same pillow as an SVG shape (for the signs, which are SVG pictures rather than painted).
+    // id = the name of that picture's snow colours (snowColours below), one per picture.
+    function svgCap(x0, x1, y, t, seed, id, lip = .3, sag = 0) {
+      const { top, bot } = capPoints(x0, x1, y, t, seed, lip, Math.max(12, Math.round((x1 - x0) / (t * .12))), sag);
+      const line = pts => pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`).join("");
+      return `<path d="${line([...top, ...bot.reverse()])}Z" fill="url(#${id})"/><path d="${line(top)}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="${(t * .1).toFixed(2)}" stroke-linejoin="round"/>`;
+    }
+    // The snow's colours in an SVG picture: the same bands as a painted pillow (SNOW_BANDS below)
+    function snowColours(id) {
+      return `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfdfe"/><stop offset=".22" stop-color="#f6f7fa"/><stop offset=".52" stop-color="#e8eaf0"/><stop offset=".8" stop-color="#d2d5e0"/><stop offset=".93" stop-color="#c2c6d4"/><stop offset="1" stop-color="#cbcfdb"/></linearGradient>`;
+    }
+
+    /* How fresh powder is lit, top to bottom (each pair = how far down, then the colour). Powder is matte: it
+       scatters light every way, so it stays white almost all the way round, going only a soft grey-lavender in
+       the curl underneath, with a little light bouncing back up into the very bottom edge. (Ice and old crusted
+       snow are the ones with glassy crests and deep blue shadows.) */
+    const SNOW_BANDS = [[0, [253, 253, 254]], [.22, [246, 247, 250]], [.52, [233, 235, 241]], [.8, [212, 215, 225]], [.93, [196, 200, 212]], [1, [205, 208, 219]]];
+    // The grain of real snow (her trail photo), as a repeating pattern: laid very lightly over every pillow and the street
+    const grainPattern = (ctx, units) => {
+      if (!TEX.snowGrain) return null;
+      const p = ctx.createPattern(TEX.snowGrain, "repeat");
+      p.setTransform(new DOMMatrix().scale(units / TEX.snowGrain.width));   // units = how wide one repeat is, in building units
+      return p;
+    };
+
+    /* A pillow of fresh powder on a ledge, like the banks in Kathi's canyon-road photo: from x0 to x1, resting on
+       the line y, t thick in the middle. Its top and front are soft rounded lumps; its front curls down over the
+       edge (lip) and sags lower here and there (sag). How it's painted:
+         1. its shadow on whatever is under it: soft, grey-lavender (shadow = false to leave it out);
+         2. the body, one thin slice at a time, each lit top to bottom with SNOW_BANDS;
+         3. the lumps: soft round highlights with a faint shadow under each, like clumps of powder;
+         4. the faintest grain of real snow and a very few glints (powder barely sparkles at dusk);
+         5. a soft, blurred edge all round it, because powder has no hard outline.
+       icicles = the longest icicle hanging from its front edge (0 = none, the usual: fresh powder has none);
+       skip(x) = true where none may hang. */
+    function snowCap(ctx, x0, x1, y, t, seed, o = {}) {
+      const { lip = .4, sag = 0, shadow = true, icicles = 0, skip = () => false, bands = SNOW_BANDS } = o;
+      const len = x1 - x0, step = Math.max(.6, Math.min(t * .08, G.phone ? 1.6 : 2));
+      const { top, bot, R } = capPoints(x0, x1, y, t, seed, lip, Math.max(6, Math.round(len / step)), sag);
+      const n = top.length - 1, soft = px => `blur(${(px * u * dpr).toFixed(2)}px)`;
+      if (shadow) {                                                           // 1. its shadow, soft
+        const sh = t * .8 + 2;
+        ctx.save(); ctx.filter = soft(Math.max(.6, t * .12));
+        ctx.beginPath(); smooth(ctx, bot); smooth(ctx, bot.map(([x, yy]) => [x + t * .12, yy + sh]).reverse(), false); ctx.closePath();
+        ctx.fillStyle = vgrad(ctx, y, y + t * (lip + sag) + sh, [[0, "rgba(60,64,92,.26)"], [1, "rgba(60,64,92,0)"]]); ctx.fill();
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.beginPath(); smooth(ctx, top); smooth(ctx, [...bot].reverse(), false); ctx.closePath(); ctx.clip();
+      for (let i = 0; i < n; i++) {                                           // 2. slice by slice
+        const xa = top[i][0], xb = top[i + 1][0], yt = Math.min(top[i][1], top[i + 1][1]) - .5, yb = Math.max(bot[i][1], bot[i + 1][1]) + .5;
+        const g = ctx.createLinearGradient(0, yt, 0, yb);
+        bands.forEach(([at, c]) => g.addColorStop(at, rgb(c)));
+        ctx.fillStyle = g; ctx.fillRect(xa, yt, xb - xa + .6, yb - yt);
+      }
+      for (let i = 0; i < len / Math.max(2, t * .3); i++) {                   // 3. the lumps
+        const k = (R() * n) | 0, [lx, ty] = top[k], by = bot[k][1], ly = ty + (by - ty) * (.15 + R() * .55), r = t * (.12 + R() * .2);
+        const sg = ctx.createRadialGradient(lx + r * .25, ly + r * .45, 0, lx + r * .25, ly + r * .45, r * 1.15);
+        sg.addColorStop(0, "rgba(150,156,182,.12)"); sg.addColorStop(1, "rgba(150,156,182,0)"); ctx.fillStyle = sg; ctx.fillRect(lx - r, ly - r, r * 2.6, r * 2.6);
+        const hg = ctx.createRadialGradient(lx - r * .2, ly - r * .25, 0, lx - r * .2, ly - r * .25, r);
+        hg.addColorStop(0, "rgba(255,255,255,.3)"); hg.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = hg; ctx.fillRect(lx - r * 1.3, ly - r * 1.3, r * 2.3, r * 2.3);
+      }
+      const gp = grainPattern(ctx, G.phone ? 90 : 160);                      // 4. grain and glints
+      if (gp) { ctx.globalCompositeOperation = "soft-light"; ctx.globalAlpha = .22; ctx.fillStyle = gp; ctx.fillRect(x0, y - t * 1.3, len, t * (1.3 + lip + sag) + 2); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; }
+      ctx.fillStyle = hgrad(ctx, x0, x1, [[0, "rgba(255,255,255,.1)"], [.5, "rgba(255,255,255,0)"], [1, "rgba(60,64,92,.05)"]]); ctx.fillRect(x0, y - t * 1.3, len, t * (1.3 + lip + sag) + 2);
+      for (let i = 0; i < len * t / 300; i++) { ctx.fillStyle = `rgba(255,255,255,${.3 + R() * .35})`; const s = .3 + R() * .35; ctx.fillRect(x0 + R() * len, y - t + R() * t * .7, s, s); }
+      ctx.restore();
+      ctx.save(); ctx.filter = soft(Math.max(.35, t * .035)); ctx.lineJoin = "round";   // 5. the soft powdery edge
+      ctx.lineWidth = Math.max(.6, t * .07); ctx.strokeStyle = "rgba(250,251,253,.75)"; ctx.beginPath(); smooth(ctx, top); ctx.stroke();
+      ctx.lineWidth = Math.max(.5, t * .05); ctx.strokeStyle = "rgba(222,224,232,.35)"; ctx.beginPath(); smooth(ctx, bot); ctx.stroke();
+      ctx.restore();
+      if (icicles) {                                                          // icicles: many short, a few long
+        for (let i = 2; i < n - 1; i++) {
+          if (R() > .3) continue;
+          const [x, yb] = bot[i];
+          if (skip(x)) continue;
+          const L = Math.max(2, icicles * Math.pow(R(), 2.4)), w = Math.min(G.phone ? 2.4 : 3.6, .9 + L * .12), dx = (R() - .5) * L * .08;
+          ctx.fillStyle = "rgba(18,24,48,.16)"; ctx.beginPath(); ctx.moveTo(x - w / 2 + 1.5, yb + 1); ctx.quadraticCurveTo(x + 1.5, yb + L * .6, x + dx + 1.8, yb + L + 2); ctx.quadraticCurveTo(x + 1.5, yb + L * .6, x + w / 2 + 1.5, yb + 1); ctx.fill();   // its shadow
+          const g = ctx.createLinearGradient(x - w / 2, 0, x + w / 2, 0);
+          g.addColorStop(0, "rgba(150,170,205,.65)"); g.addColorStop(.3, "rgba(255,255,255,.95)"); g.addColorStop(.55, "rgba(214,226,244,.75)"); g.addColorStop(1, "rgba(120,140,180,.7)");
+          ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x - w / 2, yb - 1); ctx.quadraticCurveTo(x - w * .2, yb + L * .6, x + dx, yb + L); ctx.quadraticCurveTo(x + w * .2, yb + L * .6, x + w / 2, yb - 1); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.9)"; ctx.beginPath(); ctx.arc(x + dx, yb + L - .4, Math.max(.3, w * .14), 0, 7); ctx.fill();   // the drop at its tip
+        }
+      }
+    }
+
+    /* Winter: the top of the wall becomes the edge of the roof. A pale stone coping runs along it, and on it sits
+       the deepest snow on the street: seen from below, a heavy white overhang curling over the coping, sagging
+       here and there. */
+    function paintRoof(ctx) {
+      const r = G.roof, ref = G.ref, P = G.phone;
+      ledgeShadow(ctx, -10, r.y + r.h, ref + 20, P ? 10 : 18, .55);                                   // the coping's shadow on the wall
+      ctx.fillStyle = vgrad(ctx, r.y, r.y + r.h, [[0, "#e6e3da"], [.35, "#d2cfc6"], [1, "#8e8a81"]]); ctx.fillRect(-10, r.y, ref + 20, r.h);
+      bevel(ctx, -10, r.y, ref + 20, r.h, 1, "rgba(255,255,255,.4)", "rgba(0,0,0,.35)");
+      grain(ctx, -10, r.y, ref + 20, r.h, .3);
+      ctx.fillStyle = "#c8c4ba"; ctx.fillRect(-10, 0, ref + 20, r.y);                                  // (the snow covers everything above it)
+      const lit = [[0, [255, 255, 255]], [.5, [253, 253, 254]], [.8, [245, 246, 249]], [.94, [228, 230, 237]], [1, [234, 235, 241]]];   // lit by the street: white nearly all the way down
+      snowCap(ctx, -40, ref + 40, r.y + 2, P ? 26 : 42, 7, { lip: .5, sag: .35, bands: lit });
+    }
+
+    /* Snow piled on the ledges (painted after the vines, so it lies over them): the row of bricks over the upstairs
+       window, its sill, a heavy pillow along the cornice, and a dusting blown in on the shop's sill */
+    function paintLedgeSnow(ctx) {
+      const P = G.phone, li = G.lintel, ws = G.wsill, co = G.cornice, s = G.front.sill;
+      snowCap(ctx, li.x - 2, li.x + li.w + 2, li.y + 1, P ? 6 : 10, 12, { lip: .35, sag: .2 });
+      snowCap(ctx, ws.x - 4, ws.x + ws.w + 4, ws.y + 1, P ? 11 : 19, 11, { lip: .5, sag: .35 });
+      snowCap(ctx, co.x - 6, co.x + co.w + 6, co.y + 1, P ? 15 : 26, 21, { lip: .5, sag: .3 });
+      snowCap(ctx, s.x + 2, s.x + s.w - 2, s.y + 1, P ? 2.6 : 4, 31, { lip: .25 });
+    }
+
+    /* Real clumps of snow stuck to the building, the way it sticks to wool: cut from Kathi's snowy sweater, and
+       pressed onto the red brick, the black joinery and the door surrounds, more of them on the upper parts of
+       each (where blown snow catches). Each stamp is a random patch of the clumps, small and slightly see-through. */
+    function paintStuckSnow(ctx) {
+      const T = TEX.stuck; if (!T) return;
+      const R = rng(4242), P = G.phone, sc = P ? .2 : .3;
+      const stamp = (x0, y0, w, h, n) => {
+        for (let i = 0; i < n; i++) {
+          const sw = 30 + R() * 60, sh = 20 + R() * 40, sx = R() * (T.width - sw), sy = R() * (T.height - sh);
+          const x = x0 + R() * w, y = y0 + Math.pow(R(), 1.6) * h;
+          ctx.globalAlpha = .5 + R() * .45; ctx.drawImage(T, sx, sy, sw, sh, x - sw * sc / 2, y - sh * sc / 2, sw * sc, sh * sc);
+        }
+        ctx.globalAlpha = 1;
+      };
+      G.piers.forEach(p => stamp(p.x, G.shopTop + 18, p.w, G.ground - G.shopTop - 40, Math.round((G.ground - G.shopTop) / (P ? 28 : 24))));
+      if (!P) { stamp(0, G.shopTop + 10, 22, G.ground - G.shopTop - 30, 12); stamp(G.ref - 22, G.shopTop + 10, 22, G.ground - G.shopTop - 30, 12); }
+      G.doors.forEach(d => { stamp(d.opening.x, d.opening.y, d.opening.w, 14, P ? 3 : 6); stamp(d.opening.x, d.opening.y, 8, d.opening.h * .6, P ? 3 : 5); });
+      const f = G.front;
+      f.posts.forEach(px => stamp(px, f.y + f.rail, f.postW, (f.sill.y - f.y) * .7, P ? 3 : 6));
+      stamp(f.x, f.y, f.w, f.rail, P ? 6 : 14);
+      stamp(G.fascia.x, G.fascia.y, G.fascia.w, 10, P ? 8 : 18);
+    }
+
+    /* The street under deep fresh powder, like the banks on Kathi's canyon road: nothing but soft mounds. Painted
+       with the building (step 8), so the shop's warm light is laid over it afterwards with the rest of the light.
+         1. a soft white base, a touch bluer back by the wall;
+         2. rounded mounds scattered over the street, small and low by the wall, big and tall toward you, the
+            nearer ones overlapping the ones behind, so you see the white tops of the near mounds against the
+            blue-shadowed feet of the ones behind: that's what makes it look deep and three-dimensional. Each mound
+            is a pillow of powder (snowCap), lit top to bottom with BANK_BANDS: white on top, soft blue at its foot;
+         3. the shop's warm light on the snow in front of each window and door;
+         4. the drift banked against the foot of the wall (low in each doorway). */
+    function paintSnowGround(ctx) {
+      const R = rng(1218), ref = G.ref, gy = G.ground, depth = G.h - gy, P = G.phone;
+      const blob = (x, y, rx, ry, col) => {
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1); g.addColorStop(0, col); g.addColorStop(1, col.replace(/[\d.]+\)$/, "0)"));
+        ctx.save(); ctx.translate(x, y); ctx.scale(rx, ry); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1, 0, 7); ctx.fill(); ctx.restore();
+      };
+      const BANK_BANDS = [[0, [253, 253, 255]], [.28, [248, 249, 252]], [.55, [226, 231, 244]], [.8, [194, 205, 232]], [1, [170, 184, 222]]];
+      // 1. the base
+      ctx.save(); ctx.beginPath(); ctx.rect(-10, gy - 30, ref + 20, depth + 32); ctx.clip();
+      ctx.fillStyle = vgrad(ctx, gy, G.h, [[0, "#d4d9e7"], [1, "#eef0f5"]]); ctx.fillRect(-10, gy - 2, ref + 20, depth + 4);
+      // 2. the mounds: scattered at random over the street (not in rows), then drawn from the back to the front, so
+      //    nearer ones overlap the ones behind. The further back a mound sits, the smaller and lower it is.
+      const mounds = [], N = P ? 340 : 300;                                  // (the phone's street is twice as deep)
+      for (let i = 0; i < N; i++) {
+        const t = R(), hgt = (P ? 11 : 11) + t * t * (P ? 30 : 38);
+        mounds.push([R() * (ref + 80) - 40, gy + 6 + t * (depth + 10), hgt, hgt * (P ? 3.4 + R() * 2.6 : 2.8 + R() * 2.2), 1500 + i]);
+      }
+      mounds.sort((m1, m2) => m1[1] - m2[1]).forEach(([x, base, hgt, w, seed]) =>
+        snowCap(ctx, x - w / 2, x + w / 2, base, hgt * (.8 + R() * .4), seed, { lip: 0, shadow: false, bands: BANK_BANDS }));
+      // 3. the shop's warm light on the snow
+      ctx.globalCompositeOperation = "multiply";
+      G.front.glass.forEach(gl => blob(gl.x + gl.w / 2, gy + depth * .3, gl.w * .85, depth * .75, "rgba(255,212,164,.42)"));
+      G.doors.forEach(d => blob(d.leaf.x + d.leaf.w / 2, gy + depth * .2, d.leaf.w * 1.1, depth * .55, d.side === "l" ? "rgba(255,180,170,.28)" : "rgba(255,216,170,.32)"));
+      ctx.globalCompositeOperation = "source-over";
+      ctx.restore();
+      // 4. the drift against the wall: a long pillow along its foot, low in each doorway
+      const ends = [-12];
+      G.doors.forEach(d => ends.push(d.opening.x + 4, d.opening.x + d.opening.w - 4));
+      ends.push(ref + 12);
+      for (let i = 0; i < ends.length; i += 2) snowCap(ctx, ends[i], ends[i + 1], gy + 4, P ? 16 : 24, 1300 + i, { lip: .05, shadow: false, bands: BANK_BANDS });
+      G.doors.forEach((d, i) => snowCap(ctx, d.opening.x - 2, d.opening.x + d.opening.w + 2, gy + 2, P ? 5 : 7, 1350 + i, { lip: .05, shadow: false }));   // swept, but snowing again
+    }
+
+    /* The Boston ivy in winter, after Kathi's bare-ivy photo: every leaf has fallen and only the vines are left,
+       a dark lace of stems sweeping out over the wall from two old trunks, forking again and again into fine
+       twigs, knotted where each leaf's stalk once grew. With no leaves to hide the wall it reaches a little
+       further than the autumn ivy did (out to about two and a half times its side bands, and twice as far down
+       from the roofline), but it never crosses the window, the letter board or the hanging sign.
+       Each stem is { pts, w0, w1, depth }: its points from base to tip, how thick it is at the base (w0) and at
+       the tip (w1), and how many times it has forked (depth: -1 = an old trunk, 0 = a main stem, 1+ = twigs). */
+    function growBareIvy() {
+      const R = rng(1203), ref = G.ref, I = G.ivy, gy = G.ground, P = G.phone, k = P ? .55 : 1, band = I.side, wk = P ? .65 : 1;
+      // where the bare vines may grow
+      const clear = (x, y) => I.keepClear.some(c => x > c.x - 3 && x < c.x + c.w + 3 && y > c.y - 3 && y < c.y + c.h + 3);
+      const zone = (x, y, reach = 1) => {
+        if (clear(x, y) || y > gy - 4 || x < -12 || x > ref + 12) return false;
+        if (y < I.canopy * 2 * reach) return true;
+        if (P && y > G.cornice.y) return false;                          // phones: none below the cornice, so both doors show
+        const w = y < G.cornice.y ? band * 2.5 * reach : y < G.shopTop ? band * 1.25 : band * (P ? .5 : 1) * (1 - Math.max(0, (y - G.shopTop) / (gy - G.shopTop)) * .25);
+        return x < w || x > ref - w;                                     // (over the fascia and down to the street: the autumn ivy's own bands)
+      };
+      const stems = [], todo = [];
+      const FORK = [.12, .15, .15, .12];        // how often a stem forks, by depth (per step of growth)
+      const WANDER = [.3, .38, .5, .6, .6];     // how much it wanders: the old stems run steady, the twigs curl
+      // One stem: it wanders as it grows, bending slowly one way (curl), leaning toward "lean" (an angle: -PI/2 = up,
+      // PI/2 = down, 0 = right), and forks along the way, each fork leaving at its own angle, a little thinner.
+      // reach (0.7-1.3) = how far out this stem may go: each stops at its own distance, so the edge is ragged.
+      const grow = ([x, y, dir, len, w, depth, lean, reach]) => {
+        const pts = [[x, y]], step = (depth > 1 ? 3 : 4) * k, curl = (R() - .5) * .07;
+        for (let t = 0; t < len; t += step) {
+          dir += (R() - .5) * WANDER[depth] + curl;
+          dir = Math.atan2(Math.sin(dir) + Math.sin(lean) * .1, Math.cos(dir) + Math.cos(lean) * .1);
+          x += Math.cos(dir) * step; y += Math.sin(dir) * step;
+          if (!zone(x, y, reach)) break;
+          pts.push([x, y]);
+          if (depth < 4 && pts.length > 2 && R() < FORK[depth]) {
+            const side = R() < .5 ? -1 : 1, d2 = dir + side * (.4 + R() * .8);
+            todo.push([x, y, d2, Math.max(7 * k, (len - t) * (.5 + R() * .35)), w * (.6 + R() * .1), depth + 1, d2 + (R() - .5) * .8, reach * (.9 + R() * .25)]);
+          }
+        }
+        if (pts.length > 2) stems.push({ pts, w0: w, w1: Math.max(.3 * wk, w * .35), depth });
+      };
+      // 1. the two old trunks (the autumn ivy's own), rising from the pavement and hugging the outer corners,
+      //    each sending main stems sweeping up and in across the wall
+      [[0, 1], [ref, -1]].forEach(([edge, side]) => {
+        const trunk = [], x0 = edge + side * band * .22;
+        for (let y = P ? G.cornice.y : gy - 8; y > -10; y -= 5 * k) trunk.push([x0 + side * (Math.sin(y * .021) * band * .16 + Math.sin(y * .057 + edge) * band * .07), y]);   // (from inside the drift of snow at its foot)
+        stems.push({ pts: trunk, w0: 4.2 * wk, w1: 2.4 * wk, depth: -1 });
+        for (let i = 3; i < trunk.length; i += 3) {
+          const [bx, by] = trunk[i], a = -1.3 + R() * 1.7, up = by < G.shopTop, lean = -1.7 + R() * 2;   // lean: from straight up to a little downhill
+          todo.push([bx, by, side > 0 ? a : Math.PI - a, band * (up ? 1.6 + R() * 2 : .7 + R() * .6), (up ? 2.3 : 1.8) * wk, 0, side > 0 ? lean : Math.PI - lean, .7 + R() * .6]);
+        }
+      });
+      // 2. the runner along the roofline, and stems sweeping down and out from it (a few long ones trailing
+      //    down the wall where nothing is in the way)
+      const top = [];
+      const ry = (G.roof ? G.roof.y + G.roof.h : 0) + 6;                  // just under the coping (the roof's snow hangs over it)
+      for (let x = -20; x < ref + 20; x += 6 * k) top.push([x, ry + Math.sin(x * .03) * 6]);
+      stems.push({ pts: top, w0: 2.6 * wk, w1: 2.2 * wk, depth: 0 });
+      for (let x = 10 * k; x < ref; x += 34 * k) {
+        const out = x < ref / 2 ? -1 : 1, blocked = clear(x, I.canopy * 1.4);
+        let len = I.canopy * (1 + R() * 1.2) * (blocked ? .6 : 1);
+        if (!blocked && R() < .25) len += I.droop * (.5 + R() * .5);
+        todo.push([x, ry + Math.sin(x * .03) * 6, Math.PI / 2 - out * (.3 + R() * .7), len, 1.7 * wk, 0, Math.PI / 2 - out * (R() * .9), .7 + R() * .6]);
+      }
+      // 3. runners creeping along the top of the cornice from each end
+      [[0, 0], [ref, Math.PI]].forEach(([x0, dir]) => todo.push([x0, G.cornice.y - 4, dir, P ? 60 : 160, 1.3 * wk, 1, dir, 1]));
+      while (todo.length) grow(todo.shift());
+      return stems;
+    }
+
+    /* The ivy in winter, cut straight from Kathi's winery photo (assets/img/winter/ivy.webp), so it looks just like
+       it: thin dark stems clinging flat to the wall, the little clusters where the leaf stalks were, a few last red
+       leaves. (Only her filter's blue cast is taken out, so the stems are the dark plum-grey of real bare ivy.)
+       The picture isn't pasted on: it holds how much the vines darkened her wall (white = bare wall), and it is
+       MULTIPLIED onto the brick, so the brick's own texture shows through every stem, as if the ivy grows on it.
+         - It is laid at its own sharpness: half a building unit per pixel of her photo.
+         - It goes on as overlapping patches (about 100 x 130 units, one every 56 x 76), each a random piece of the
+           photo, some turned the other way round, on a loose grid with each row shifted like brickwork. Their edges fade out and they overlap, so there are no seams or
+           repeating columns; where two overlap, the darker wins ("darken"), so stems simply cross.
+         - The one patch with the red leaves goes on once, upper left of the window.
+         - Then the window, the letter board and the hanging sign are cleared, and below the cornice it keeps to the
+           autumn ivy's bands (none on phones, so both doors show).
+         - Last, a little snow along the near-level stems (ivy-snow.webp, the same patches).
+       IVY = where each strip sits in the picture: [x, y, width, height] in pixels. A, B = the tall strips left and
+       right of her window; C, N = from under her balcony; D = N with the red leaves; T = from above her window. */
+    const IVY = { A: [0, 0, 215, 960], B: [220, 0, 262, 960], C: [487, 0, 115, 410], D: [607, 0, 142, 410], N: [754, 0, 142, 410], T: [0, 965, 550, 130] };
+    function paintPhotoIvy(ctx) {
+      const P = G.phone, ref = G.ref, gy = G.ground, band = G.ivy.side, s = .5, R = rng(55), F = 28;
+      const top = (G.roof ? G.roof.y + G.roof.h : 0) - 6;
+      const canvas = (w, h) => { const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h); return c; };
+      const feather = (w, h) => {                                          // see-through at the edges, solid in the middle
+        const m = canvas(w, h), x = m.getContext("2d");
+        const hg = x.createLinearGradient(0, 0, w, 0); hg.addColorStop(0, "rgba(0,0,0,0)"); hg.addColorStop(F / w, "#000"); hg.addColorStop(1 - F / w, "#000"); hg.addColorStop(1, "rgba(0,0,0,0)");
+        x.fillStyle = hg; x.fillRect(0, 0, w, h); x.globalCompositeOperation = "destination-in";
+        const vg = x.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(F / h, "#000"); vg.addColorStop(1 - F / h, "#000"); vg.addColorStop(1, "rgba(0,0,0,0)");
+        x.fillStyle = vg; x.fillRect(0, 0, w, h); return m;
+      };
+      const patch = (pic, k, sx, sy, w, h, onWhite) => {                   // one piece of the photo, its edges faded
+        const [ax, ay] = IVY[k], c = canvas(w, h), x = c.getContext("2d");
+        x.drawImage(pic, ax + sx, ay + sy, w, h, 0, 0, w, h);
+        x.globalCompositeOperation = "destination-in"; x.drawImage(feather(w, h), 0, 0);
+        if (!onWhite) return c;
+        const b = canvas(w, h), y = b.getContext("2d"); y.fillStyle = "#fff"; y.fillRect(0, 0, w, h); y.drawImage(c, 0, 0); return b;
+      };
+      // where the patches go: a loose grid over the upper wall, and down the two corners on bigger screens
+      const spots = [];                                                    // [strip, x in photo, y in photo, width, height, x, y, flipped]
+      const pick = () => { const r = R(); return r < .36 ? "A" : r < .72 ? "B" : r < .84 ? "C" : "N"; };
+      const add = (x, y) => {
+        const k = pick(), [, , sw, sh] = IVY[k], w = Math.min(sw, 200), h = Math.min(sh, 260);
+        const reach = k === "A" || k === "B" ? .7 : 1;                    // (the bottom of the tall strips is the dense base of the ivy: left out)
+        spots.push([k, R() * (sw - w), R() * (sh - h) * reach, w, h, x, y, R() < .5]);
+      };
+      const gx = 56, gyStep = 76;                                         // each row shifted like brickwork, so no gaps line up into stripes
+      for (let y = top - 20, row = 0; y < G.cornice.y; y += gyStep, row++) {
+        const shift = (row % 2 ? .5 : 0) * gx + (R() - .5) * gx * .4;
+        for (let x = -50 + shift; x < ref + 10; x += gx) add(x + (R() - .5) * gx * .3, y + (R() - .5) * gyStep * .35);
+      }
+      if (!P) for (let y = G.cornice.y - 40; y < gy; y += gyStep) { add(-40 + R() * 20, y); add(ref - 80 - R() * 20, y); }
+      spots.push(["D", 0, 0, 142, 220, P ? -8 : 296, top + (P ? 26 : 36), false]);   // the last red leaves
+      // where the ivy doesn't grow: the window, the letter board, the hanging sign, and (below the cornice) the middle
+      const clearOut = c => {
+        c.fillStyle = "#fff";
+        const w = G.upperWin, M = G.marquee, sg = G.sign, sgh = sg.w * 666 / 640;
+        c.fillRect(w.x - 6, w.y - 8, w.w + 12, w.h + 12);
+        c.fillRect(M.x + 2, M.y + 2, M.w - 4, M.h - 4);
+        c.fillRect(sg.x + sg.w * .02, sg.y + sgh * .14, sg.w * .96, sgh * .8);
+        const wd = y => P ? -20 : y < G.shopTop ? band * 1.25 : band * (1 - Math.max(0, (y - G.shopTop) / (gy - G.shopTop)) * .25);
+        c.beginPath(); c.moveTo(-20, gy - 18);
+        for (let y = gy - 18; y >= G.cornice.y + 6; y -= 8) c.lineTo(wd(y), y);
+        for (let y = G.cornice.y + 6; y <= gy - 18; y += 8) c.lineTo(ref - wd(y), y);
+        c.lineTo(ref + 20, gy - 18); c.lineTo(ref + 20, G.h + 20); c.lineTo(-20, G.h + 20); c.closePath(); c.fill();
+      };
+      const layer = (pic, snow) => {
+        const c = canvas(ctx.canvas.width, ctx.canvas.height), o = c.getContext("2d");
+        o.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
+        if (!snow) { o.fillStyle = "#fff"; o.fillRect(-20, -20, ref + 40, G.h + 40); o.globalCompositeOperation = "darken"; }
+        spots.forEach(([k, sx, sy, w, h, x, y, fh]) => {
+          o.save(); o.translate(x + (fh ? w * s : 0), y); o.scale(fh ? -s : s, s);
+          o.drawImage(patch(pic, k, sx, sy, w, h, !snow), 0, 0); o.restore();
+        });
+        o.globalCompositeOperation = snow ? "destination-out" : "source-over";
+        o.filter = `blur(${(3 * u * dpr).toFixed(1)}px)`; clearOut(o); o.filter = "none";
+        return c;
+      };
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalCompositeOperation = "multiply"; ctx.drawImage(layer(TEX.ivy, false), 0, 0);    // the vines, darkening the brick
+      ctx.globalCompositeOperation = "source-over";
+      if (S.snow && TEX.ivySnow) ctx.drawImage(layer(TEX.ivySnow, true), 0, 0);               // a little snow on them
+      ctx.restore();
+    }
+
+    function paintBareVines(ctx) {
+      const stems = growBareIvy(), V = (S.vines || ["#2a2024", "#3a2c33", "#4d3c45"]).map(hex), R = rng(77);
+      // Shadows first: every stem drawn dark at low resolution, then laid back blurred, down and to the right
+      const sc = .25, shc = document.createElement("canvas");
+      shc.width = Math.max(1, W * sc); shc.height = Math.max(1, H * sc);
+      const sx = shc.getContext("2d"); sx.setTransform(u * sc, 0, 0, u * sc, 0, 0); sx.strokeStyle = "#000"; sx.lineCap = sx.lineJoin = "round";
+      stems.forEach(st => { sx.lineWidth = (st.w0 + st.w1) * .7; sx.beginPath(); smooth(sx, st.pts.map(([x, y]) => [x + 2.5, y + 4])); sx.stroke(); });
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = .3; ctx.imageSmoothingQuality = "high"; ctx.drawImage(shc, 0, 0, W * dpr, H * dpr); ctx.restore();
+      // A stem, drawn piece by piece so it can taper from its base to its tip.
+      // f(i) gives the width at point i; dx, dy shift it (for the highlight and the snow).
+      ctx.lineCap = ctx.lineJoin = "round";
+      const trace = (pts, f, dx = 0, dy = 0, from = 1, to = pts.length - 1) => {
+        for (let i = from; i < to; i++) {
+          const [ax, ay] = pts[i - 1], [bx, by] = pts[i], [cx, cy] = pts[i + 1];
+          ctx.lineWidth = f(i); ctx.beginPath();
+          ctx.moveTo((ax + bx) / 2 + dx, (ay + by) / 2 + dy); ctx.quadraticCurveTo(bx + dx, by + dy, (bx + cx) / 2 + dx, (by + cy) / 2 + dy); ctx.stroke();
+        }
+      };
+      stems.sort((a, b) => b.depth - a.depth).forEach(st => {        // the finest twigs first, the trunks last (on top)
+        const { pts, w0, w1, depth } = st, n = pts.length, wid = i => lerp(w0, w1, i / (n - 1));
+        const col = V[Math.max(0, Math.min(2, depth))];
+        ctx.strokeStyle = rgb(col); trace(pts, wid);
+        if (w0 > .8) { const o = (w0 + w1) / 2; ctx.strokeStyle = rgb(mix(col, [215, 180, 186], .35), 1, .5); trace(pts, i => wid(i) * .32, -o * .22, -o * .26); }   // the lit edge, top left
+        // knots where the leaf stalks grew: a little bump and two or three short stubs
+        if (depth <= 2) for (let i = 2; i < n - 1; i += 2 + ((R() * 3) | 0)) {
+          const [x, y] = pts[i], w = wid(i), a = Math.atan2(pts[i + 1][1] - y, pts[i + 1][0] - x);
+          ctx.fillStyle = rgb(col, .85); ctx.beginPath(); ctx.arc(x, y, w * .75, 0, 7); ctx.fill();
+          ctx.strokeStyle = rgb(V[2], 1.05); ctx.lineWidth = Math.max(.35, w * .3);
+          for (let s = 0; s < 2 + (R() < .4); s++) {
+            const b = a + (s % 2 ? 1 : -1) * (.7 + R() * .8), l = (1.5 + R() * 2.5) * (G.phone ? .7 : 1);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(b) * l, y + Math.sin(b) * l); ctx.stroke();
+          }
+        }
+        // snow lying along the top of the stem, in runs, wherever it isn't too steep to hold it
+        if (S.snow && w0 > (G.phone ? .9 : 1.4)) {
+          let on = R() < .4;
+          for (let i = 1; i < n - 1; i++) {
+            const [ax, ay] = pts[i - 1], [bx, by] = pts[i + 1], steep = Math.abs(by - ay) / (Math.abs(bx - ax) + .01);
+            on = steep > 1.1 ? false : on ? R() < .9 : R() < .3;
+            if (!on) continue;
+            const w = wid(i), s = w * (.7 + R() * .6) + .5, up = -(w * .5 + s * .35);
+            ctx.strokeStyle = "rgba(150,162,196,.9)"; trace(pts, () => s, 0, up + .3, i, i + 1);     // its shaded underside
+            ctx.strokeStyle = "rgba(242,245,252,.96)"; trace(pts, () => s * .8, -.15, up - .15, i, i + 1);
+          }
+        }
+      });
+    }
+
+    /* Snow on the things that stand in front of the wall: a cushion on top of the letter board, snow banked round
+       the foot of each old ivy trunk, and round the four feet of the A-frame sign (so it stands in the snow, not on it) */
+    function paintSnowFront(ctx) {
+      const M = G.marquee, P = G.phone, F = G.floorSign;
+      snowCap(ctx, M.x - 5, M.x + M.w + 5, M.y + 1, P ? 11 : 18, 501, { lip: .4, sag: .3, shadow: false });
+      if (S.bare && !P) growBareIvy().filter(st => st.depth < 0).forEach(({ pts: [[x]] }, i) =>   // the drift round the foot of each old ivy trunk
+        snowCap(ctx, x - 18, x + 18, G.ground - 14, 14, 620 + i, { lip: .2, shadow: false }));
+      const fy = F.y + F.w * 1.66;                                                      // where its feet stand
+      [[3, 1.1], [23, .8], [77, .8], [97, 1.1]].forEach(([fx, s], i) => {
+        const x = F.x + F.w * fx / 100, r = F.w * .11 * s;
+        snowCap(ctx, x - r * 1.2, x + r * 1.2, fy + F.w * .02, F.w * .07 * s, 610 + i, { lip: .15, shadow: false });
       });
     }
 
@@ -1174,16 +1679,20 @@
 
     // The poster window: the Poetic Drift poster hung straight and centred in the glass,
     // framed by a ring of bulbs, in front of the bookshop's shelves, with the street reflected in the glass
+    // The poster's title always sits on one line: 7 (hundredths of the poster's width) for a short title,
+    // smaller for a long one, so that its letters (about 0.74 of their size wide, each) fill no more than 86% of the width
+    const titleSize = book => Math.min(7, 86 / (book.length * .74)).toFixed(2);
     function buildPosters(gl) {
       const host = $("nrsf-posters"), best = POSTERS.find(p => p.kind === "bestseller");
       const bestHTML = (x, y, w) => best ? `<span class="nrsf-poster" style="${pos(x, y, w)}">
           <span class="nrsf-p-best"><span class="l1"><em>${esc(best.rank)}</em> NOT RISING MAGAZINE</span><span class="l2">BEST STORYTELLER</span>
-          <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title">${esc(best.book.toUpperCase())}</span></span></span>` : "";
+          <span class="book"><img src="${img(best.cover)}" alt=""></span><span class="by">NEW BOOK BY <b>${esc(best.author.toUpperCase())}</b></span><span class="title" style="font-size:${titleSize(best.book)}cqw">${esc(best.book.toUpperCase())}</span></span></span>` : "";
       // Same bulb sizes as the newsstand window next door, so the two match
       const P = G.phone ? { ring: 7, gap: 22, r: 3.6, posterW: 64 } : { ring: 13, gap: 30, r: 6.2, posterW: 172 };
       const pw = P.posterW, ph = pw * 1102 / 864;               // the poster's height follows from its shape (864 wide : 1102 tall)
       let html = bestHTML((gl.w - pw) / 2, (gl.h - ph) / 2, pw); // centred: half the leftover space on each side
       html += bulbRing(gl, P);
+      if (G.stage) html = bestHTML(G.poster.x - gl.x, G.poster.y - gl.y, G.poster.w);   // a stage: on the picture's poster (see-through; the picture shows it)
       host.innerHTML = html;
       // Clicking the poster opens it up close first (with a BUY IT button), instead of going straight to the shop
       const posterEl = host.querySelector(".nrsf-poster");
@@ -1234,9 +1743,10 @@
     function buildNews(gl) {
       const host = $("nrsf-covers"), NR = window.NR;
       const issues = NR ? NR.FEATURES.map((f, i) => ({ f, no: String(i + 1).padStart(2, "0") })).filter(o => o.f.cover) : [];
-      const P = G.phone
+      const P = G.stage ? G.news                                                                                         // a stage: its own spot in the picture
+        : G.phone
         ? { ring: 7, gap: 22, r: 3.6, x0: 15, x1: 75, y0: 58, cols: 2, coverW: 26, rowH: 62, tag: 4, tagGap: 5, max: 4 }   // phones: just the first 4 issues, 2 by 2
-        : { ring: 13, gap: 30, r: 6.2, x0: 30, x1: 271, y0: 70, cols: 6, coverW: 32, rowH: 67, tag: 4.4, tagGap: 7 };
+        : { ring: 13, gap: 30, r: 6.2, x0: 30, x1: 271, y0: 68, cols: 5, coverW: 26, rowH: 48.5, tag: 3.8, tagGap: 5 };   // bigger screens: all 20 issues of Vol. 1, 5 across and 4 high
       const pw = (P.x1 - P.x0) / P.cols, ch = P.coverW * 1056 / 816;
       let html = "";
       issues.forEach(({ f, no }, i) => {
@@ -1249,6 +1759,7 @@
         html += `<span class="nrsf-tag" style="left:${cx * u}px;top:${(cy + ch + P.tagGap) * u}px;font-size:${P.tag * u}px">NO. ${no}</span>`;
         if (col === 0) html += `<span class="nrsf-glass-shelf" style="${pos(P.x0 - 6, cy + ch, P.x1 - P.x0 + 12, 4)}"></span>`;
       });
+      if (G.stage) { host.innerHTML = html; return; }            // a stage picture has its own bulbs and lettering
       // the ring of vanity globes round the inside of the window
       html += bulbRing(gl, P);
       // "The Newsstand" gilt sign-writing on the glass, arched above the magazines and inside the bulbs
@@ -1280,7 +1791,7 @@
     function build() {
       W = root.clientWidth;
       if (!W) return;
-      G = W < 640 ? PHONE : DESK;
+      G = ST ? Object.assign({}, ST, { phone: W < 640 }) : W < 640 ? PHONE : DESK;   // a stage: the same picture on every screen
       root.classList.toggle("nrsf--phone", !!G.phone);
       dpr = Math.min(2, window.devicePixelRatio || 1);
       u = W / G.ref; H = G.h * u;
@@ -1305,7 +1816,7 @@
       buildNews(G.front.glass[1]);
       wireLinks();
       drawGlobes($("nrsf-marquee-lights"));
-      placeOpenSign(dr.leaf);
+      if (!G.stage) placeOpenSign(dr.leaf);   // (a stage picture has its own OPEN sign)
       place($("nrsf-floorsign"), G.floorSign);
       return painted;
     }
@@ -1318,7 +1829,7 @@
        BAKED in data.js lists the seasons that have pictures. Any other season paints live, and so does
        the page with ?live at the end of its address (that's how the bake tool, and you, can see the live painting).
        After changing anything about the building or the ivy, run the bake tool again. */
-    const LIVE = !!window.NRSF_PAINT_LIVE || /[?&]live\b/.test(location.search) || !(D.BAKED || []).includes(season);
+    const LIVE = !ST && (!!window.NRSF_PAINT_LIVE || /[?&]live\b/.test(location.search) || !(D.BAKED || []).includes(season));   // a stage is never painted
     const PICS = {};                                                 // baked pictures, loaded once each
     function layers() {                                              // [name, canvas, width, height] of every baked layer
       const [dl, dr] = G.doors, [g0, g1] = G.front.glass;
@@ -1336,11 +1847,26 @@
       return PICS[file] || (PICS[file] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = img(file); }));
     };
     function paintScene() {
+      if (G.stage) return paintStage();
       if (LIVE) { paintLive(); return Promise.resolve(); }
       const L = layers();
       return Promise.all(L.map(([name]) => picture(name))).then(pics => {
         if (pics.some(p => !p)) return textures().then(paintLive);   // a picture is missing: paint live instead
         L.forEach(([, c, w, h], i) => { const ctx = sizeCanvas(c, w, h, dpr); ctx.drawImage(pics[i], 0, 0, c.width, c.height); });
+      });
+    }
+    // A stage: the picture fills the street, and each door gets its own piece of the picture, so the picture's
+    // own doors swing open. Nothing else is painted (the ivy layer is emptied).
+    function paintStage() {
+      return picture("stage").then(pic => {
+        if (!pic) return;
+        const k = pic.naturalWidth / G.ref, paint = $("nrsf-paint");          // k = picture pixels per street unit
+        sizeCanvas(paint, W, H, dpr).drawImage(pic, 0, 0, paint.width, paint.height);
+        sizeCanvas($("nrsf-ivy"), 1, 1, 1);
+        G.doors.forEach(({ leaf: L }, i) => {
+          const c = $(i ? "nrsf-door-r" : "nrsf-door-l").querySelector("canvas");
+          sizeCanvas(c, L.w * u, L.h * u, dpr).drawImage(pic, L.x * k, L.y * k, L.w * k, L.h * k, 0, 0, c.width, c.height);
+        });
       });
     }
     function paintLive() {
@@ -1409,6 +1935,31 @@
       setTimeout(loop, 600); setTimeout(gust, 5000);
     }
 
+    /* ---------- Falling snow: light, fluffy, powdery flakes drifting gracefully down ----------
+       The snow lives in its own file, assets/snowfall.js (its knobs are at the top of that file). This just hands
+       it the street's falling layer and tells it how big a street unit is, where the pavement starts, whether
+       this is the phone plan, and whether the visitor has asked for less motion. */
+    function startSnow() {
+      if (!window.NRSnowfall || !G) return;                         // (if the snow file didn't load, the street simply has no snowfall)
+      // a stage picture is measured in its own pixels; the snow uses the usual street units (1200 across on bigger
+      // screens, 400 on phones), so the flakes are the same size on screen whichever street is showing
+      const per = () => G.stage ? G.ref / (G.phone ? 400 : 1200) : 1;        // picture pixels in one street unit
+      // phones with a stage show it as a postcard on a snowy night (storefront.css), so the snow falls over the whole
+      // screen, not just the picture: it gets its own layer, the sky, the size of the whole storefront
+      let layer = $("nrsf-fall"), top = () => 0;
+      if (G.stage && G.phone) {
+        layer = document.createElement("div"); layer.className = "nrsf-sky"; layer.setAttribute("aria-hidden", "true");
+        root.appendChild(layer); top = () => scene.offsetTop;                 // where the picture starts on the screen
+      }
+      window.NRSnowfall.start(layer, {
+        unit: () => u * per(), phone: () => !!(G && G.phone), still: reduceMotion,
+        ground: () => G && (top() + G.ground * u) / (u * per()),              // where the pavement starts (far flakes land there)
+        floor: () => G && (top() + H) / (u * per())                           // where the street ends (middle flakes land before it)
+      });
+    }
+    // What drifts down past the shop: the season's "falling" in data.js ("leaves", "snow", or false for nothing)
+    const startFalling = () => S.falling === "snow" ? startSnow() : startLeaves();
+
     /* ---------- Doors and windows lead somewhere ---------- */
     const toastEl = $("nrsf-toast");
     let toastTimer;
@@ -1444,7 +1995,9 @@
     // Live painting needs the photo textures (brick, wood, leaves, cobbles) first. Baked pictures don't.
     let TEXP = null;
     const load = (key, path) => new Promise(res => { const i = new Image(); i.onload = () => { TEX[key] = i; res(); }; i.onerror = () => res(); i.src = img(path); });
-    const textures = () => TEXP || (TEXP = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick-red.webp")]));
+    const textures = () => TEXP || (TEXP = Promise.all([load("bricks", "bricks.jpg"), load("wood", "wood.jpg"), load("leaves", "leaves.webp"), load("cobbles", "cobbles.webp"), load("redbrick", "redbrick-red.webp"),
+      ...(S.snow ? [load("snowGrain", "winter/snow-detail.webp"), load("stuck", "winter/stuck-snow.webp")] : []),
+      ...(S.bare ? [load("ivy", "winter/ivy.webp"), load("ivySnow", "winter/ivy-snow.webp")] : [])]));   // winter: her bare ivy   // winter: the grain of real snow, and real clumps of it
     const fontsReady = document.fonts
       ? Promise.all(["700 20px Cinzel", "400 20px Sancreek", "600 20px Oswald", "400 20px \"Archivo Black\""].map(f => document.fonts.load(f).catch(() => {})))
       : Promise.resolve();
@@ -1460,7 +2013,7 @@
     let built = false;
     if (LIVE) fontsReady.then(() => built && build());
     const ready = LIVE ? Promise.all([textures(), Promise.race([fontsReady, new Promise(r => setTimeout(r, 3000))])]) : Promise.resolve();
-    ready.then(() => { const p = build(); built = true; return p; }).then(() => { arrive(); startLeaves(); });
+    ready.then(() => { const p = build(); built = true; return p; }).then(() => { arrive(); startFalling(); });
     if ("ResizeObserver" in window) {
       let t, lastW = root.clientWidth;                         // only repaint when the width really changes
       new ResizeObserver(() => { if (!built || root.clientWidth === lastW) return; lastW = root.clientWidth; clearTimeout(t); t = setTimeout(build, 150); }).observe(root);
