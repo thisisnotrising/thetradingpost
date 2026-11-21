@@ -22,6 +22,8 @@
 <style>
 /* basic reset: no page margin, phone notches respected */
 html { box-sizing: border-box; } *, *::before, *::after { box-sizing: inherit; }
+/* iPhone Safari enlarges some lettering when the phone is turned sideways; this keeps every word the size we set (pinch-zoom still works) */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
