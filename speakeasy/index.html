@@ -630,19 +630,24 @@ document.querySelectorAll(".spot").forEach(s => {
 const pstick = $("pstick"), pframe = $("pframe");
 const DOOR = { x: .497, y: .52, h: .27 };                                   // the door's centre and height, as fractions of the corridor picture
 const ZOOM = 1.35;
+const WIDEST = 2.2;                                                         // the corridor fills screens up to 2.2x as wide as they are tall
+const STEP = 1.15;                                                          // the least the walk zooms in, on wide screens
 function walk() {
   if (room === "hall") { $("hcue").classList.toggle("gone", scrollY > 40); return; }
   if (room !== "passage") return;
-  /* the corridor's width: the screen's, but on wide screens no more than 1.25x the height (so the door starts at about
-     half the screen's height and there's a walk up to it); the sides then fade into the dark, as in the other rooms */
-  const vw = pstick.clientWidth, vh = pstick.clientHeight, fw = Math.max(Math.min(vw, vh * 1.25), vh * 2 / 3), fh = fw * 1.5;
+  /* the corridor's width: the screen's, edge to edge, on phones, tablets and desktops alike. Only an extra-wide screen
+     (wider than WIDEST x its height, like an ultrawide monitor) stops short, because any wider and the door would no
+     longer fit top to bottom; there the sides fade into the dark, as in the other rooms */
+  const vw = pstick.clientWidth, vh = pstick.clientHeight, fw = Math.max(Math.min(vw, vh * WIDEST), vh * 2 / 3), fh = fw * 1.5;
   pframe.style.width = fw + "px"; pframe.classList.toggle("narrow", fw < vw - 1);
   const p = Math.min(1, Math.max(0, scrollY / (ROOMS.passage.offsetHeight - innerHeight))), e = still ? 0 : p * p * (3 - 2 * p);
-  /* where the walk ends: zoomed until the door is about 3/4 of the screen's height, but never past ZOOM */
-  const s1 = Math.min(ZOOM, Math.max(1, .74 * vh / (DOOR.h * fh)));
+  /* where the walk ends: zoomed until the door is about 3/4 of the screen's height, but never past ZOOM. On a wide
+     screen the door is already that big, so the walk still takes you at least STEP closer: you feel yourself walk in */
+  const s1 = Math.min(ZOOM, Math.max(STEP, .74 * vh / (DOOR.h * fh)));
   const s = 1 + (s1 - 1) * e;
-  /* the door's centre on screen: from a little below the middle (the first view) to the middle (the end) */
-  const cy0 = vh * .62, cy1 = vh * .5;
+  /* the door's centre on screen: from a little below the middle (the first view) to the middle (the end). When the
+     door is big (wide screens), it starts only as low as keeps its foot on the screen */
+  const cy0 = Math.max(vh * .5, Math.min(vh * .62, vh * .96 - DOOR.h * fh / 2)), cy1 = vh * .5;
   const cx = vw / 2, cy = cy0 + (cy1 - cy0) * e;
   /* the corridor placed (at this scale) to put the door there, but never so far that an edge of the picture shows */
   const x = s * fw > vw ? Math.min(0, Math.max(vw - s * fw, cx - s * DOOR.x * fw)) : (vw - s * fw) / 2,
