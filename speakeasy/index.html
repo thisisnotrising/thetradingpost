@@ -65,6 +65,8 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
   --body: Arimo, "Helvetica Neue", Arial, sans-serif;
 }
 html, body { background: var(--night); color: var(--ink); }
+/* iPhone Safari enlarges some lettering when the phone is turned sideways; this keeps every word the size we set (pinch-zoom still works) */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { margin: 0; overflow-x: clip; font-family: var(--body); }
 [hidden] { display: none !important; }
 .label { font: 700 10px/1 var(--body); letter-spacing: .2em; text-transform: uppercase; }
