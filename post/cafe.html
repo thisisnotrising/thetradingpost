@@ -68,6 +68,8 @@
 /* --- The page itself: black behind everything. The page scrolls up and down only, never sideways: how far it
    scrolls is how far the camera comes down through the room. While a popup is open it stays put (.locked). --- */
 html { box-sizing: border-box; overflow-x: hidden; } *, *::before, *::after { box-sizing: inherit; }
+/* iPhone Safari enlarges some lettering when the phone is turned sideways; this keeps every word the size we set (pinch-zoom still works) */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 html, body { margin: 0; background: #0d0d0e; }
 /* (Oct 31) No rubber-band bounce past the top or bottom (it showed black above the roof and below the floor) */
 html, body { overscroll-behavior: none; }
