@@ -731,20 +731,25 @@ window.NRPOST = {
 
 /* ================= PART 4 · THE SPEAK ================= */
 /* THE SPEAK (speakeasy/), behind door 9¾. Every marquee (the hall's, the lounge's, the bar's) and the
-   stage card read STAGE: NOW PLAYING, then the show; the card's button goes to the episode.
+   stage card read STAGE: its heading (NOW PLAYING, NOW SOARING...), then the show; the card's button goes to the episode.
+   STAGE.closeUp: true when there's something to walk up to on the stage (the podcast: Dan and Kathi); false in
+   THEATER MODE (curtains closed, a film on the screen), when tapping the stage or STAGE opens the card instead.
    STAGE.says: Dan's bubble, in the hall and on the stage close-up. BAR: the Old Fashioned (Buy Me a Coffee), and Kathi's bubble at the bar
    with its FOLLOW button. Each bubble shows one line at a time, at reading pace. */
 window.NRSPEAK = {
   STAGE: {
-    title: "KESTRYL EDGE PODCAST",                                            // the show (under NOW PLAYING on every marquee and the card)
-    episode: "E13 · The Negative Space Is The Work",                          // the episode, in small letters on the card
-    link: "https://substack.com/@dankorus/p-215427993",                       // where the card's button and Dan's bubbles go (opens in a new tab)
+    // THEATER MODE (Nov 21): the lounge's curtains are closed and Natalie Nicholson's film plays on them
+    heading: "NOW SOARING",                                                    // the first line on every marquee and the card
+    title: "NATALIE NICHOLSON",                                               // the second line
+    episode: "Wilbur C. Fibbermust",                                          // in small letters on the card
+    link: "https://crankthatnat.substack.com/p/you-dont-have-to-be-a-filmmaker-to",   // the card's button (opens in a new tab)
     button: "Watch",                                                          // the card's button
-    says: [                                                                   // Dan's bubble on the stage, in the hall and up close: one line per change of words
-      "Kathi is creating journalism for the people",
-      "so we can reclaim our critical thinking.",
-      "The negative space is the work."
-    ]
+    closeUp: false,                                                           // no close-up: the stage and STAGE open the card
+    says: []                                                                  // Dan's bubble: none while the film plays
+    /* THE PODCAST, to switch back (and put hall-*.webp back in the hall's picture in speakeasy/index.html):
+    heading: "NOW PLAYING", title: "KESTRYL EDGE PODCAST", episode: "E13 · The Negative Space Is The Work",
+    link: "https://substack.com/@dankorus/p-215427993", button: "Watch", closeUp: true,
+    says: ["Kathi is creating journalism for the people", "so we can reclaim our critical thinking.", "The negative space is the work."] */
   },
   BAR: {
     oldFashioned: "https://buymeacoffee.com/thisisnotrising",   // Buy Me An Old Fashioned: the glass on the bar, and the bar's OLD FASHIONED button

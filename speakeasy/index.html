@@ -49,7 +49,8 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
      4. THE BAR (speak/bar-*.webp), from the hall's bar or the BAR button, or
         the stage's THE BAR. Kathi sits at the bar and says hello in a chat.
    What's on the stage and what Kathi says come from NRSPEAK in assets/data.js
-   (PART 4): every marquee says NOW PLAYING, then the show.
+   (PART 4): every marquee says its heading (NOW PLAYING, NOW SOARING), then the show. In THEATER MODE
+   (NRSPEAK.STAGE.closeUp false) the curtains are closed: the stage and STAGE open the card, not the close-up.
    Each picture comes in three sizes (1600, 2400 and 3200 pixels wide): the
    browser downloads only the one the screen needs, so it's sharp and light.
    ====================================================================== */
@@ -335,26 +336,30 @@ dialog.pop::backdrop { background: transparent; }
 </section>
 <p class="cue label" id="pcue" aria-hidden="true">Walk the passage</p>
 
-<!-- 2 · THE HALL -->
-<main class="hall" id="room-hall" hidden aria-label="THE SPEAK: an underground hall under a brick vault papered in banknotes and strung with Edison bulbs, its ivy turned autumn crimson. Up on the balcony, the bar with its stools and bottles, the marquee above it. Spiral iron staircases either side frame the stage: a twisted twig arch strung with fairy lights, macramé hangings and cream curtains around a great amethyst geode, fiddle-leaf figs in terracotta pots, and Dan and Kathi in headphones in leather butterfly chairs with sheepskins, at brass microphones either side of a hammered brass table with candles; Kathi wears stacked beaded bracelets and evil eye rings. In front, a sunken pit: a small audience in silhouette on white chesterfield couches heaped with boho cushions, blankets and fur, around a brass table of candles and flowers, plants all round. Either side of the pit, under a brass wall lamp each: at the left a crimson door with a black plaque reading SHADOW BANNED in white, at the right a black door under a neon sign reading RESTROOM, only its REST lit, flickering.">
+<!-- 2 · THE HALL, THEATER MODE (Nov 21, holiday render v2): a cinema screen under the valance, Natalie Nicholson's film on it.
+     The picture is hall-theater-*.webp (made by tools/speak-faces/theater_hall.py); the podcast's picture, hall-*.webp, is kept to switch back.
+     Everything placed on it (lamps, marquee board, neon, the spots) is in percentages of the picture, measured on it. -->
+<main class="hall" id="room-hall" hidden aria-label="THE SPEAK, in theater mode, dressed for the holidays: an underground hall under a brick vault papered in banknotes, swagged with cream muslin, strung with Edison bulbs and garlands of pine, with big red velvet bows. Up on the balcony, the bar with its stools, bottles and candles, the marquee above it. Along the balcony rail, a garland of frosted pine with red baubles, pinecones, tiny lights and a great red bow; under it, a macramé valance with gold baubles hanging, red velvet drapes tied back, and a cinema screen in a black frame. On the screen, a title card: a bearded old man in a straw hat with a daisy, and the title Wilbur C. Fibbermust, by Natalie Nicholson. Brass lanterns with candles at the screen's feet, little snowy Christmas trees and poinsettias either side. In front, a sunken pit: an audience in silhouette on chesterfield couches with knitted throws, around a brass table of candles and red flowers, watching. Either side of the pit, under a brass wall lamp each: at the left a crimson door with a black plaque reading SHADOW BANNED in white, at the right a black door under a neon sign reading RESTROOM, only its REST lit, flickering.">
   <div class="art">
-    <img src="../assets/img/speak/hall-1600.webp" srcset="../assets/img/speak/hall-1600.webp 1600w, ../assets/img/speak/hall-2400.webp 2400w, ../assets/img/speak/hall-3200.webp 3200w" sizes="(max-aspect-ratio: 9/10) 170vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
+    <img src="../assets/img/speak/hall-theater-1600.webp" srcset="../assets/img/speak/hall-theater-1600.webp 1600w, ../assets/img/speak/hall-theater-2400.webp 2400w, ../assets/img/speak/hall-theater-3200.webp 3200w" sizes="(max-aspect-ratio: 9/10) 170vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
     <canvas class="dust" aria-hidden="true" data-motes="70"></canvas>
-    <!-- the lamps: the bulbs under the vault, the wall lamps, the stage's candles, the pit's candles -->
-    <span class="flame" style="left:20.04%;top:12.86%;--s:3%;--d:2.3s"></span><span class="flame" style="left:31.9%;top:17.42%;--s:3%;--d:2.8s"></span><span class="flame" style="left:51.02%;top:15.47%;--s:3%;--d:2.6s"></span><span class="flame" style="left:63.3%;top:14.11%;--s:3%;--d:3.1s"></span>
-    <span class="flame" style="left:73.93%;top:17.49%;--s:3%;--d:3.2s"></span><span class="flame" style="left:90.89%;top:15.36%;--s:3%;--d:2.7s"></span><span class="flame" style="left:21.53%;top:21.23%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:27.85%;top:22.32%;--s:2.5%;--d:2.4s"></span>
-    <span class="flame" style="left:77.5%;top:26.5%;--s:2.5%;--d:2.6s"></span><span class="flame" style="left:7%;top:52.3%;--s:3%;--d:2.8s"></span><span class="flame" style="left:94.5%;top:52%;--s:3%;--d:2.5s"></span><span class="flame" style="left:51.65%;top:61.18%;--s:2.5%;--d:3.1s"></span>
-    <span class="flame" style="left:22%;top:66%;--s:2.5%;--d:2.7s"></span><span class="flame" style="left:80%;top:66%;--s:2.5%;--d:3s"></span><span class="flame" style="left:2%;top:73%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:97%;top:74%;--s:2.5%;--d:2.4s"></span>
-    <span class="flame" style="left:48.5%;top:79.5%;--s:3%;--d:2.5s"></span><span class="flame" style="left:52%;top:80.5%;--s:2.5%;--d:3s"></span><span class="flame" style="left:55%;top:84.5%;--s:3%;--d:2.3s"></span><span class="flame" style="left:9.5%;top:91.5%;--s:3%;--d:2.8s"></span>
-    <span class="flame" style="left:51.5%;top:94%;--s:3%;--d:2.6s"></span><span class="flame" style="left:58%;top:92.5%;--s:3%;--d:3.1s"></span>
-    <div class="board" style="left:32.5%;top:21.62%;width:34.72%;height:5.02%"><span class="tiles" data-marquee></span></div>
+    <!-- the lamps: the bulbs under the vault, the wall lamps, the balcony's candles, the lanterns at the screen, the pit's candles -->
+    <span class="flame" style="left:23.63%;top:3.06%;--s:2.5%;--d:2.3s"></span><span class="flame" style="left:30.27%;top:4.30%;--s:2.5%;--d:2.8s"></span><span class="flame" style="left:40.72%;top:3.45%;--s:2.5%;--d:2.6s"></span><span class="flame" style="left:52.73%;top:1.95%;--s:2.5%;--d:3.1s"></span>
+    <span class="flame" style="left:64.45%;top:3.97%;--s:2.5%;--d:3.2s"></span><span class="flame" style="left:75.98%;top:2.99%;--s:2.5%;--d:2.7s"></span><span class="flame" style="left:46.39%;top:6.38%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:58.11%;top:8.14%;--s:2.5%;--d:2.4s"></span>
+    <span class="flame" style="left:34.47%;top:9.05%;--s:2.5%;--d:2.6s"></span><span class="flame" style="left:72.36%;top:9.38%;--s:2.5%;--d:2.5s"></span><span class="flame" style="left:17.38%;top:8.40%;--s:2.5%;--d:3s"></span><span class="flame" style="left:82.62%;top:8.59%;--s:2.5%;--d:2.8s"></span>
+    <span class="flame" style="left:2.93%;top:45.44%;--s:3%;--d:2.8s"></span><span class="flame" style="left:97.17%;top:45.31%;--s:3%;--d:2.5s"></span><span class="flame" style="left:3.91%;top:52.73%;--s:3%;--d:3.1s"></span><span class="flame" style="left:17.97%;top:31.51%;--s:2.5%;--d:2.7s"></span>
+    <span class="flame" style="left:16.31%;top:32.88%;--s:2.5%;--d:3s"></span><span class="flame" style="left:82.81%;top:23.57%;--s:2.5%;--d:2.4s"></span><span class="flame" style="left:82.81%;top:26.63%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:24.41%;top:66.67%;--s:2.5%;--d:2.6s"></span>
+    <span class="flame" style="left:76.76%;top:66.47%;--s:2.5%;--d:3.1s"></span><span class="flame" style="left:79.20%;top:66.99%;--s:2.5%;--d:2.3s"></span><span class="flame" style="left:7.91%;top:69.86%;--s:2.5%;--d:2.8s"></span><span class="flame" style="left:11.13%;top:71.22%;--s:2.5%;--d:2.5s"></span>
+    <span class="flame" style="left:92.29%;top:70.90%;--s:2.5%;--d:3s"></span><span class="flame" style="left:5.57%;top:81.64%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:79.20%;top:77.73%;--s:2.5%;--d:2.4s"></span><span class="flame" style="left:48.05%;top:87.63%;--s:3%;--d:2.5s"></span>
+    <span class="flame" style="left:52.54%;top:90.17%;--s:3%;--d:3s"></span><span class="flame" style="left:65.53%;top:92.19%;--s:3%;--d:2.3s"></span><span class="flame" style="left:42.29%;top:93.23%;--s:3%;--d:2.8s"></span><span class="flame" style="left:38.57%;top:93.95%;--s:2.5%;--d:2.6s"></span>
+    <div class="board" style="left:37.99%;top:19.53%;width:24.22%;height:3.65%"><span class="tiles" data-marquee></span></div>
     <!-- the RESTROOM sign with REST dead: flickered on top of the picture's lit REST (the blink) -->
-    <span class="neon" style="left:87.875%;top:52.6667%;width:11.25%;height:2.5%" aria-hidden="true"><img src="../assets/img/speak/restroom-dark.webp" width="360" height="120" alt="" decoding="async"></span>
-    <button class="spot" type="button" data-room="bar" data-name="The Bar" style="left:20%;top:26.7%;width:60%;height:13%" aria-label="The Bar: go up to the bar"></button>
-    <button class="spot" type="button" data-room="stage" data-name="The Stage" style="left:19.5%;top:40.5%;width:61%;height:30%" aria-label="The Stage: go up close"></button>
-    <button class="spot" type="button" data-room="cellar" data-name="The Cellar" style="left:1.5%;top:52.5%;width:11%;height:18.5%" aria-label="The Cellar: go through the red door"></button>
-    <button class="spot" type="button" data-pop="restroom" data-name="Restroom · Soon" style="left:87%;top:52.5%;width:12.5%;height:18.5%" aria-label="Restroom: opening soon"></button>
-    <!-- Dan's bubble on the stage (the script writes it from NRSPEAK.STAGE.says, and changes its words at reading pace) -->
+    <span class="neon" style="left:92.66%;top:53.54%;width:6.88%;height:3.23%" aria-hidden="true"><img src="../assets/img/speak/restroom-theater-dark.webp" width="220" height="155" alt="" decoding="async"></span>
+    <button class="spot" type="button" data-room="bar" data-name="The Bar" style="left:12.70%;top:17.58%;width:74.71%;height:15.30%" aria-label="The Bar: go up to the bar"></button>
+    <button class="spot" type="button" data-room="stage" data-name="The Stage" style="left:22.07%;top:41.67%;width:54.30%;height:24.09%" aria-label="The Stage: go up close"></button>
+    <button class="spot" type="button" data-room="cellar" data-name="The Cellar" style="left:0.00%;top:53.26%;width:7.42%;height:19.79%" aria-label="The Cellar: go through the red door"></button>
+    <button class="spot" type="button" data-pop="restroom" data-name="Restroom · Soon" style="left:92.58%;top:53.71%;width:7.42%;height:19.53%" aria-label="Restroom: opening soon"></button>
+    <!-- Dan's bubble on the stage (the script writes it from NRSPEAK.STAGE.says; in theater mode there's none) -->
     <div class="say-dan" id="say-dan"></div>
   </div>
 </main>
@@ -464,12 +469,12 @@ dialog.pop::backdrop { background: transparent; }
 </dialog>
 
 <!-- What is on the stage: NRSPEAK in assets/data.js (PART 4) -->
-<script src="../assets/data.js"></script>
+<script src="../assets/data.js?v=2026-11-21-theater"></script>   <!-- the version makes browsers fetch the new data.js with this page, never a stale copy -->
 <script>
 (function () {
 /* What's on the stage: NRSPEAK.STAGE in assets/data.js (these are only the fallbacks) */
 const SPEAK = window.NRSPEAK || {};
-const STAGE = Object.assign({ title: "", episode: "", link: "", button: "Watch", says: [] }, SPEAK.STAGE || {});
+const STAGE = Object.assign({ heading: "NOW PLAYING", title: "", episode: "", link: "", button: "Watch", closeUp: true, says: [] }, SPEAK.STAGE || {});
 const BAR = Object.assign({ oldFashioned: "https://buymeacoffee.com/thisisnotrising", says: [], follow: "", followButton: "Follow" }, SPEAK.BAR || {});
 const DOORS = { restroom: "THE RESTROOM" };
 document.getElementById("bar-go").href = BAR.oldFashioned;
@@ -478,8 +483,8 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: NOW PLAYING, then the show */
-const lines = `<span class="l1">NOW PLAYING</span><span class="l2">${esc(STAGE.title)}</span>`;
+/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: the heading (NOW PLAYING, NOW SOARING), then the show */
+const lines = `<span class="l1">${esc(STAGE.heading)}</span><span class="l2">${esc(STAGE.title)}</span>`;
 document.querySelectorAll("[data-marquee]").forEach(t => t.innerHTML = lines);
 $("show-tiles").innerHTML = lines + (STAGE.episode ? `<span class="note">${esc(STAGE.episode)}</span>` : "");
 const showGo = $("show-go");
@@ -487,6 +492,23 @@ if (STAGE.link) { showGo.href = STAGE.link; showGo.target = "_blank"; showGo.rel
 showGo.firstChild.textContent = STAGE.button;
 if (STAGE.link) showGo.setAttribute("aria-label", `${STAGE.button}: ${STAGE.episode || STAGE.title} (opens in a new tab)`);
 showGo.addEventListener("click", e => { if (showGo.getAttribute("aria-disabled") === "true") e.preventDefault(); });
+
+/* THE HEADING'S WORDS everywhere the card is named: the buttons and spots that open it ("Now Playing" becomes
+   "Now Soaring"), and the screen-reader descriptions that mention it. */
+const HEAD = STAGE.heading.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+document.querySelectorAll('[data-pop="show"]').forEach(b => {
+  if (b.dataset.name) b.dataset.name = HEAD;
+  if (b.lastChild && b.lastChild.nodeType === 3 && /now playing/i.test(b.lastChild.textContent)) b.lastChild.textContent = HEAD;
+});
+document.querySelectorAll("[aria-label]").forEach(e => e.setAttribute("aria-label",
+  e.getAttribute("aria-label").replace(/NOW PLAYING/g, STAGE.heading).replace(/now playing/gi, HEAD.toLowerCase())));
+
+/* THEATER MODE (NRSPEAK.STAGE.closeUp is false): the curtains are closed, so there's no close-up to walk up to.
+   Whatever would take you to the stage (the stage in the hall, the STAGE button) opens the card instead. */
+if (!STAGE.closeUp) document.querySelectorAll('[data-room="stage"]').forEach(b => {
+  b.removeAttribute("data-room"); b.dataset.pop = "show";
+  if (b.classList.contains("spot")) { b.dataset.name = HEAD; b.setAttribute("aria-label", `${HEAD}: ${STAGE.episode || STAGE.title}`); }
+});
 
 /* the gold Edison bulbs around the popups' little marquees: 13 along the top and the bottom, 3 down each side,
    centred on the frame (in percentages of the card). --i gives each its own moment to glow brighter. */
@@ -524,6 +546,7 @@ function show(to, from) {
       if (to === "bar") chatPlay(1300); });                                 // at the bar, Kathi says hello once the lights are up
 }
 function go(to, fromAddress) {
+  if (to === "stage" && !STAGE.closeUp) to = "hall";                         // theater mode: no close-up (an old #stage link lands in the hall)
   if (!(to in ROOMS) || to === room) return;
   if (!fromAddress) { location.hash = to; return; }                         // the address change calls go() again (below)
   if (room === "hall") hallY = scrollY;                                     // remember where you were in the hall
@@ -535,6 +558,7 @@ function go(to, fromAddress) {
 addEventListener("hashchange", () => go(location.hash.slice(1) || "passage", true));
 /* start the next rooms' pictures downloading early, so walking through a door is instant (from the hall: the stage first, then the bar) */
 const NEXT = { passage: ["hall"], hall: ["stage", "bar", "cellar"], stage: ["bar"], bar: ["stage"], cellar: ["stage"] };
+if (!STAGE.closeUp) for (const k in NEXT) NEXT[k] = NEXT[k].filter(r => r !== "stage");   // theater mode: the close-up is never needed
 function warm(at) { NEXT[at].forEach((k, i) => setTimeout(() => { ROOMS[k].querySelector("img").loading = "eager"; }, 1200 + i * 2000)); }
 
 /* SPEECH BUBBLES: ONE crystal bubble each (Dan on the stage in the hall, Kathi at the bar) whose words change at
