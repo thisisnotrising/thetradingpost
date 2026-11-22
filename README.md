@@ -23,7 +23,11 @@ assets/img/speak/       THE SPEAK's four rooms, each in three or four widths (th
                         the hall's RESTROOM sign with REST dark, flickered on top of the hall (the blink). Made by
                         tools/speak-faces/hall_bar.py (the recipe, explained at its top; faces.py holds the faces), then the
                         opening-day finish: faces_nov8.py (the faces, from one podcast frame), shadow_banned.py (the red door's
-                        SHADOW / BANNED plaque), hair_texture.py (Dan's hair), speak_grade.py (every room's warmth held to 5-10) and cellar_screen.py (THE CELLAR's TV screen).
+                        SHADOW / BANNED plaque), hair_texture.py (Dan's hair), speak_grade.py (every room's warmth held to 5-10).
+                        THE CELLAR (cellar-*.webp), the library since Nov 22: tools/speak-faces/cellar_room.py (the set
+                        designer's render sharpened 4x with esrgan_np.py, the coherence filter every room has, warmth about 8,
+                        the TV's words set again in Oswald by cellar_tv.py, and the coffee table's
+                        stack of TO BE HUMAN, Season 2 built by cellar_tbh.py). (cellar_screen.py made the Nov 8 stone cellar's TV.)
                         THE REST (rest-*.webp) and its popup's napkin (napkin-kevin.webp, Kevin's napkin exactly as he made it):
                         tools/speak-faces/rest_newsprint.py (the recipe, Nov 21 evening: the set designer's newsprint render
                         sharpened 4x with esrgan_np.py, the same upscaler in plain numpy; Kevin's napkin set over the arch in
