@@ -338,7 +338,6 @@ dialog.pop::backdrop { background: transparent; }
 .rmq .orn b { font-weight: 400; font-size: 1.35em; }
 .rmq .tiles { color: #000; text-shadow: 0 1px 0 rgba(255,255,255,.6); text-transform: uppercase; gap: 0; }
 .rmq .tiles .l1 { font-size: min(21cqh, 5.4cqw); } .rmq .tiles .l2 { font-size: min(24cqh, 6cqw); }
-.rmq .tiles .note { font: 400 min(13cqh, 3.4cqw)/1.2 var(--body); color: #444; letter-spacing: .02em; margin-top: .3em; text-transform: none; text-shadow: none; }
 .rmq .bulbs { position: absolute; inset: 0; }
 .rmq .bulbs i { position: absolute; width: var(--b); height: var(--b); margin: calc(var(--b) / -2) 0 0 calc(var(--b) / -2); border-radius: 50%;
   background: radial-gradient(circle at 46% 42%, #fffdf3 0 34%, #fff1c8 50%, #ffd98a 68%, #f2b55a 84%, #a8742c);
@@ -564,11 +563,11 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: the heading (NOW PLAYING, NOW SOARING), the show, and
-   (Nov 22) the episode's name under it */
-const lines = `<span class="l1">${esc(STAGE.heading)}</span><span class="l2">${esc(STAGE.title)}</span>` + (STAGE.episode ? `<span class="note">${esc(STAGE.episode)}</span>` : "");
+/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: the heading (NOW PLAYING, NOW SOARING) and the show.
+   Only the card adds the episode's name under it (Nov 22: taken off the hall's and the bar's marquees) */
+const lines = `<span class="l1">${esc(STAGE.heading)}</span><span class="l2">${esc(STAGE.title)}</span>`;
 document.querySelectorAll("[data-marquee]").forEach(t => t.innerHTML = lines);
-$("show-tiles").innerHTML = lines;
+$("show-tiles").innerHTML = lines + (STAGE.episode ? `<span class="note">${esc(STAGE.episode)}</span>` : "");
 const showGo = $("show-go");
 if (STAGE.link) { showGo.href = STAGE.link; showGo.target = "_blank"; showGo.rel = "noopener"; showGo.removeAttribute("aria-disabled"); }
 showGo.firstChild.textContent = STAGE.button;
