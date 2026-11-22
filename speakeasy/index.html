@@ -48,7 +48,9 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
         STAGE button.
      4. THE BAR (speak/bar-*.webp), from the hall's bar or the BAR button, or
         the stage's THE BAR. Kathi sits at the bar and says hello in a chat.
-     5. THE CELLAR (speak/cellar-*.webp), through the red door.
+     5. THE CELLAR (speak/cellar-*.webp), through the red door: the library cellar, its TV
+        on a barrel at the front right (it opens Perla's episode, its synopsis on the TV's screen);
+        on the coffee table, a stack of TO BE HUMAN, Season 2 (it opens the cover, and the way to it on the Newsstand).
      6. THE REST (speak/rest-*.webp), through the RESTROOM door: a narrow
         powder room papered in Prohibition-era front pages, with her 3x5
         Interview answers set among them and Kevin Kermes's 3x5 Napkin of her
@@ -106,7 +108,8 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
 @media (max-aspect-ratio: 9/10) { .art { width: 170vw; margin-left: -35vw; } }
 .art > img, .s-wrap > img { display: block; width: 100%; height: 100%; filter: brightness(.05); transition: filter 1.8s cubic-bezier(.3,.6,.2,1); }
 .lit .art > img, .lit .s-wrap > img { filter: none; }
-@media (max-aspect-ratio: 9/10) { .cellar .art { width: 140vw; margin-left: -40vw; } }   /* phones: the right of the room, so the TV is in view */
+/* THE CELLAR on phones: the slice from 25% to 96% of the picture, so THE LIBRARY's neon and the TV's whole screen are both in view */
+@media (max-aspect-ratio: 9/10) { .cellar .art { width: 140vw; margin-left: -35vw; } }
 /* THE REST on phones: as wide as the room can be while still filling the screen top to bottom (the picture is 2:3, so
    two-thirds of the screen's height), centred, so the Prohibition papering shows down both walls and the napkin, the
    cards and the barrel sink stay in view; never narrower than the screen. (122vw comes first for phones too old to
@@ -123,17 +126,39 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
   box-shadow: 0 2px 0 rgba(255,255,255,.06), 0 20px 60px rgba(0,0,0,.7); background: #b89e74; }
 .napkin img { display: block; width: 100%; height: 100%; }
 /* THE CELLAR's TV: its screen breathes a little light (held still for visitors who ask for less motion) */
-.tv-glow { position: absolute; left: 77.1%; top: 50.4%; width: 17%; height: 10.4%; border-radius: 22%; pointer-events: none;
+.tv-glow { position: absolute; left: 80.4%; top: 56%; width: 16%; height: 10%; border-radius: 22%; pointer-events: none;
   background: radial-gradient(closest-side, rgba(205,225,230,.22), rgba(205,225,230,0)); mix-blend-mode: screen; opacity: 0; }
 .lit .tv-glow { animation: tvglow 3.2s ease-in-out infinite; }
 @keyframes tvglow { 0%, 100% { opacity: .35; } 45% { opacity: .9; } 50% { opacity: .55; } 55% { opacity: 1; } }
-.tvcard { width: min(86vw, 420px); aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 8%; box-sizing: border-box;
+.tvcard { width: min(86vw, 420px, calc((100svh - 110px) * 4 / 3)); aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 8% 9%; box-sizing: border-box;
+  container-type: inline-size;   /* the lettering inside is sized to the TV (cqw = 1% of its width), so it fits at every size */
   border-radius: 18% / 22%; color: #eef2f0; text-align: center;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 2px, transparent 2px 4px), radial-gradient(ellipse at 50% 45%, #4b5753, #1d2321 75%);
-  box-shadow: inset 0 0 0 10px #a2804a, inset 0 0 0 12px #6f5530, inset 0 0 40px rgba(0,0,0,.8), 0 20px 60px rgba(0,0,0,.7); }
-.tv-text { margin: 0; display: grid; gap: .7em; font-family: Oswald, "Arial Narrow", sans-serif; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .04em; line-height: 1.15; font-size: clamp(17px, 5.2vw, 24px); text-shadow: 0 0 8px rgba(220,240,235,.45); }
-.tv-text span + span { color: #fff; }
+  /* the cellar's TV (Nov 22): near-black glass lit blue-grey in the middle, a silver-cream bezel and the red-brown wood
+     cabinet around it, the colours measured on the TV in the room */
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 2px, transparent 2px 4px), radial-gradient(ellipse at 50% 45%, #3e4a51, #121516 75%);
+  box-shadow: inset 0 0 0 10px #c2bbb1, inset 0 0 0 12px #857466, inset 0 0 40px rgba(0,0,0,.8),
+    0 0 0 8px #4e1d12, 0 0 0 9px #2a0e07, 0 20px 60px rgba(0,0,0,.7); }
+/* ON THE TV's SCREEN: the episode's synopsis, glowing like the words on the TV in the room (Oswald, the site's letters):
+   a small caption line, then the sentence */
+.tv-syn { display: grid; gap: .8em; text-shadow: 0 0 8px rgba(220,240,235,.45); }
+.tv-syn p { margin: 0; }
+.syn-kicker { font: 600 max(10px, 3cqw)/1.3 var(--display); letter-spacing: .16em; text-transform: uppercase; color: rgba(238,242,240,.72); }
+.syn-kicker span { white-space: nowrap; }   /* if it ever has to wrap, it wraps between the parts, never inside one */
+.syn-text { font: 400 max(13px, 4.6cqw)/1.4 var(--display); letter-spacing: .02em; color: #fff; text-wrap: pretty; }
+/* THE TO BE HUMAN POPUP: the cover like a printed copy (a soft shadow under it), the blurb, then the button.
+   The cover shrinks on short screens so the button always shows (300px leaves room for the words and the button). */
+.tbh-cover { display: block; width: min(64vw, 300px, calc((100svh - 300px) * .773)); height: auto; border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.06), 0 24px 60px rgba(0,0,0,.75); }
+.tbh-blurb { width: min(86vw, 400px); display: grid; gap: .55em; text-align: center; }
+.tbh-blurb p { margin: 0; font: 400 clamp(14px, 3.9vw, 16px)/1.5 var(--body); color: var(--ink); text-wrap: pretty; }
+.tbh-blurb .tbh-head { font: 600 clamp(15px, 4.4vw, 19px)/1.2 var(--display); letter-spacing: .06em; text-transform: uppercase; color: #fff; }
+/* a phone on its side: the cover on the left, the words and the button on the right */
+@media (max-height: 560px) and (min-aspect-ratio: 1/1) {
+  #pop-tbh .box { grid-template-columns: auto minmax(0, 340px); column-gap: 28px; row-gap: 14px; align-items: center; }
+  #pop-tbh .tbh-cover { grid-row: 1 / span 2; width: calc((100svh - 48px) * .773); }
+  #pop-tbh .tbh-blurb { width: auto; text-align: left; align-self: end; }
+  #pop-tbh .go-panel { justify-self: start; align-self: start; }
+}
 /* THE RESTROOM SIGN: the hall's picture shows RESTROOM with REST lit. This small picture is the same sign with REST
    dead too, laid exactly over it (in percentages of the hall's picture, like everything else). Showing it puts REST
    out, so flickering it on and off is the blink: a failing neon that stutters, dies for a moment, and catches again.
@@ -445,14 +470,25 @@ dialog.pop::backdrop { background: transparent; }
   </div>
 </section>
 
-<!-- 5 · THE CELLAR (through the red SHADOW BANNED door): a stone wine cellar, a level deeper, so it stays warmer.
-     The TV on the barrel at the front right shows the message (tools/speak-faces/cellar_screen.py); it opens #pop-tv. -->
-<main class="hall cellar" id="room-cellar" hidden aria-label="THE CELLAR: a stone wine cellar under a vaulted ceiling and an iron candle chandelier. Pothos trails down the stone walls past framed old maps. Two patterned armchairs, one with a cream knit throw, sit by a side table with a lamp, red wine, books and dark flowers, on a long red rug. At the far end, a bookcase in a stone arch; above it, a balcony with leather armchairs and oak barrels. Down the right side, floor-to-ceiling wine racks with candles and a library ladder. At the front right, a vintage wooden television set with a gold bezel stands on an oak barrel, beside a candle, an amethyst and trailing pothos. Its screen glows with the words: Billion-dollar corporations want this suppressed.">
+<!-- 5 · THE CELLAR (through the red door): the library cellar, the set designer's Nov 22 render, sharpened 4x and given
+     the coherence filter the hall and THE REST have (warmth held to about 8, like the storefront and Nebula Cafe), with
+     the TV's words set again in Oswald, and the coffee table's books become a stack of TO BE HUMAN, Season 2
+     (tools/speak-faces/cellar_room.py). The TV on the barrel at the front right opens #pop-tv; the stack, #pop-tbh. -->
+<main class="hall cellar" id="room-cellar" hidden aria-label="THE CELLAR: a red-brick vault, two storeys tall, strung with Edison bulbs and trailing ivy. Up on a curved iron balcony, a white stag's head with great antlers looks down over two leather chesterfield armchairs with sheepskins and patterned cushions, a little round table of candles and red berries, oak barrels and copper stills, and a macrame planter hanging from the vault. Below, under a brick arch, a tall arched glass bookcase of old leather books and candles, lit by a neon sign in script reading The Library, an amethyst geode glowing in its shelves and a brass globe. Brass lanterns either side. On the right, a bar with leather stools under a Tiffany lamp and hanging wine glasses, floor-to-ceiling shelves of bottles and a brass library ladder. In front, a leather chesterfield heaped with a knit throw, fur and patterned cushions, a hammered brass table with candles and a stack of the magazine TO BE HUMAN, Season 2, an amethyst resting on it, a leather pouf, fur and cowhide rugs on dark tile. At the front right, a vintage wooden television set on an oak barrel, beside a candle, an amethyst and trailing ivy. Its screen glows with the words: Billion-dollar corporations want this suppressed.">
   <div class="art">
     <img src="../assets/img/speak/cellar-1600.webp" srcset="../assets/img/speak/cellar-1600.webp 1600w, ../assets/img/speak/cellar-2400.webp 2400w, ../assets/img/speak/cellar-3200.webp 3200w" sizes="(max-aspect-ratio: 9/10) 140vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
     <canvas class="dust" aria-hidden="true" data-motes="50"></canvas>
+    <!-- the candles and lamps: up on the balcony, the two brass lanterns by the arch, the bar, the bookcase, the brass table and the barrel -->
+    <span class="flame" style="left:22.7%;top:17.6%;--s:3%;--d:2.7s"></span><span class="flame" style="left:45.1%;top:18.6%;--s:3%;--d:3.1s"></span><span class="flame" style="left:39.1%;top:25.3%;--s:4%;--d:2.4s"></span>
+    <span class="flame" style="left:8.2%;top:46.9%;--s:5%;--d:2.9s"></span><span class="flame" style="left:60.2%;top:47.7%;--s:5%;--d:2.5s"></span>
+    <span class="flame" style="left:62.2%;top:57%;--s:3.5%;--d:3s"></span><span class="flame" style="left:74.5%;top:57%;--s:3.5%;--d:2.6s"></span>
+    <span class="flame" style="left:20.9%;top:60.9%;--s:3%;--d:2.8s"></span><span class="flame" style="left:48.8%;top:60.9%;--s:3%;--d:2.3s"></span>
+    <span class="flame" style="left:30.2%;top:76.2%;--s:7%;--d:3.2s"></span><span class="flame" style="left:33.3%;top:79.3%;--s:4.5%;--d:2.6s"></span><span class="flame" style="left:37%;top:79.8%;--s:4%;--d:2.9s"></span>
+    <span class="flame" style="left:85.6%;top:70.9%;--s:5%;--d:2.7s"></span>
     <span class="tv-glow" aria-hidden="true"></span>
-    <button class="spot" type="button" data-pop="tv" data-name="Watch the TV" style="left:74%;top:48.2%;width:26%;height:19.6%" aria-label="The television: what the algorithm will bury"></button>
+    <button class="spot" type="button" data-pop="tv" data-name="Watch the TV" style="left:78.5%;top:54.5%;width:21.5%;height:17%" aria-label="The television: what the algorithm will bury"></button>
+    <!-- the stack of TO BE HUMAN, Season 2 on the coffee table (with the amethyst on it, so it's easy to tap on a phone) -->
+    <button class="spot" type="button" data-pop="tbh" data-name="To Be Human · Season 2" style="left:34%;top:74%;width:16%;height:7.2%" aria-label="TO BE HUMAN, Season 2, on the coffee table"></button>
   </div>
 </main>
 
@@ -527,11 +563,28 @@ dialog.pop::backdrop { background: transparent; }
     <span class="go-panel crystal"><a class="go crystal" id="show-go" aria-disabled="true">Watch<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
   </div>
 </dialog>
-<dialog class="pop" id="pop-tv" aria-label="On the TV">
+<!-- THE TV: the episode's synopsis on its screen, then the way out to it (the TV in the room keeps its headline) -->
+<dialog class="pop" id="pop-tv" aria-label="On the TV" aria-describedby="tv-syn">
   <div class="box" tabindex="-1">
     <button class="close" type="button" aria-label="Close">×</button>
-    <div class="tvcard"><p class="tv-text"><span>Billion-dollar corporations want this suppressed</span></p></div>
-    <span class="go-panel crystal"><a class="go crystal" id="tv-go" href="https://substack.com/home/post/p-224228748" target="_blank" rel="noopener" aria-label="The algorithm will bury this: watch the episode (opens in a new tab)">The Algorithm Will Bury This<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+    <div class="tvcard"><div class="tv-syn">
+      <p class="syn-kicker"><span>Superhuman Podcast</span> | <span>Season 2</span> | <span>Perla</span></p>
+      <p class="syn-text" id="tv-syn">In September 2020, Perla lost her 20-year-old son, Elijah, after he took counterfeit prescription pills containing fentanyl that had been purchased through Snapchat.</p>
+    </div></div>
+    <span class="go-panel crystal"><a class="go crystal" id="tv-go" href="https://substack.com/home/post/p-224228748" target="_blank" rel="noopener" aria-label="The algorithm will bury this: Perla's episode of the Superhuman Podcast (opens in a new tab)">The Algorithm Will Bury This<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+  </div>
+</dialog>
+<!-- TO BE HUMAN, SEASON 2 (the stack on the coffee table): the cover, the blurb, and the way to it on the Newsstand
+     (same tab: the Newsstand is part of 777 Daydream St.; #tbh-s2 opens the magazine straight away) -->
+<dialog class="pop" id="pop-tbh" aria-label="To Be Human, Season 2" aria-describedby="tbh-blurb">
+  <div class="box" tabindex="-1">
+    <button class="close" type="button" aria-label="Close">×</button>
+    <img class="tbh-cover" src="../assets/img/memoir01-cover.webp" width="1000" height="1294" alt="The cover of TO BE HUMAN, a micro memoir by Garrett Rees, from THIS IS NOT RISING: TO BE HUMAN in tall white letters on black beside a black-and-white photo of Garrett, long hair and beard, sunglasses, a can in his hand, looking up, and his dog at his feet looking up at him." loading="lazy" decoding="async">
+    <div class="tbh-blurb" id="tbh-blurb">
+      <p class="tbh-head">Big Pharma wants this suppressed.</p>
+      <p>An allegedly true story about an ordinary human, the opioid crisis, and an active cold-case murder investigation in Lake Powell, Utah.</p>
+    </div>
+    <span class="go-panel crystal"><a class="go crystal" id="tbh-go" href="https://nebularising.media/thetradingpost/newsstand/#tbh-s2" aria-label="The algorithm will bury this: read To Be Human, Season 2 on the Newsstand">The Algorithm Will Bury This<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
   </div>
 </dialog>
 <dialog class="pop" id="pop-napkin" aria-label="3x5 Napkin by Kevin Kermes">
