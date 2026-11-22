@@ -48,6 +48,13 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
         STAGE button.
      4. THE BAR (speak/bar-*.webp), from the hall's bar or the BAR button, or
         the stage's THE BAR. Kathi sits at the bar and says hello in a chat.
+     5. THE CELLAR (speak/cellar-*.webp), through the red door.
+     6. THE REST (speak/rest-*.webp), through the RESTROOM door: walls papered
+        in dictionary pages (like Kathi's own "The Rest", 2016) with Kevin
+        Kermes's 3x5 Napkin of her and her four notes tiled all through them, in
+        squares half the size of a page (one napkin to every three notes), all
+        in greyscale. Click anywhere on the walls: the napkin,
+        and the way out to the interview.
    What's on the stage and what Kathi says come from NRSPEAK in assets/data.js
    (PART 4): every marquee says its heading (NOW PLAYING, NOW SOARING), then the show. In THEATER MODE
    (NRSPEAK.STAGE.closeUp false) the curtains are closed: the stage and STAGE open the card, not the close-up.
@@ -100,6 +107,18 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
 .art > img, .s-wrap > img { display: block; width: 100%; height: 100%; filter: brightness(.05); transition: filter 1.8s cubic-bezier(.3,.6,.2,1); }
 .lit .art > img, .lit .s-wrap > img { filter: none; }
 @media (max-aspect-ratio: 9/10) { .cellar .art { width: 140vw; margin-left: -40vw; } }   /* phones: the right of the room, so the TV is in view */
+/* THE REST on phones: tall enough to fill the screen, the slice from the toilet to past the mirror (18% to 85% of the
+   picture), so the napkin over the mirror and the barrel sink are always in view */
+@media (max-aspect-ratio: 9/10) { .rest .art { width: 150vw; margin-left: -27vw; } }
+/* THE REST's walls: one invisible button over all the papered walls. Pointing at them only warms the paper a little
+   (no box: the walls are the whole top of the room) and the name tag follows the pointer */
+.spot.wall { border-radius: 0; }
+.spot.wall:hover, .spot.wall:focus-visible { background: rgba(255,236,200,.045); box-shadow: none; }
+/* THE NAPKIN popup: Kevin's napkin exactly as he made it (assets/img/speak/napkin-kevin.webp), square, as big as the
+   screen allows with room for the button under it */
+.napkin { width: min(86vw, 440px, calc(100svh - 150px)); aspect-ratio: 1; margin: 0; border-radius: 3px; overflow: hidden;
+  box-shadow: 0 2px 0 rgba(255,255,255,.06), 0 20px 60px rgba(0,0,0,.7); background: #b89e74; }
+.napkin img { display: block; width: 100%; height: 100%; }
 /* THE CELLAR's TV: its screen breathes a little light (held still for visitors who ask for less motion) */
 .tv-glow { position: absolute; left: 77.1%; top: 50.4%; width: 17%; height: 10.4%; border-radius: 22%; pointer-events: none;
   background: radial-gradient(closest-side, rgba(205,225,230,.22), rgba(205,225,230,0)); mix-blend-mode: screen; opacity: 0; }
@@ -358,7 +377,7 @@ dialog.pop::backdrop { background: transparent; }
     <button class="spot" type="button" data-room="bar" data-name="The Bar" style="left:12.70%;top:17.58%;width:74.71%;height:15.30%" aria-label="The Bar: go up to the bar"></button>
     <button class="spot" type="button" data-room="stage" data-name="The Stage" style="left:22.07%;top:41.67%;width:54.30%;height:24.09%" aria-label="The Stage: go up close"></button>
     <button class="spot" type="button" data-room="cellar" data-name="The Cellar" style="left:0.00%;top:53.26%;width:7.42%;height:19.79%" aria-label="The Cellar: go through the red door"></button>
-    <button class="spot" type="button" data-pop="restroom" data-name="Restroom · Soon" style="left:92.58%;top:53.71%;width:7.42%;height:19.53%" aria-label="Restroom: opening soon"></button>
+    <button class="spot" type="button" data-room="rest" data-name="The Rest" style="left:92.58%;top:53.71%;width:7.42%;height:19.53%" aria-label="The Rest: go through the restroom door"></button>
     <!-- Dan's bubble on the stage (the script writes it from NRSPEAK.STAGE.says; in theater mode there's none) -->
     <div class="say-dan" id="say-dan"></div>
   </div>
@@ -409,13 +428,32 @@ dialog.pop::backdrop { background: transparent; }
   </div>
 </main>
 
+<!-- 6 · THE REST (through the RESTROOM door, on the hall's level, so it keeps the hall's warmth, 8). The set designer's
+     render, sharpened 4x, its walls re-papered in dictionary pages with Kevin Kermes's own napkin and her notes tiled
+     through them as half-page squares, the small sheepskin by the barrel taken out (tools/speak-faces/rest_room.py).
+     The walls are one button: they open #pop-napkin, whose button is the way out to the interview. -->
+<main class="hall rest" id="room-rest" hidden aria-label="THE REST: a powder room under a black arched ceiling, papered floor to tile in greyscale like a checkerboard: half pages of dictionary alternating with grey squares, one in four Kevin Kermes's 3x5 Napkin and the others four handwritten notes in Kathi's words, repeated all over the walls: As Director of Talent and Culture, I saw why our humanity is the one thing we can't erase from the systems shaping the future. Media is one of them. It looks like having read over a thousand human-curated works from 700+ writers in eight months. Voices that want to exchange ideas vs. voices that want to trap our attention for profit. Absurdity is essential. The napkin, one of them centred over the mirror, is his ink drawing of Kathi on a kraft paper napkin, smiling in a wide-brimmed hat, lettered KATHI DALGUNTAS and Hi, HUMAN. A two-tier iron chandelier of Edison bulbs hung on chains, a round black mirror between brass wall lamps, a hanging pothos, a copper basin set in an oak barrel, a copper toilet with a black seat, black tile, cream towels and a sheepskin rug.">
+  <div class="art">
+    <img src="../assets/img/speak/rest-1600.webp" srcset="../assets/img/speak/rest-1600.webp 1600w, ../assets/img/speak/rest-2400.webp 2400w, ../assets/img/speak/rest-3200.webp 3200w" sizes="(max-aspect-ratio: 9/10) 150vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
+    <canvas class="dust" aria-hidden="true" data-motes="40"></canvas>
+    <!-- the chandelier's bulbs (top ring, then bottom ring) and the two wall lamps -->
+    <span class="flame" style="left:45.8%;top:8.6%;--s:3%;--d:2.4s"></span><span class="flame" style="left:38.4%;top:9.1%;--s:3%;--d:2.9s"></span><span class="flame" style="left:53.3%;top:9.5%;--s:3%;--d:2.6s"></span><span class="flame" style="left:33.4%;top:10.8%;--s:3%;--d:3.1s"></span>
+    <span class="flame" style="left:58.2%;top:11.6%;--s:3%;--d:2.3s"></span><span class="flame" style="left:34.9%;top:17.1%;--s:3%;--d:2.8s"></span><span class="flame" style="left:56.6%;top:17%;--s:3%;--d:2.7s"></span><span class="flame" style="left:41%;top:18.8%;--s:3%;--d:3.2s"></span>
+    <span class="flame" style="left:50%;top:18.7%;--s:3%;--d:2.5s"></span><span class="flame" style="left:40.5%;top:24.1%;--s:3%;--d:2.9s"></span><span class="flame" style="left:47.6%;top:24.2%;--s:3%;--d:2.4s"></span><span class="flame" style="left:34.9%;top:25.4%;--s:3%;--d:3s"></span>
+    <span class="flame" style="left:53.1%;top:25.4%;--s:3%;--d:2.6s"></span><span class="flame" style="left:37.5%;top:29.3%;--s:3%;--d:2.8s"></span><span class="flame" style="left:49.2%;top:29.4%;--s:3%;--d:3.1s"></span><span class="flame" style="left:43.2%;top:29.8%;--s:3%;--d:2.3s"></span>
+    <span class="flame" style="left:41.3%;top:51.6%;--s:6%;--d:2.7s"></span><span class="flame" style="left:78.6%;top:50.8%;--s:6%;--d:3s"></span>
+    <!-- the walls: everything papered, from the ceiling down to the black tile -->
+    <button class="spot wall" type="button" data-pop="napkin" data-name="3x5 Interview · Kevin Kermes" style="left:0;top:0;width:100%;height:60%" aria-label="The walls: Kevin Kermes's 3x5 Napkin interview with Kathi"></button>
+  </div>
+</main>
+
 <div class="tag crystal label" id="tag" hidden></div>
-<!-- THE HALL'S PANEL: BAR (up) | STAGE (up), CELLAR (up-left) | RESTROOM (up-right) -->
+<!-- THE HALL'S PANEL: BAR (up) | STAGE (up), CELLAR (up-left) | RESTROOM (up-right: THE REST) -->
 <nav class="panel crystal" id="panel-hall" hidden aria-label="THE SPEAK">
   <button class="crystal" type="button" data-room="bar"><svg class="arw" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Bar</button>
   <button class="crystal" type="button" data-room="stage"><svg class="arw" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Stage</button>
   <button class="crystal" type="button" data-room="cellar"><svg class="arw" style="rotate:315deg;scale:1.17" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Cellar</button>
-  <button class="crystal" type="button" data-pop="restroom"><svg class="arw" style="rotate:45deg;scale:1.17" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Restroom<span class="soon">Soon</span></button>
+  <button class="crystal" type="button" data-room="rest"><svg class="arw" style="rotate:45deg;scale:1.17" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Restroom</button>
 </nav>
 <!-- THE STAGE'S PANEL: back to the hall, or what's playing -->
 <nav class="panel crystal" id="panel-stage" hidden aria-label="The stage">
@@ -430,6 +468,11 @@ dialog.pop::backdrop { background: transparent; }
 <nav class="panel crystal" id="panel-cellar" hidden aria-label="The cellar">
   <button class="crystal" type="button" data-room="hall"><svg class="arw" style="rotate:270deg" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Back to Hall</button>
   <button class="crystal" type="button" data-pop="tv"><svg class="arw" style="rotate:90deg" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>The TV</button>
+</nav>
+<!-- THE REST'S PANEL: back to the hall, or the 3x5 Interview (the napkin popup) -->
+<nav class="panel crystal" id="panel-rest" hidden aria-label="The rest">
+  <button class="crystal" type="button" data-room="hall"><svg class="arw" style="rotate:270deg" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>Back to Hall</button>
+  <button class="crystal" type="button" data-pop="napkin"><svg class="arw" style="rotate:90deg" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10.5V1.5M2.2 5.3 6 1.5l3.8 3.8"/></svg>3x5 Interview</button>
 </nav>
 <!-- TOP RIGHT, on the stage only: straight to THE BAR (BACK TO HALL, top left, is the way back from every room;
      from the bar, that's the only way out, so nothing in the navigation is called anything but its room's name). -->
@@ -461,6 +504,13 @@ dialog.pop::backdrop { background: transparent; }
     <span class="go-panel crystal"><a class="go crystal" id="tv-go" href="https://substack.com/home/post/p-224228748" target="_blank" rel="noopener" aria-label="The algorithm will bury this: watch the episode (opens in a new tab)">The Algorithm Will Bury This<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
   </div>
 </dialog>
+<dialog class="pop" id="pop-napkin" aria-label="3x5 Napkin by Kevin Kermes">
+  <div class="box" tabindex="-1">
+    <button class="close" type="button" aria-label="Close">×</button>
+    <figure class="napkin"><img src="../assets/img/speak/napkin-kevin.webp" width="1264" height="1264" alt="Kevin Kermes's 3x5 Napkin: an ink drawing of Kathi on a kraft paper napkin, smiling in a wide-brimmed hat, her long hair over a jacket, lettered KATHI DALGUNTAS and Hi, HUMAN, signed www.kevinkermes.com" loading="lazy" decoding="async"></figure>
+    <span class="go-panel crystal"><a class="go crystal" id="napkin-go" href="https://creatingwhatsnext.substack.com/p/3x5-interview-022-kathi-dalguntas" target="_blank" rel="noopener" aria-label="Read 3x5 Interview (022): Kathi Dalguntas, by Kevin Kermes on Creating What's Next (opens in a new tab)">Read the 3x5 Interview<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></a></span>
+  </div>
+</dialog>
 <dialog class="pop" id="pop-soon" aria-label="Opening soon">
   <div class="box" tabindex="-1">
     <button class="close" type="button" aria-label="Close">×</button>
@@ -476,7 +526,7 @@ dialog.pop::backdrop { background: transparent; }
 const SPEAK = window.NRSPEAK || {};
 const STAGE = Object.assign({ heading: "NOW PLAYING", title: "", episode: "", link: "", button: "Watch", closeUp: true, says: [] }, SPEAK.STAGE || {});
 const BAR = Object.assign({ oldFashioned: "https://buymeacoffee.com/thisisnotrising", says: [], follow: "", followButton: "Follow" }, SPEAK.BAR || {});
-const DOORS = { restroom: "THE RESTROOM" };
+const DOORS = {};                                                           // doors not open yet: OPENING SOON, then the door's name (none right now)
 document.getElementById("bar-go").href = BAR.oldFashioned;
 
 const $ = id => document.getElementById(id);
@@ -522,27 +572,28 @@ function open(what) {
   $("pop-" + what).showModal();
 }
 
-/* ROOMS. go() is the only way between them. Each room has its own address (#passage, #hall, #stage, #bar),
+/* ROOMS. go() is the only way between them. Each room has its own address (#passage, #hall, #stage, #bar, #cellar, #rest),
    so the browser's Back button walks you back the way you came, and a link can land straight in a room.
      BACK  the way back, top left, in each room: its words, and the room it goes to
      TOP   top right, on the stage only: straight across to the bar */
-const ROOMS = { passage: $("room-passage"), hall: $("room-hall"), stage: $("room-stage"), bar: $("room-bar"), cellar: $("room-cellar") };
-const BACK = { passage: ["\u2190\uFE0E 777 Daydream St.", null], hall: ["\u2190\uFE0E The passage", "passage"], stage: ["\u2190\uFE0E Back to Hall", "hall"], bar: ["\u2190\uFE0E Back to Hall", "hall"], cellar: ["\u2190\uFE0E Back to Hall", "hall"] };
+const ROOMS = { passage: $("room-passage"), hall: $("room-hall"), stage: $("room-stage"), bar: $("room-bar"), cellar: $("room-cellar"), rest: $("room-rest") };
+const BACK = { passage: ["\u2190\uFE0E 777 Daydream St.", null], hall: ["\u2190\uFE0E The passage", "passage"], stage: ["\u2190\uFE0E Back to Hall", "hall"], bar: ["\u2190\uFE0E Back to Hall", "hall"], cellar: ["\u2190\uFE0E Back to Hall", "hall"], rest: ["\u2190\uFE0E Back to Hall", "hall"] };
 const TOP = { stage: ["The Bar \u2192\uFE0E", "bar"] };
 const veil = $("veil"), back = $("back"), topbar = $("topbar");
 let room = null, hallY = 0;
 function show(to, from) {
   chatOff();
   for (const k in ROOMS) { ROOMS[k].hidden = k !== to; ROOMS[k].classList.remove("lit"); }
-  $("panel-hall").hidden = to !== "hall"; $("panel-stage").hidden = to !== "stage"; $("panel-bar").hidden = to !== "bar"; $("panel-cellar").hidden = to !== "cellar";
+  $("panel-hall").hidden = to !== "hall"; $("panel-stage").hidden = to !== "stage"; $("panel-bar").hidden = to !== "bar"; $("panel-cellar").hidden = to !== "cellar"; $("panel-rest").hidden = to !== "rest";
   topbar.hidden = !(to in TOP); if (to in TOP) { topbar.textContent = TOP[to][0]; topbar.dataset.room = TOP[to][1]; }
   $("pcue").classList.toggle("gone", to !== "passage"); $("hcue").classList.toggle("gone", to !== "hall");
   const [text, prev] = BACK[to]; back.textContent = text;
   if (prev) { back.href = "#" + prev; back.dataset.room = prev; } else { back.href = "https://nebularising.media/thetradingpost/"; delete back.dataset.room; }
-  scrollTo(0, to === "passage" ? (from ? ROOMS.passage.offsetHeight - innerHeight : 0) : to === "hall" && (from === "stage" || from === "bar" || from === "cellar") ? hallY : 0);
+  scrollTo(0, to === "passage" ? (from ? ROOMS.passage.offsetHeight - innerHeight : 0) : to === "hall" && (from === "stage" || from === "bar" || from === "cellar" || from === "rest") ? hallY : 0);
   const img = ROOMS[to].querySelector("img");
   return new Promise(res => { if (img.complete && img.naturalWidth) res(); else { img.loading = "eager"; img.addEventListener("load", res, { once: true }); img.addEventListener("error", res, { once: true }); } })
     .then(() => { $("teleport").classList.add("gone"); veil.classList.add("gone"); requestAnimationFrame(() => ROOMS[to].classList.add("lit")); walk(); warm(to);
+      if (to === "rest") $("pop-napkin").querySelector("img").loading = "eager";   // in THE REST, the napkin comes down early, so it opens at once
       if (to === "bar") chatPlay(1300); });                                 // at the bar, Kathi says hello once the lights are up
 }
 function go(to, fromAddress) {
@@ -557,7 +608,7 @@ function go(to, fromAddress) {
 }
 addEventListener("hashchange", () => go(location.hash.slice(1) || "passage", true));
 /* start the next rooms' pictures downloading early, so walking through a door is instant (from the hall: the stage first, then the bar) */
-const NEXT = { passage: ["hall"], hall: ["stage", "bar", "cellar"], stage: ["bar"], bar: ["stage"], cellar: ["stage"] };
+const NEXT = { passage: ["hall"], hall: ["stage", "bar", "cellar", "rest"], stage: ["bar"], bar: ["stage"], cellar: ["stage"], rest: ["stage"] };
 if (!STAGE.closeUp) for (const k in NEXT) NEXT[k] = NEXT[k].filter(r => r !== "stage");   // theater mode: the close-up is never needed
 function warm(at) { NEXT[at].forEach((k, i) => setTimeout(() => { ROOMS[k].querySelector("img").loading = "eager"; }, 1200 + i * 2000)); }
 
