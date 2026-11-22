@@ -525,7 +525,7 @@ window.NRSF = {
     speakeasy: "speakeasy/",        // left door, 9¾: THE SPEAK
     newsstand: "newsstand/",        // the magazine window
     ramh: "https://robotsatemyhomework.com/ramh-library",  // the A-frame floor sign (opens in a new tab)
-    marquee: "https://nebularising.media/thetradingpost/newsstand/",   // the button under the letter board up close: Issue 20 (Machine Poet) on the Newsstand ("" = no popup)
+    marquee: "https://thisisnotrising.org/2026/11/22/machine-poet/",   // the button under the letter board up close: Issue 20 (Machine Poet) story on thisisnotrising.org ("" = no popup)
     magazine: "https://thisisnotrising.org/"                 // the button under the NOT RISING sign up close ("" = no popup)
   },
 
