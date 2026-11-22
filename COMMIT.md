@@ -1,5 +1,21 @@
 # THE SPEAK: what this commit changes
 
+THE SPEAK: the lace & macrame stage (Nov 22, live 11:11 AM). Commit message: "THE SPEAK: lace & macrame stage: lace drapes, heart panels, two tiers of lace up top"
+Upload (Add file -> Upload files, all at once, commit directly to main): the folders assets, speakeasy and tools, and COMMIT.md.
+  - assets/img/speak/hall-theater-1600/2400/3200.webp (same names, so the page code is unchanged): in theater mode the
+    red velvet drapes either side of the screen are now cream lace, tied back in the same rope, with a soft sheer
+    hanging behind them where the dark backstage showed; a macrame panel (two knotted hearts, a diamond lattice of
+    square knots, long fringe, hung on cords that run up behind the lace) lines each edge of the screen; across the
+    top, under the pine garland, two tiers of scalloped lace festoons (the back tier's low points fill the gaps where
+    the front ones meet) and lace tails down both corners of the arch. The garland, the red bow, the red and glass
+    baubles, the macrame valance's fringe (now behind the lace), the screen and film card, trees, poinsettias and
+    lanterns are exactly as they were. Warmth 8.1 before and after (within 5-10). Inspired by her lace & macrame
+    reference; everything drawn from scratch, nothing cut from the photo.
+  - tools/speak-faces/lace_stage.py (new; runs after theater_hall.py), with curtains.py (the sides), swags.py (the top)
+    and lace.py (the lace pattern and its scalloped edge).
+  - speakeasy/index.html: only the hall's description for screen readers (lace instead of red velvet) and the note
+    on where the picture comes from.
+
 STOREFRONT: the SPEAKEASY sign (Nov 22). Upload (same commit is fine): assets/img/storefront/winter-desk-stage.webp,
 winter-phone-stage.webp, assets/storefront.css, index.html, tools/speakeasy-sign-easy.py, tools/ref/winter-*-stage-easy-dark.webp.
   - EASY and its arrow on the red door's transom are back, faded: the same gold paint as SPEAK, worn, still readable;
