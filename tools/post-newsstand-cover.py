@@ -1,4 +1,7 @@
 """
+(Nov 22: replaced by tools/post-newsstand-front.py, which lays the whole clean Newsstand, all 20 pockets, into the room.
+Kept for the record.)
+
 A NEW COVER ON THE POST'S NEWSSTAND                      python3 tools/post-newsstand-cover.py 20
 (needs Python 3 with numpy and OpenCV: pip install numpy opencv-python-headless)
 

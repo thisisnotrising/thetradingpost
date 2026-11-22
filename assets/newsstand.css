@@ -709,12 +709,13 @@ body {
 /* On the narrowest phones, "Nebula Cafe" is long enough to bump into "777 Daydream St.",
    so both signposts pull their letters a little closer together there */
 @media (max-width: 360px) { .nrns a.nrns-back { letter-spacing: .1em; } }
-/* INSIDE THE POST (Nov 5): the Newsstand popup's × (44 px round, 8 px from the top right corner) sits exactly where
-   "Nebula Cafe →" is. So inside the popup, on any screen narrow enough for the two to touch (up to 1280 px wide; on a
-   wider screen the stand stops short of the edge and the × is clear), the top pair of signposts steps down 48 px
-   into a row of their own under the ×, and the whole stand moves down the same 48 px so the marquee keeps its
-   distance. The bottom pair stays where it is (nothing covers it). "in-post" is set in newsstand/index.html. */
-@media (max-width: 1280px) {
-  .in-post .nrns.stand { padding-top: 84px; }                       /* 36 + 48 */
-  .in-post .nrns > a.nrns-back { top: 58px; }                        /* 10 + 48 */
-}
+/* INSIDE THE POST (Nov 22, Kathi; replaces the Nov 5 signposts in the popup): the Newsstand popup opened from THE
+   POST shows just the stand's tabs and its cover grid. The room behind it already has the NOW SOARING sign and its
+   awning, and the popup's x is the way back into the room, so inside the popup there are no signposts (top or
+   bottom: "777 Daydream St." and "Nebula Cafe"), no sign and no awning. The tabs (01-20, 21-40, Memoirs) stay: they're
+   how you reach the other covers. On screens up to 1280 px wide the popup's x (44 px round, 8 px from the top right
+   corner) would sit on the Memoirs tab, so the stand starts 64 px down, under it. "in-post" is set in
+   newsstand/index.html. On its own (not in the popup) the Newsstand page keeps everything. */
+.in-post .nrns > a.nrns-back, .in-post .nrns .nrns-foot, .in-post .nrns > .sign, .in-post .nrns > .awning { display: none !important; }
+.in-post .nrns.stand { padding-top: 64px; }
+@media (min-width: 1281px) { .in-post .nrns.stand { padding-top: 36px; } }

@@ -25,10 +25,13 @@ assets/img/speak/       THE SPEAK's four rooms, each in three or four widths (th
                         opening-day finish: faces_nov8.py (the faces, from one podcast frame), shadow_banned.py (the red door's
                         SHADOW / BANNED plaque), hair_texture.py (Dan's hair), speak_grade.py (every room's warmth held to 5-10) and cellar_screen.py (THE CELLAR's TV screen).
                         THE REST (rest-*.webp) and its popup's napkin (napkin-kevin.webp, Kevin's napkin exactly as he made it):
-                        tools/speak-faces/rest_room.py (the recipe: sharpened 4x with esrgan_np.py, the same upscaler in plain
-                        numpy; the small sheepskin taken out by rest_rug.py; the walls re-papered by rest_wallpaper.py in dictionary pages
-                        set by dictionary.py, in her own words, with Kevin's napkin and her notes (lettered by notes.py) tiled through
-                        them as half-page squares).
+                        tools/speak-faces/rest_newsprint.py (the recipe, Nov 21 evening: the set designer's newsprint render
+                        sharpened 4x with esrgan_np.py, the same upscaler in plain numpy; Kevin's napkin set over the arch in
+                        place of the render's redrawn portrait, framed by Prohibition clippings (no bare wall); her 3x5 answers
+                        set as Prohibition newspaper articles, her-words.txt; the wallpaper one aged cream). rest_paper.py
+                        draws the clippings and articles (fonts/: Old Standard, open licence).
+                        The dictionary-papered first version was made by rest_room.py (with rest_rug.py, rest_wallpaper.py,
+                        dictionary.py and notes.py); kept so it can be made again.
 post/cafe.html          THE POST, the room inside, as a STAGE SET: the same 3D box and camera as the original
                         room, but every wall, the floor, the roof and everything standing in the room is one
                         finished photo. Four clickable spots on the walls open four popups. (Its look, bones

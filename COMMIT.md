@@ -1,5 +1,50 @@
 # THE SPEAK: what this commit changes
 
+STOREFRONT: the SPEAKEASY sign (Nov 22). Upload (same commit is fine): assets/img/storefront/winter-desk-stage.webp,
+winter-phone-stage.webp, assets/storefront.css, index.html, tools/speakeasy-sign-easy.py, tools/ref/winter-*-stage-easy-dark.webp.
+  - EASY and its arrow on the red door's transom are back, faded: the same gold paint as SPEAK, worn, still readable;
+    SPEAK stays the clear, bright part (winter pictures, by tools/speakeasy-sign-easy.py; the fall sign's EASY in
+    storefront.css, opacity .13 -> .34).
+
+THE POST: the clean Newsstand (Nov 22). Commit message: "THE POST: the Newsstand, clean: even rows, ISSUE tags, clear glass"
+Upload (same way, can go in the same commit): assets/img/post/room2/room-2400.webp, room-1600.webp,
+room-2400-winter.webp, room-1600-winter.webp, tools/post-newsstand-front.py, tools/ref/newsstand-front.webp.
+  - THE POST's room picture had the Newsstand baked in with yellow smears of glare under every row, an uneven cover
+    grid and no ISSUE labels. The real Newsstand (the one post/recipe.html builds, straight on, on its white brick) is
+    now laid over it on the left wall in the wall's perspective and the room's light, autumn and winter: 20 covers in
+    an even 5 x 4 grid, each with its ISSUE tag, clear glass, the 01-20 / 21-40 / MEMOIRS tabs. The room's own glowing
+    bulbs frame it on all four sides; the NOW SOARING sign, its awning and the bench are unchanged. The phone pictures
+    don't show the stand, so they stay.
+  - assets/newsstand.css and newsstand/index.html: the Newsstand popup inside THE POST shows just the tabs and the
+    cover grid: no "← 777 Daydream St." / "Nebula Cafe →" signposts (top or bottom), no NOW SOARING sign or awning
+    (the room behind already has them; the popup's × is the way back). The Newsstand page on its own is unchanged.
+    Upload these two as well.
+
+THE REST, newsprint edition (Nov 21, evening). Commit message: "THE REST: newsprint room, Kevin's napkin framed, her words as articles"
+Upload (Add file -> Upload files, all at once, commit directly to main): the folders speakeasy, assets and tools, and README.md.
+  - assets/img/speak/rest-1200/1800/2400.webp (new, lighter set; on GitHub, delete the old rest-1600.webp and
+    rest-3200.webp afterwards: nothing uses them): the set designer's newsprint render (Prohibition front pages, her 3x5
+    answers, black doors, barrel sink), sharpened 4x. Kevin's napkin, exactly his drawing, sits over the arch in place
+    of the render's redrawn portrait, framed by four Prohibition clippings (VOLSTEAD ACT IN FORCE, DRY AGENTS RAID
+    CLUB; SECRET ROOMS FILL NIGHTLY, RUM RUNNERS SLIP PAST), with no bare wall left anywhere. Her 3x5 answers are set
+    as Prohibition newspaper articles, word for word, each headlined with a phrase from her own answer: THE ONE THING
+    WE CAN'T ERASE (left wall), HUMANS THINK DIFFERENTLY and WE MAKE OUR OWN MEANING (right wall), A THOUSAND
+    HUMAN-CURATED WORKS and HEARD OVER THE ALGORITHM (under the napkin). All the wallpaper is one aged cream, like the
+    passage's pages (warmth 7.6, within 5-10). Left wall headline mended: 'Amendmeat' -> 'Amendment'. WebP quality
+    75: a phone downloads ~665 KB for the room (was ~1.3 MB), a retina desktop ~950 KB (was ~2 MB).
+  - speakeasy/index.html: THE SPEAK's marquees now match the Newsstand's marquee popup (square black case ringed with
+    warm bulbs, white backlit letter board with grey rails, the oOo ornament, black letters): the popup cards (NOW
+    SOARING, OPENING SOON) and, laid over the painted ones, the marquee over the balcony bar in the hall and the one
+    over the bar up close; every marquee also shows the show's name (Wilbur C. Fibbermust), a touch larger. THE REST keeps the same candle glow and dust as every
+    room in THE SPEAK; the glows sit on the new bulbs, lanterns and candles; the walls button reaches
+    down to the white brick (doors included); phones show as much of the room as fills the screen (both papered
+    walls in view); the room's screen-reader description rewritten for the new room, with her words as on the walls.
+  - tools/speak-faces/rest_newsprint.py (the recipe), rest_paper.py (the clippings and the cards),
+    originals/rest-newsprint-render.png, and fonts/ (Old Standard, plus Courier Prime for the card version kept in
+    rest_paper.py, with their open licences).
+  - README.md: the file map points THE REST at the new recipe.
+  napkin-kevin.webp (the popup) and data.js are unchanged.
+
 Upload these into the thetradingpost repo (branch main), keeping the folders as they are here. Files with the same name
 are replaced; everything else on the site stays as it is. (This COMMIT.md is just these notes: no need to upload it.)
 Checked against GitHub on Nov 5 (after today's Newsstand commits): data.js and README.md differ only by THE SPEAK's parts,

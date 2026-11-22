@@ -49,17 +49,17 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
      4. THE BAR (speak/bar-*.webp), from the hall's bar or the BAR button, or
         the stage's THE BAR. Kathi sits at the bar and says hello in a chat.
      5. THE CELLAR (speak/cellar-*.webp), through the red door.
-     6. THE REST (speak/rest-*.webp), through the RESTROOM door: walls papered
-        in dictionary pages (like Kathi's own "The Rest", 2016) with Kevin
-        Kermes's 3x5 Napkin of her and her four notes tiled all through them, in
-        squares half the size of a page (one napkin to every three notes), all
-        in greyscale. Click anywhere on the walls: the napkin,
-        and the way out to the interview.
+     6. THE REST (speak/rest-*.webp), through the RESTROOM door: a narrow
+        powder room papered in Prohibition-era front pages, with her 3x5
+        Interview answers set among them and Kevin Kermes's 3x5 Napkin of her
+        over the mirror. Click anywhere on the walls: the napkin, and the way
+        out to the interview.
    What's on the stage and what Kathi says come from NRSPEAK in assets/data.js
    (PART 4): every marquee says its heading (NOW PLAYING, NOW SOARING), then the show. In THEATER MODE
    (NRSPEAK.STAGE.closeUp false) the curtains are closed: the stage and STAGE open the card, not the close-up.
-   Each picture comes in three sizes (1600, 2400 and 3200 pixels wide): the
-   browser downloads only the one the screen needs, so it's sharp and light.
+   Each picture comes in three sizes (1600, 2400 and 3200 pixels wide; THE
+   REST, the lightest, 1200, 1800 and 2400): the browser downloads only the
+   one the screen needs, so it's sharp and light.
    ====================================================================== */
 :root {
   color-scheme: dark;
@@ -107,9 +107,12 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
 .art > img, .s-wrap > img { display: block; width: 100%; height: 100%; filter: brightness(.05); transition: filter 1.8s cubic-bezier(.3,.6,.2,1); }
 .lit .art > img, .lit .s-wrap > img { filter: none; }
 @media (max-aspect-ratio: 9/10) { .cellar .art { width: 140vw; margin-left: -40vw; } }   /* phones: the right of the room, so the TV is in view */
-/* THE REST on phones: tall enough to fill the screen, the slice from the toilet to past the mirror (18% to 85% of the
-   picture), so the napkin over the mirror and the barrel sink are always in view */
-@media (max-aspect-ratio: 9/10) { .rest .art { width: 150vw; margin-left: -27vw; } }
+/* THE REST on phones: as wide as the room can be while still filling the screen top to bottom (the picture is 2:3, so
+   two-thirds of the screen's height), centred, so the Prohibition papering shows down both walls and the napkin, the
+   cards and the barrel sink stay in view; never narrower than the screen. (122vw comes first for phones too old to
+   know svh; they keep it.) */
+@media (max-aspect-ratio: 9/10) { .rest .art { width: 122vw; margin-left: -11vw;
+  width: max(100vw, calc(100svh / 1.5)); margin-left: calc((100vw - max(100vw, calc(100svh / 1.5))) / 2); } }
 /* THE REST's walls: one invisible button over all the papered walls. Pointing at them only warms the paper a little
    (no box: the walls are the whole top of the room) and the name tag follows the pointer */
 .spot.wall { border-radius: 0; }
@@ -166,7 +169,6 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
    (49% down); when it's shorter, it sits in the middle. ---- */
 .b-wrap { --w: min(max(100vw, 177.7vh), calc(100vw / .40), 205vh); --h: calc(var(--w) * 941 / 1672); aspect-ratio: 1672 / 941;
   top: max(calc(50% - var(--h) / 2), min(0px, max(calc(100% - var(--h)), calc(50% - var(--h) * .49)))); }
-#room-bar .tiles .l1, #room-bar .tiles .l2 { font-size: min(34cqh, 8cqw); }
 /* screens taller than wide: the picture is lifted so Kathi's boots (91% of the way down) end above the panel, and its
    top and bottom edges fade into the dark. Screens wider than tall: the panel moves left, under the empty stools,
    so it never covers her. Very wide screens: the sides fade into the dark, as on the stage. */
@@ -297,26 +299,50 @@ dialog.pop::backdrop { background: transparent; }
 .bmc figcaption { display: grid; gap: 6px; padding: 12px 16px 22px; }
 .bmc-name { font: 700 clamp(17px, 4.8vw, 20px)/1.2 var(--body); }
 .where { font: 400 12px/1.3 var(--body); color: #6b6b6b; }
-/* the popup marquee, built like the marquees in the renders: a dark bronze frame with rounded corners,
-   gold Edison bulbs all round (the script places them), and a warm-lit slatted board */
-.mcard { width: min(86vw, 440px); aspect-ratio: 3 / 1.25; position: relative; container-type: size; border-radius: 7cqh;
-  background: radial-gradient(130% 150% at 50% 50%, transparent 55%, rgba(0,0,0,.35)), linear-gradient(#4a2e18, #311d0f 50%, #23150a);
-  box-shadow: inset 0 1px 0 rgba(255,214,160,.35), inset 0 0 0 1px rgba(150,100,50,.45), inset 0 -2px 6px rgba(0,0,0,.5),
-    0 20px 60px rgba(0,0,0,.7), 0 0 60px rgba(255,170,80,.25); }
-.mcard .mboard { position: absolute; left: 6%; right: 6%; top: 14%; bottom: 14%; display: grid; place-items: center; border: 2px solid #140b05; border-radius: 4px; container-type: size;
-  box-shadow: 0 0 0 1px rgba(160,110,60,.35), inset 0 0 0 1px rgba(255,225,180,.5), inset 0 0 26px rgba(255,165,80,.32);
-  background: linear-gradient(180deg, rgba(0,0,0,0) calc(100% - 3px), rgba(150,120,90,.45) calc(100% - 3px) calc(100% - 1px), rgba(255,248,236,.9) calc(100% - 1px)) 0 0 / 100% calc(100% / 5) repeat-y, radial-gradient(ellipse 70% 120% at 50% 40%, #fbf2e3, #f4e4cc 70%, #e8d2b3); }
+/* the popup marquee (Nov 22: made to match the Newsstand's marquee popup exactly, newsstand.css "THE MARQUEE POPUP"):
+   a square black case ringed with warm bulbs, a backlit white letter board with the NOW SOARING sign's grey rails,
+   the little "oOo" ornament at the top, and black letters. The script places the bulbs in the case. */
+.mcard { width: min(86vw, 440px); aspect-ratio: 3 / 1.25; position: relative; container-type: size; border-radius: 0;
+  background: #0d0d0d;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), 0 0 40px rgba(255,236,190,.45), 0 0 120px rgba(255,210,140,.25), 0 20px 60px rgba(0,0,0,.7); }
+.mcard .mboard { position: absolute; left: 6%; right: 6%; top: 14%; bottom: 14%; display: grid; place-content: center; place-items: center; border-radius: 0; container-type: size;
+  box-shadow: inset 0 0 30px rgba(0,0,0,.18);
+  background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 calc(20% - 3px), rgba(60,50,40,.22) calc(20% - 3px) calc(20% - 1px), rgba(255,255,255,.6) calc(20% - 1px) 20%),
+    radial-gradient(ellipse 70% 120% at 50% 40%, #ffffff, #f3f1ea 60%, #dcdad5); }
+.mcard .orn { font: 400 min(11cqh, 4.6cqw)/1 Arimo, Arial, sans-serif; color: #000; letter-spacing: .1em; margin-bottom: 4cqh; }
+.mcard .orn b { font-weight: 400; font-size: 1.35em; }
+.mcard .tiles { color: #000; text-shadow: 0 1px 0 rgba(255,255,255,.6); text-transform: uppercase; }
 .mcard .tiles .l1 { font-size: min(17cqh, 6cqw); } .mcard .tiles .l2 { font-size: min(19cqh, 6.4cqw); }
-.mcard .tiles .note { font: 400 min(9cqh, 4cqw)/1.2 var(--body); color: #555; letter-spacing: .02em; margin-top: .5em; }
+.mcard .tiles .note { font: 400 min(11.5cqh, 4.9cqw)/1.2 var(--body); color: #444; letter-spacing: .02em; margin-top: .45em; text-transform: none; text-shadow: none; }
 .mcard .bulbs { position: absolute; inset: 0; pointer-events: none; }
 /* (each bulb is pulled back by half its size with margins, not translate, so its halo can sit behind it) */
-.mcard .bulbs i { position: absolute; width: 9.5cqh; height: 9.5cqh; margin: -4.75cqh 0 0 -4.75cqh; border-radius: 50%;
-  background: radial-gradient(circle at 46% 42%, #fffef8 0 30%, #fff4d8 44%, #ffd890 60%, #f7a444 75%, #c8661a 88%, #6e3209);
-  box-shadow: .4cqh .65cqh 0 .3cqh rgba(14,7,2,.92), 0 0 1.4cqh .45cqh rgba(255,196,110,.95), 0 0 4cqh 1.1cqh rgba(255,150,50,.5); }
-.mcard .bulbs i::before { content: ""; position: absolute; inset: -170%; z-index: -1; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,178,80,.6), rgba(255,140,40,.22) 38%, transparent 66%);
-  animation: bulb-glow 2.8s ease-in-out calc(var(--i) * -.37s) infinite alternate; }
+.mcard .bulbs i { position: absolute; width: 8cqh; height: 8cqh; margin: -4cqh 0 0 -4cqh; border-radius: 50%;
+  background: radial-gradient(circle at 46% 42%, #fffdf3 0 34%, #fff1c8 50%, #ffd98a 68%, #f2b55a 84%, #a8742c);
+  box-shadow: 0 0 1.2cqh .35cqh rgba(255,236,190,.9), 0 0 3.5cqh 1cqh rgba(255,206,120,.45); }
+.mcard .bulbs i::before { content: ""; position: absolute; inset: -150%; z-index: -1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,226,160,.45), rgba(255,200,110,.16) 38%, transparent 66%);
+  animation: bulb-glow 2.4s ease-in-out calc(var(--i) * -.37s) infinite alternate; }
 @keyframes bulb-glow { from { opacity: .68; } to { opacity: 1; } }
+/* THE ROOMS' MARQUEES (Nov 22): over the balcony bar in the hall, and over the bar up close, the same marquee as the
+   popup (and the Newsstand's): a black case round the painted one's place, ringed with bulbs (--b: their size; the
+   script places data-cols along the top and the bottom and data-rows down each side), and the white board inset by
+   --sx at the sides and --sy at the top and bottom. Dark until the room's lights come up, like everything on it. */
+.rmq { position: absolute; container-type: size; background: #0d0d0d; opacity: 0; transition: opacity 1.8s cubic-bezier(.3,.6,.2,1); pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.05), 0 0 3cqh rgba(255,236,190,.4), 0 0 10cqh rgba(255,210,140,.2); }
+.lit .rmq { opacity: 1; }
+.rmq .mboard { position: absolute; left: var(--sx); right: var(--sx); top: var(--sy); bottom: var(--sy); display: grid; place-content: center; place-items: center; container-type: size;
+  box-shadow: inset 0 0 3cqh rgba(0,0,0,.2);
+  background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 calc(20% - 2px), rgba(60,50,40,.2) calc(20% - 2px) calc(20% - 1px), rgba(255,255,255,.55) calc(20% - 1px) 20%),
+    radial-gradient(ellipse 70% 120% at 50% 40%, #ffffff, #f3f1ea 60%, #dcdad5); }
+.rmq .orn { font: 400 min(12cqh, 3.2cqw)/1 Arimo, Arial, sans-serif; color: #000; letter-spacing: .1em; margin-bottom: 3cqh; }
+.rmq .orn b { font-weight: 400; font-size: 1.35em; }
+.rmq .tiles { color: #000; text-shadow: 0 1px 0 rgba(255,255,255,.6); text-transform: uppercase; gap: 0; }
+.rmq .tiles .l1 { font-size: min(21cqh, 5.4cqw); } .rmq .tiles .l2 { font-size: min(24cqh, 6cqw); }
+.rmq .tiles .note { font: 400 min(13cqh, 3.4cqw)/1.2 var(--body); color: #444; letter-spacing: .02em; margin-top: .3em; text-transform: none; text-shadow: none; }
+.rmq .bulbs { position: absolute; inset: 0; }
+.rmq .bulbs i { position: absolute; width: var(--b); height: var(--b); margin: calc(var(--b) / -2) 0 0 calc(var(--b) / -2); border-radius: 50%;
+  background: radial-gradient(circle at 46% 42%, #fffdf3 0 34%, #fff1c8 50%, #ffd98a 68%, #f2b55a 84%, #a8742c);
+  box-shadow: 0 0 1.4cqh .4cqh rgba(255,236,190,.9), 0 0 4cqh 1.2cqh rgba(255,206,120,.45); }
 
 @media (prefers-reduced-motion: reduce) {
   .flame, .passage.lit .flame { animation: none; opacity: .85; }
@@ -326,6 +352,7 @@ dialog.pop::backdrop { background: transparent; }
   .msg.crystal, .msg.in, .chat .go-panel { transition: none; }
   .dust { display: none; }
   .mcard .bulbs i::before { animation: none; }
+  .rmq { transition: none; }
   .neon { animation: none; }
 }
 </style>
@@ -371,7 +398,8 @@ dialog.pop::backdrop { background: transparent; }
     <span class="flame" style="left:76.76%;top:66.47%;--s:2.5%;--d:3.1s"></span><span class="flame" style="left:79.20%;top:66.99%;--s:2.5%;--d:2.3s"></span><span class="flame" style="left:7.91%;top:69.86%;--s:2.5%;--d:2.8s"></span><span class="flame" style="left:11.13%;top:71.22%;--s:2.5%;--d:2.5s"></span>
     <span class="flame" style="left:92.29%;top:70.90%;--s:2.5%;--d:3s"></span><span class="flame" style="left:5.57%;top:81.64%;--s:2.5%;--d:2.9s"></span><span class="flame" style="left:79.20%;top:77.73%;--s:2.5%;--d:2.4s"></span><span class="flame" style="left:48.05%;top:87.63%;--s:3%;--d:2.5s"></span>
     <span class="flame" style="left:52.54%;top:90.17%;--s:3%;--d:3s"></span><span class="flame" style="left:65.53%;top:92.19%;--s:3%;--d:2.3s"></span><span class="flame" style="left:42.29%;top:93.23%;--s:3%;--d:2.8s"></span><span class="flame" style="left:38.57%;top:93.95%;--s:2.5%;--d:2.6s"></span>
-    <div class="board" style="left:37.99%;top:19.53%;width:24.22%;height:3.65%"><span class="tiles" data-marquee></span></div>
+    <!-- the marquee over the balcony bar: the Newsstand's marquee (black case, bulbs, white board), laid over the painted one -->
+    <div class="rmq" style="left:36.03%;top:18.33%;width:27.97%;height:5.92%;--sx:5.9%;--sy:17.5%;--b:10cqh" data-cols="15" data-rows="2" aria-hidden="true"><span class="mboard"><span class="tiles" data-marquee></span></span></div>
     <!-- the RESTROOM sign with REST dead: flickered on top of the picture's lit REST (the blink) -->
     <span class="neon" style="left:92.66%;top:53.54%;width:6.88%;height:3.23%" aria-hidden="true"><img src="../assets/img/speak/restroom-theater-dark.webp" width="220" height="155" alt="" decoding="async"></span>
     <button class="spot" type="button" data-room="bar" data-name="The Bar" style="left:12.70%;top:17.58%;width:74.71%;height:15.30%" aria-label="The Bar: go up to the bar"></button>
@@ -408,7 +436,8 @@ dialog.pop::backdrop { background: transparent; }
     <span class="flame" style="left:12.75%;top:6.91%;--s:5%;--d:2.3s"></span><span class="flame" style="left:27.89%;top:10.27%;--s:4.5%;--d:2.8s"></span><span class="flame" style="left:72.03%;top:10.32%;--s:4.5%;--d:2.6s"></span><span class="flame" style="left:87.33%;top:6.96%;--s:5%;--d:3.1s"></span>
     <span class="flame" style="left:6.83%;top:24.28%;--s:5%;--d:2.5s"></span><span class="flame" style="left:93%;top:24.09%;--s:5%;--d:3s"></span><span class="flame" style="left:12.92%;top:38.15%;--s:3%;--d:3.2s"></span><span class="flame" style="left:86.56%;top:37.71%;--s:3%;--d:2.7s"></span>
     <span class="flame" style="left:13.36%;top:45.85%;--s:3%;--d:2.9s"></span><span class="flame" style="left:74.72%;top:45.31%;--s:3%;--d:2.4s"></span><span class="flame" style="left:86.28%;top:45.76%;--s:3%;--d:2.3s"></span>
-    <div class="board" style="left:31.94%;top:11.65%;width:35.72%;height:11.6%"><span class="tiles" data-marquee></span></div>
+    <!-- the marquee over the bar: the Newsstand's marquee (black case, bulbs, white board), laid over the painted one -->
+    <div class="rmq" style="left:29.67%;top:7.45%;width:40.11%;height:18.76%;--sx:4.9%;--sy:17.5%;--b:10cqh" data-cols="18" data-rows="3" aria-hidden="true"><span class="mboard"><span class="tiles" data-marquee></span></span></div>
     <button class="spot" type="button" data-pop="show" data-name="Now Playing" style="left:29.9%;top:7.5%;width:39.9%;height:18.3%" aria-label="The marquee: now playing"></button>
     <!-- Kathi (the invisible button over her) and her chat (the script writes it from NRSPEAK.BAR.says: one bubble, its words changing at reading pace) -->
     <button class="b-kathi" id="b-kathi" type="button" aria-controls="chat" aria-expanded="false" aria-label="Kathi, on a bar stool: hear what she says"></button>
@@ -428,22 +457,24 @@ dialog.pop::backdrop { background: transparent; }
   </div>
 </main>
 
-<!-- 6 · THE REST (through the RESTROOM door, on the hall's level, so it keeps the hall's warmth, 8). The set designer's
-     render, sharpened 4x, its walls re-papered in dictionary pages with Kevin Kermes's own napkin and her notes tiled
-     through them as half-page squares, the small sheepskin by the barrel taken out (tools/speak-faces/rest_room.py).
-     The walls are one button: they open #pop-napkin, whose button is the way out to the interview. -->
-<main class="hall rest" id="room-rest" hidden aria-label="THE REST: a powder room under a black arched ceiling, papered floor to tile in greyscale like a checkerboard: half pages of dictionary alternating with grey squares, one in four Kevin Kermes's 3x5 Napkin and the others four handwritten notes in Kathi's words, repeated all over the walls: As Director of Talent and Culture, I saw why our humanity is the one thing we can't erase from the systems shaping the future. Media is one of them. It looks like having read over a thousand human-curated works from 700+ writers in eight months. Voices that want to exchange ideas vs. voices that want to trap our attention for profit. Absurdity is essential. The napkin, one of them centred over the mirror, is his ink drawing of Kathi on a kraft paper napkin, smiling in a wide-brimmed hat, lettered KATHI DALGUNTAS and Hi, HUMAN. A two-tier iron chandelier of Edison bulbs hung on chains, a round black mirror between brass wall lamps, a hanging pothos, a copper basin set in an oak barrel, a copper toilet with a black seat, black tile, cream towels and a sheepskin rug.">
+<!-- 6 · THE REST (through the RESTROOM door, on the hall's level, so it keeps the hall's warmth: within 5-10). The
+     set designer's newsprint render (Nov 21, evening), sharpened 4x, with Kevin Kermes's own napkin over the arch in
+     place of the render's redrawn portrait, framed by Prohibition clippings; her 3x5 answers, on the walls and
+     under the napkin, set as Prohibition newspaper articles (no bare wall anywhere); all the wallpaper one aged cream; the render's wall lettering mended to her 3x5 answers word for word
+     (tools/speak-faces/rest_newsprint.py, with rest_paper.py). The walls are one button: they open #pop-napkin, whose
+     button is the way out to the interview. -->
+<main class="hall rest" id="room-rest" hidden aria-label="THE REST: a narrow powder room under a black vault, its walls papered down to white brick in old front pages and clippings, all one aged cream, in candlelight: NATION VOTES PROHIBITION, 18th Amendment Ratified; SPEAKEASIES ON THE RISE, Secret Rooms, Jazz and Dry Cocktails; RAIDS ON ILLEGAL BARS CONTINUE. Kathi's words from her 3x5 Interview are set among them as newspaper articles. On the left wall, THE ONE THING WE CAN'T ERASE: As Director of Talent &amp; Culture, I saw why our humanity is the one thing we can't erase from the systems shaping the future. Media is one of them. Over the mirror, under the arch, Kevin Kermes's 3x5 Napkin: his ink drawing of Kathi smiling in a wide-brimmed hat, lettered KATHI DALGUNTAS and Hi, HUMAN, framed by clippings: VOLSTEAD ACT IN FORCE, Nation Goes Dry at Midnight, and under it DRY AGENTS RAID CLUB, Three Hundred Cases Seized in Cellar; SECRET ROOMS FILL NIGHTLY, Patrons Knock Twice at Unmarked Doors, and under it RUM RUNNERS SLIP PAST, Harbor Patrol Outwitted Again. Beneath it, two articles. A THOUSAND HUMAN-CURATED WORKS: It looks like having read over a thousand human-curated works from 700+ writers in eight months. Under it, a short clipping: JAZZ PLAYS TILL DAWN, Cellar Clubs Defy the Dry Law. And HEARD OVER THE ALGORITHM: I watch the Impact on Mission the most. I want to help humans be heard over the algorithm. I want to prove that helping others helps me prosper too. When I see that a writer I featured grew 10x more than the control group in 1 week, I keep going. On the right wall, HUMANS THINK DIFFERENTLY: Voices that want to exchange ideas vs. voices that want to trap our attention for profit. It's the former we should reward. Otherwise, Stackhunters decide who they restack, and we're all different for a reason. Humans think differently. Human curation should represent that. And below the raids, WE MAKE OUR OWN MEANING: It requires the willingness to hold multiple conflicting ideas at once. We make our own meaning in a world that makes zero sense right now. Mostly, we have fun while doing purposeful work, even when it's painful. Absurdity is essential. A ring chandelier of Edison bulbs hung on chains, trailing pothos, a round black mirror between brass lanterns, a copper basin set in an oak barrel, white hydrangeas, candles, an amethyst geode, cream towels, a black door either side with brass handles (a brass bee on the right one), black tile and a long sheepskin rug.">
   <div class="art">
-    <img src="../assets/img/speak/rest-1600.webp" srcset="../assets/img/speak/rest-1600.webp 1600w, ../assets/img/speak/rest-2400.webp 2400w, ../assets/img/speak/rest-3200.webp 3200w" sizes="(max-aspect-ratio: 9/10) 150vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
+    <img src="../assets/img/speak/rest-1800.webp" srcset="../assets/img/speak/rest-1200.webp 1200w, ../assets/img/speak/rest-1800.webp 1800w, ../assets/img/speak/rest-2400.webp 2400w" sizes="(max-aspect-ratio: 9/10) 125vw, 100vw" width="3200" height="4800" alt="" loading="lazy" decoding="async">
     <canvas class="dust" aria-hidden="true" data-motes="40"></canvas>
-    <!-- the chandelier's bulbs (top ring, then bottom ring) and the two wall lamps -->
-    <span class="flame" style="left:45.8%;top:8.6%;--s:3%;--d:2.4s"></span><span class="flame" style="left:38.4%;top:9.1%;--s:3%;--d:2.9s"></span><span class="flame" style="left:53.3%;top:9.5%;--s:3%;--d:2.6s"></span><span class="flame" style="left:33.4%;top:10.8%;--s:3%;--d:3.1s"></span>
-    <span class="flame" style="left:58.2%;top:11.6%;--s:3%;--d:2.3s"></span><span class="flame" style="left:34.9%;top:17.1%;--s:3%;--d:2.8s"></span><span class="flame" style="left:56.6%;top:17%;--s:3%;--d:2.7s"></span><span class="flame" style="left:41%;top:18.8%;--s:3%;--d:3.2s"></span>
-    <span class="flame" style="left:50%;top:18.7%;--s:3%;--d:2.5s"></span><span class="flame" style="left:40.5%;top:24.1%;--s:3%;--d:2.9s"></span><span class="flame" style="left:47.6%;top:24.2%;--s:3%;--d:2.4s"></span><span class="flame" style="left:34.9%;top:25.4%;--s:3%;--d:3s"></span>
-    <span class="flame" style="left:53.1%;top:25.4%;--s:3%;--d:2.6s"></span><span class="flame" style="left:37.5%;top:29.3%;--s:3%;--d:2.8s"></span><span class="flame" style="left:49.2%;top:29.4%;--s:3%;--d:3.1s"></span><span class="flame" style="left:43.2%;top:29.8%;--s:3%;--d:2.3s"></span>
-    <span class="flame" style="left:41.3%;top:51.6%;--s:6%;--d:2.7s"></span><span class="flame" style="left:78.6%;top:50.8%;--s:6%;--d:3s"></span>
-    <!-- the walls: everything papered, from the ceiling down to the black tile -->
-    <button class="spot wall" type="button" data-pop="napkin" data-name="3x5 Interview · Kevin Kermes" style="left:0;top:0;width:100%;height:60%" aria-label="The walls: Kevin Kermes's 3x5 Napkin interview with Kathi"></button>
+    <!-- the glows, breathing like every room's: the chandelier's bulbs (top ring, the lower ring and the two hanging below
+         it), the two brass lanterns, the two candles -->
+    <span class="flame" style="left:50.2%;top:5.7%;--s:3%;--d:2.4s"></span><span class="flame" style="left:40.5%;top:7.8%;--s:3%;--d:2.9s"></span><span class="flame" style="left:59.5%;top:7.8%;--s:3%;--d:2.6s"></span><span class="flame" style="left:36.7%;top:10.1%;--s:3%;--d:3.1s"></span><span class="flame" style="left:63.1%;top:10.2%;--s:3%;--d:2.3s"></span>
+    <span class="flame" style="left:40.8%;top:14.1%;--s:3%;--d:2.8s"></span><span class="flame" style="left:50%;top:14.6%;--s:3%;--d:2.7s"></span><span class="flame" style="left:58.7%;top:14.1%;--s:3%;--d:3.2s"></span><span class="flame" style="left:42.6%;top:18.6%;--s:3%;--d:2.5s"></span><span class="flame" style="left:57.1%;top:18.6%;--s:3%;--d:2.9s"></span>
+    <span class="flame" style="left:33.4%;top:48%;--s:6%;--d:2.7s"></span><span class="flame" style="left:65.9%;top:48%;--s:6%;--d:3s"></span>
+    <span class="flame" style="left:40.9%;top:63.3%;--s:2.5%;--d:2.2s"></span><span class="flame" style="left:64.5%;top:61.5%;--s:2.5%;--d:2.6s"></span>
+    <!-- the walls: everything papered (doors included), from the vault down to the white brick -->
+    <button class="spot wall" type="button" data-pop="napkin" data-name="3x5 Interview · Kevin Kermes" style="left:0;top:0;width:100%;height:74%" aria-label="The walls: Kevin Kermes's 3x5 Napkin interview with Kathi"></button>
   </div>
 </main>
 
@@ -533,10 +564,11 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: the heading (NOW PLAYING, NOW SOARING), then the show */
-const lines = `<span class="l1">${esc(STAGE.heading)}</span><span class="l2">${esc(STAGE.title)}</span>`;
+/* EVERY MARQUEE (the hall's, the bar's, the card's) is filled here: the heading (NOW PLAYING, NOW SOARING), the show, and
+   (Nov 22) the episode's name under it */
+const lines = `<span class="l1">${esc(STAGE.heading)}</span><span class="l2">${esc(STAGE.title)}</span>` + (STAGE.episode ? `<span class="note">${esc(STAGE.episode)}</span>` : "");
 document.querySelectorAll("[data-marquee]").forEach(t => t.innerHTML = lines);
-$("show-tiles").innerHTML = lines + (STAGE.episode ? `<span class="note">${esc(STAGE.episode)}</span>` : "");
+$("show-tiles").innerHTML = lines;
 const showGo = $("show-go");
 if (STAGE.link) { showGo.href = STAGE.link; showGo.target = "_blank"; showGo.rel = "noopener"; showGo.removeAttribute("aria-disabled"); }
 showGo.firstChild.textContent = STAGE.button;
@@ -563,7 +595,17 @@ if (!STAGE.closeUp) document.querySelectorAll('[data-room="stage"]').forEach(b =
 /* the gold Edison bulbs around the popups' little marquees: 13 along the top and the bottom, 3 down each side,
    centred on the frame (in percentages of the card). --i gives each its own moment to glow brighter. */
 document.querySelectorAll(".mcard").forEach(m => { const pts = []; for (let i = 0; i <= 12; i++) { const x = 4.6 + 90.8 * i / 12; pts.push([x, 7], [x, 93]); } for (let j = 1; j < 4; j++) { const y = 7 + 86 * j / 4; pts.push([3, y], [97, y]); }
+  m.querySelector(".mboard").insertAdjacentHTML("afterbegin", `<span class="orn" aria-hidden="true">o<b>O</b>o</span>`);
   m.insertAdjacentHTML("afterbegin", `<span class="bulbs" aria-hidden="true">${pts.map(([x, y], i) => `<i style="left:${x}%;top:${y}%;--i:${(i * 7) % 11}"></i>`).join("")}</span>`); });
+/* the rooms' marquees (.rmq): data-cols bulbs along the top and the bottom and data-rows down each side, each in the
+   middle of the black case (half of --sx in from the sides, half of --sy in from the top and the bottom) */
+document.querySelectorAll(".rmq").forEach(m => {
+  const sx = parseFloat(m.style.getPropertyValue("--sx")) / 2, sy = parseFloat(m.style.getPropertyValue("--sy")) / 2;
+  const cols = +m.dataset.cols, rows = +m.dataset.rows, pts = [];
+  for (let i = 0; i < cols; i++) { const x = sx + (100 - 2 * sx) * i / (cols - 1); pts.push([x, sy], [x, 100 - sy]); }
+  for (let j = 1; j <= rows; j++) { const y = sy + (100 - 2 * sy) * j / (rows + 1); pts.push([sx, y], [100 - sx, y]); }
+  m.querySelector(".mboard").insertAdjacentHTML("afterbegin", `<span class="orn">o<b>O</b>o</span>`);
+  m.insertAdjacentHTML("afterbegin", `<span class="bulbs">${pts.map(([x, y]) => `<i style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%"></i>`).join("")}</span>`); });
 
 /* POPUPS: the spot on a picture and the panel button call the same open() */
 function open(what) {

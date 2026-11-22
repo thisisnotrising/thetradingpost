@@ -28,7 +28,7 @@ body { margin: 0; font: 14px -apple-system, BlinkMacSystemFont, sans-serif; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<link rel="stylesheet" href="assets/storefront.css?v=20261122d">
+<link rel="stylesheet" href="assets/storefront.css?v=20261122e">
 <script src="assets/season.js"></script><!-- the weather dial: the one word that picks the season -->
 </head>
 <body>
@@ -56,8 +56,8 @@ document.getElementById("nrsf").dataset.season = String(window.NR_SEASON || "fal
       <p data-sign="address"></p>
     </div>
 
-    <!-- Glass above the Speakeasy door: a hand-painted sign. "SPEAK" is bright, "EASY" has almost
-         worn away. The door number 9¾ sits on the glass, centred along the bottom. -->
+    <!-- Glass above the Speakeasy door: a hand-painted sign. "SPEAK" is bright, "EASY" and its arrow
+         are faded but readable. The door number 9¾ sits on the glass, centred along the bottom. -->
     <div class="nrsf-glassbox nrsf-signglass" id="nrsf-neon">
       <p class="nrsf-speak" aria-label="The Speakeasy"><svg class="nrsf-sign-svg" viewBox="22 62 356 172" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="nrsf-sgn-paint" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f1e6d0"/><stop offset=".5" stop-color="#ead7aa"/><stop offset="1" stop-color="#d9b25c"/></linearGradient><filter id="nrsf-sgn-brush" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -0.9 1.35"/><feComposite in="SourceGraphic" operator="in"/></filter></defs><g filter="url(#nrsf-sgn-brush)" fill="url(#nrsf-sgn-paint)"><text x="200" y="138" text-anchor="middle" font-family="Sancreek, Rye, Georgia, serif" font-size="64" textLength="364" lengthAdjust="spacingAndGlyphs"><tspan font-size="86">S</tspan>PEAK<tspan class="easy">EAS<tspan font-size="86">Y</tspan></tspan></text><path d="M30 184 C70 164 110 198 160 184 C185 177 205 174 222 180 C200 184 182 192 160 198 C112 212 72 184 30 184 Z"/><path class="easy" d="M236 194 C270 178 300 202 330 184 C350 172 362 156 352 148 C372 154 372 184 352 202 L366 210 L326 224 L334 192 L344 198 C356 186 352 174 344 180 C318 204 282 194 236 194 Z"/></g></svg></p>
       <span class="nrsf-glassnum" data-sign="leftDoor"></span>

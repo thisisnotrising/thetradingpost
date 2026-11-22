@@ -102,14 +102,14 @@
 .nrsf .nrsf-numbox { overflow: hidden; background: radial-gradient(ellipse 80% 80% at 50% 70%, #5a3a1e, #1a110a 75%); }
 
 /* The hand-painted SPEAKEASY sign on the black glass above the red door.
-   "SPEAK" is in good shape; "EASY" (and its arrow) has nearly worn away. */
+   "SPEAK" is in good shape; "EASY" (and its arrow) is faded, worn but still readable. */
 .nrsf .nrsf-signglass { overflow: hidden; background: radial-gradient(ellipse 90% 80% at 50% 45%, #1b1614, #0a0807 80%); }
 .nrsf .nrsf-speak { position: absolute; left: 6%; right: 6%; top: 6%; bottom: 24%; z-index: 2; margin: 0; }
 .nrsf--phone .nrsf-speak { left: 6%; right: 6%; bottom: 24%; }   /* phones: the sign now sits on the red door's transom, like desktop */
 .nrsk .nrsf-speak { width: min(86vw, 640px); margin: 0 auto; }
 .nrsk .nrsf-speak svg { height: auto; aspect-ratio: 356 / 172; }
 .nrsf-speak svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 0 .4px rgba(0,0,0,.6)); }
-.nrsf-speak .easy { opacity: .13; }
+.nrsf-speak .easy { opacity: .34; }   /* (Nov 22) EASY and its arrow: worn but readable, faded next to SPEAK */
 /* Door numbers on the glass: small gilt numerals, centred along the bottom edge (9¾ and 9 match) */
 .nrsf .nrsf-glassnum { position: absolute; left: 0; right: 0; bottom: 4%; z-index: 3; text-align: center; font-family: Cinzel, Georgia, serif; font-weight: 700; font-size: 15cqh; line-height: 1; letter-spacing: .04em;
   background: linear-gradient(#fff3c9, #d9b46a 55%, #a07a35); -webkit-background-clip: text; background-clip: text; color: transparent;

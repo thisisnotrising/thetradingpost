@@ -30,7 +30,7 @@
 </style>
 <!-- "?v=2026-11-05" = the date these files last changed. Change it whenever you edit them (add a letter, like 2026-11-04b, for a second change on the same day), so every visitor's browser
      fetches the new copy instead of an old saved one (no hard refresh needed). -->
-<link rel="stylesheet" href="../assets/newsstand.css?v=2026-11-07b">
+<link rel="stylesheet" href="../assets/newsstand.css?v=2026-11-22">
 <!-- Came through a storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
 <style>
 html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
@@ -38,14 +38,9 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
 @media (prefers-reduced-motion: reduce) { html.from-light body::after { display: none; } }
 </style>
 <!-- Opened inside THE POST's Newsstand popup (an iframe = a window onto this page, set inside THE POST)?
-     Then this page gets the label "in-post". (Nov 5) The signposts now show there too, exactly as on this page on its own:
-       ← 777 Daydream St.  has target="_top" (below), which means "open in the WHOLE browser window", so it takes you
-                           out to the street instead of loading the street inside the popup.
-       Nebula Cafe →       closes this popup and presses THE POST's own Cafe button (newsstand.js, "Nebula Cafe →"),
-                           so you walk into the café through the same door as everywhere else in the room.
-     The popup's × sits in the top right corner, right where "Nebula Cafe →" is, so inside the popup (on any screen up to
-     1280 px wide) the top pair of signposts steps down one row, under the ×, and the marquee steps down with them
-     (newsstand.css, "INSIDE THE POST"). -->
+     Then this page gets the label "in-post", and (Nov 22) the popup shows just the tabs and the cover grid: no
+     "← 777 Daydream St." or "Nebula Cafe →" signposts (top or bottom), no NOW SOARING sign, no awning
+     (newsstand.css, "INSIDE THE POST"). The popup's × is the way back into the room. On its own, this page keeps them. -->
 <script>if (window.self !== window.top) document.documentElement.classList.add("in-post");</script>
 <script>try { if (sessionStorage.getItem("nr-light")) { sessionStorage.removeItem("nr-light"); document.documentElement.classList.add("from-light"); } } catch (e) {}</script>
 </head>
