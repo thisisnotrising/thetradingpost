@@ -22,7 +22,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Oswald:wght@400;600&family=Arimo:wght@400;700&display=swap"></noscript>
 <!-- START THIS DOWNLOAD AT ONCE: the passage is the first thing you see (the browser picks the size the screen needs) -->
-<link rel="preload" as="image" href="../assets/img/speak/passage-1600.webp" imagesrcset="../assets/img/speak/passage-1600.webp 1600w, ../assets/img/speak/passage-2400.webp 2400w, ../assets/img/speak/passage-3200.webp 3200w, ../assets/img/speak/passage-4096.webp 4096w" imagesizes="calc(max(100vw, 66.7vh) * 2)" fetchpriority="high">
+<link rel="preload" as="image" href="../assets/img/speak/passage-wide-1600.webp" imagesrcset="../assets/img/speak/passage-wide-1600.webp 1600w, ../assets/img/speak/passage-wide-2400.webp 2400w, ../assets/img/speak/passage-wide-3200.webp 3200w, ../assets/img/speak/passage-wide-4096.webp 4096w" imagesizes="calc(max(100vw, 150vh) * 1.6)" media="(min-aspect-ratio: 1/1)" fetchpriority="high">
+<link rel="preload" as="image" href="../assets/img/speak/passage-tall-1600.webp" media="not all and (min-aspect-ratio: 1/1)" imagesrcset="../assets/img/speak/passage-tall-1600.webp 1600w, ../assets/img/speak/passage-tall-2200.webp 2200w, ../assets/img/speak/passage-tall-2731.webp 2731w" imagesizes="calc(max(100vw, 66.7vh) * 2)" fetchpriority="high">
 <!-- Came through the storefront door? Fade in from the white light (the door sets "nr-light" just before leaving) -->
 <style>
 html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2147483647; background: #fff; pointer-events: none; animation: nr-from-light 1.2s ease-out .1s both; }
@@ -42,7 +43,10 @@ html.from-light body::after { content: ""; position: fixed; inset: 0; z-index: 2
    button you press, and the browser's own Back button walks you back the
    way you came (each room has its own address: #passage, #hall, #stage, #bar).
      1. THE PASSAGE (speak/passage-*.webp). Scrolling walks you down it to the
-        black door, THE SPEAK.
+        black door, THE SPEAK. Two pictures of the same holiday render (Nov 22):
+        passage-wide-*.webp for wide screens (drawn on a canvas so the walk
+        feels like walking; see "WALKING THE PASSAGE" in the script) and
+        passage-tall-*.webp, its 2:3 crop around the door, for phones.
      2. THE HALL (speak/hall-*.webp). You land up top and scroll down.
      3. THE STAGE (speak/stage-*.webp), up close: from the hall's stage or the
         STAGE button.
@@ -93,9 +97,21 @@ body { margin: 0; overflow-x: clip; font-family: var(--body); }
 .passage { position: relative; height: 300vh; }
 .p-stick { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .p-frame { position: absolute; left: 0; top: 0; aspect-ratio: 2 / 3; transform-origin: 0 0; will-change: transform; }
-.p-frame > img { display: block; width: 100%; height: 100%; filter: brightness(.12); transition: filter 2.2s ease .4s; }
-.passage.lit .p-frame > img { filter: none; }
-.p-frame.narrow > img { -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); }
+.p-frame picture { display: contents; }
+.p-frame img { display: block; width: 100%; height: 100%; filter: brightness(.12); transition: filter 2.2s ease .4s; }
+.passage.lit .p-frame img { filter: none; }
+/* two pictures of the passage: the tall one (2:3) on phones and tall screens, the wide one (3:2, Nov 22) on screens
+   wider than they are tall. Each has its own lamp glows and door button (.tall / .wide); the browser shows the set that
+   goes with the picture it chose, by the same rule as the <picture> tag */
+.p-frame .wide { display: none; }
+@media (min-aspect-ratio: 1/1) { .p-frame { aspect-ratio: 3 / 2; } .p-frame .wide { display: block; } .p-frame .tall { display: none; } }
+/* THE WALK on screens wider than they are tall (see "WALKING THE PASSAGE" in the script): the corridor is drawn on this
+   canvas instead, bent so the near walls slide past faster than the far door. The picture stays in the frame (the
+   canvas is painted from it, and it comes back if the canvas can't be used), just invisible; lit the same way. */
+.p-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: none; filter: brightness(.12); transition: filter 2.2s ease .4s; }
+.passage.lit .p-gl { filter: none; }
+.passage.dolly .p-gl { display: block; }
+.passage.dolly .p-frame img { visibility: hidden; }
 .passage .flame { opacity: 0; }
 .passage.lit .flame { animation: ignite .5s ease-out calc(var(--i) * .22s) both, flick var(--d) ease-in-out calc(var(--i) * .22s + .5s) infinite alternate; }
 @keyframes ignite { from { opacity: 0; scale: .3; } to { opacity: .9; scale: 1; } }
@@ -370,7 +386,7 @@ dialog.pop::backdrop { background: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .flame, .passage.lit .flame { animation: none; opacity: .85; }
-  .p-frame > img, .art > img, .s-wrap > img, .board, .teleport, .veil { transition: none; }
+  .p-frame img, .art > img, .s-wrap > img, .board, .teleport, .veil { transition: none; }
   .lit .tv-glow { animation: none; opacity: .7; }
   .cue::after, .teleport i, dialog.pop[open], .box, .msg .dots i, .msg .words { animation: none; }
   .msg.crystal, .msg.in, .chat .go-panel { transition: none; }
@@ -390,16 +406,30 @@ dialog.pop::backdrop { background: transparent; }
 <!-- 1 · THE PASSAGE, behind door 9¾ -->
 <section class="passage" id="room-passage" aria-label="The passage behind door 9¾: a low brick vault papered floor to ceiling with pages, red Boston ivy hanging over its mouth, brass handrails, caged Edison lamps and candles in glass along a red runner over a floor of midnight obsidian, dark and glassy as a scrying mirror, and at the end an ancient riveted iron door lettered THE SPEAK in gold.">
   <div class="p-stick" id="pstick">
+    <canvas class="p-gl" id="pgl" aria-hidden="true"></canvas>
     <div class="p-frame" id="pframe">
-      <img src="../assets/img/speak/passage-1600.webp" srcset="../assets/img/speak/passage-1600.webp 1600w, ../assets/img/speak/passage-2400.webp 2400w, ../assets/img/speak/passage-3200.webp 3200w, ../assets/img/speak/passage-4096.webp 4096w" sizes="calc(max(100vw, 66.7vh) * 2)" width="4096" height="6144" alt="" id="pimg" fetchpriority="high">
+      <picture>
+        <source media="(min-aspect-ratio: 1/1)" srcset="../assets/img/speak/passage-wide-1600.webp 1600w, ../assets/img/speak/passage-wide-2400.webp 2400w, ../assets/img/speak/passage-wide-3200.webp 3200w, ../assets/img/speak/passage-wide-4096.webp 4096w" sizes="calc(max(100vw, 150vh) * 1.6)" width="4096" height="2731">
+        <img src="../assets/img/speak/passage-tall-1600.webp" srcset="../assets/img/speak/passage-tall-1600.webp 1600w, ../assets/img/speak/passage-tall-2200.webp 2200w, ../assets/img/speak/passage-tall-2731.webp 2731w" sizes="calc(max(100vw, 66.7vh) * 2)" width="2731" height="4096" alt="" id="pimg" fetchpriority="high">
+      </picture>
       <canvas class="dust" aria-hidden="true" data-motes="46"></canvas>
-      <!-- the lanterns and lamps, lit one by one from the mouth to the door (--i is the order) -->
-      <span class="flame" style="left:21%;top:84.6%;--s:9%;--d:2.4s;--i:0"></span><span class="flame" style="left:78.1%;top:84.6%;--s:9%;--d:2.9s;--i:0"></span>
-      <span class="flame" style="left:31.4%;top:71.3%;--s:7%;--d:2.2s;--i:1"></span><span class="flame" style="left:67.2%;top:71.3%;--s:7%;--d:2.7s;--i:1"></span>
-      <span class="flame" style="left:36.8%;top:65.9%;--s:5%;--d:2.5s;--i:2"></span><span class="flame" style="left:61.5%;top:65.9%;--s:5%;--d:2.1s;--i:2"></span>
-      <span class="flame" style="left:21.2%;top:36.8%;--s:14%;--d:3.1s;--i:3"></span><span class="flame" style="left:77.8%;top:36.8%;--s:14%;--d:2.8s;--i:3"></span>
-      <span class="flame" style="left:33.5%;top:43.5%;--s:9%;--d:2.6s;--i:4"></span><span class="flame" style="left:65.1%;top:43.5%;--s:9%;--d:3.3s;--i:4"></span>
-      <button class="spot" type="button" data-room="hall" data-name="Open the door" style="left:37.1%;top:37.8%;width:25%;height:27%" aria-label="Open the door: THE SPEAK"></button>
+      <!-- THE TALL PICTURE's (the phone crop of the same render, Nov 22): lamps and candles from the mouth to the door (--i is
+           the order they light), and the door -->
+      <span class="flame tall" style="left:19.4%;top:35.7%;--s:14.6%;--d:2.6s;--i:0"></span><span class="flame tall" style="left:80.0%;top:35.6%;--s:14.6%;--d:3.3s;--i:0"></span>
+      <span class="flame tall" style="left:19.7%;top:84.6%;--s:10.1%;--d:2.2s;--i:0"></span><span class="flame tall" style="left:81.5%;top:84.5%;--s:10.1%;--d:2.7s;--i:0"></span>
+      <span class="flame tall" style="left:32.0%;top:44.1%;--s:9.5%;--d:2.5s;--i:1"></span><span class="flame tall" style="left:67.8%;top:44.1%;--s:9.5%;--d:2.1s;--i:1"></span>
+      <span class="flame tall" style="left:30.9%;top:73.9%;--s:7.6%;--d:2.3s;--i:1"></span><span class="flame tall" style="left:70.5%;top:73.9%;--s:7.6%;--d:2.8s;--i:1"></span>
+      <span class="flame tall" style="left:35.6%;top:66.9%;--s:5.9%;--d:2.6s;--i:2"></span><span class="flame tall" style="left:65.1%;top:66.9%;--s:5.9%;--d:3s;--i:2"></span>
+      <button class="spot tall" type="button" data-room="hall" data-name="Open the door" style="left:34.7%;top:38.6%;width:30.6%;height:28.3%" aria-label="Open the door: THE SPEAK"></button>
+      <!-- THE WIDE PICTURE's: the big lamps at the mouth and the nearest candles first, the candles by the door last -->
+      <span class="flame wide" style="left:22.4%;top:31.3%;--s:10.5%;--d:3.1s;--i:0"></span><span class="flame wide" style="left:78.8%;top:31.1%;--s:10.5%;--d:2.8s;--i:0"></span>
+      <span class="flame wide" style="left:25.3%;top:96.5%;--s:5%;--d:2.4s;--i:0"></span><span class="flame wide" style="left:75.1%;top:97.2%;--s:5%;--d:2.9s;--i:0"></span>
+      <span class="flame wide" style="left:35.8%;top:35.7%;--s:6.5%;--d:2.6s;--i:1"></span><span class="flame wide" style="left:62.7%;top:35.6%;--s:6.5%;--d:3.3s;--i:1"></span>
+      <span class="flame wide" style="left:35.9%;top:84.6%;--s:4.5%;--d:2.2s;--i:1"></span><span class="flame wide" style="left:63.4%;top:84.5%;--s:4.5%;--d:2.7s;--i:1"></span>
+      <span class="flame wide" style="left:41.4%;top:44.1%;--s:4.2%;--d:2.5s;--i:2"></span><span class="flame wide" style="left:57.3%;top:44.1%;--s:4.2%;--d:2.1s;--i:2"></span>
+      <span class="flame wide" style="left:40.9%;top:73.9%;--s:3.4%;--d:2.3s;--i:2"></span><span class="flame wide" style="left:58.5%;top:73.9%;--s:3.4%;--d:2.8s;--i:2"></span>
+      <span class="flame wide" style="left:43%;top:66.9%;--s:2.6%;--d:2.6s;--i:3"></span><span class="flame wide" style="left:56.1%;top:66.9%;--s:2.6%;--d:3s;--i:3"></span>
+      <button class="spot wide" type="button" data-room="hall" data-name="Open the door" style="left:42.6%;top:38.6%;width:13.6%;height:28.3%" aria-label="Open the door: THE SPEAK"></button>
     </div>
     <span class="enter crystal" id="enter" hidden><button class="go crystal" type="button" data-room="hall">Open the door<span class="arr" aria-hidden="true">&#x2192;&#xFE0E;</span></button></span>
   </div>
@@ -789,42 +819,137 @@ document.querySelectorAll(".spot").forEach(s => {
   s.addEventListener("pointerleave", () => tag.hidden = true);
 });
 
-/* WALKING THE PASSAGE. The corridor picture always fills the screen (as wide as the screen, or as tall, whichever is
-   bigger). You arrive seeing the door at the end of the corridor, the ivy at its mouth around the edges. How far you've
-   scrolled through the passage (0 to 1) walks you in: the corridor zooms gently towards the door (never more than
-   1.35x, so no phone ever has to draw a huge picture) while the door glides to the middle of the screen. On wide
-   screens the door already fills most of the height, so the walk is a slow glide; on phones it's a step closer.
-   The door is a button the whole way (one click opens it); "Open the door" comes up for the last half of the walk.
-   Scrolling back up runs it in reverse. */
-const pstick = $("pstick"), pframe = $("pframe");
-const DOOR = { x: .497, y: .52, h: .27 };                                   // the door's centre and height, as fractions of the corridor picture
-const ZOOM = 1.35;
-const WIDEST = 2.2;                                                         // the corridor fills screens up to 2.2x as wide as they are tall
-const STEP = 1.15;                                                          // the least the walk zooms in, on wide screens
+/* WALKING THE PASSAGE. The passage has two pictures (the <picture> in the passage picks one by the screen's shape):
+   · TALL (2:3) for phones and tall screens, as wide as the screen: cut from the wide one, centred on the door, so
+     phones and desktops show the same garland, bow and door.
+   · WIDE (3:2, Nov 22) for screens wider than they are tall (laptops, desktops, tablets turned sideways), as wide as
+     the screen and a little taller. It starts further back, at the vault's mouth under the garland, so you see the
+     whole corridor top to bottom and have a real way to walk.
+   You arrive seeing the door at the end of the corridor. How far you've scrolled through the passage (0 to 1) walks
+   you in; scrolling back up runs it in reverse. The door is a button the whole way (one click opens it); "Open the
+   door" comes up for the last half of the walk.
+   Two ways of walking:
+   · THE ZOOM (phones): the corridor zooms gently towards the door (never more than 1.35x) while the door glides to
+     the middle of the screen.
+   · THE BENDING WALK (wide screens): drawn the way walking really looks: what's near you (the big lamps, the
+     handrails, the garland, the papered walls beside you) slides outwards and past you fast, what's far away (the
+     door) grows slowly, and your view rises and dips a little with each step. Bending a picture takes a canvas (#pgl,
+     with WebGL: the graphics chip redraws the corridor for each step, so it stays smooth). The picture stays in the
+     frame underneath, invisible; if the canvas can't be used (an old browser, or visitors who ask for less motion),
+     the wide picture simply zooms instead.
+   HOW THE BENDING WORKS: think of the corridor as a tunnel with the door at the far end. A spot near the screen's
+   edge is on a wall right next to you; a spot near the door is far away. Step forward, and near things grow (and
+   slide outwards) a lot, far things only a little. reach() measures how far out from the door a spot is (0 at the
+   door's centre, 1 at the vault's mouth); walking STRIDE forward makes a spot at reach r 1/(1 - STRIDE x r) times
+   further out. Everything within END of the door (the door and its dark end wall) is all as far away as the door,
+   so the door grows evenly, never bent. */
+const pstick = $("pstick"), pframe = $("pframe"), pgl = $("pgl"), pimg = $("pimg");
+/* each picture: its shape (width / height); the door's centre and height, as fractions of the picture; the most the
+   walk may zoom; and how big the door is when you reach it, as a share of the screen's height */
+const TALL = { ratio: 2 / 3, door: { x: .5, y: .527, h: .273 }, zoom: 1.35, to: .74 };          // the phone crop is centred on the door
+const WIDE = { ratio: 3 / 2, door: { x: .494, y: .527, h: .273 }, zoom: 1.8, to: .7,
+               tunnel: { x: .45, y: .51 } };                                // the vault's mouth, out from the door's centre, as fractions of the picture
+const wideScreen = matchMedia("(min-aspect-ratio: 1/1)");                   // the same rule the <picture> uses to choose the wide picture
+const STRIDE = .75;                                                         // how far the bending walk takes you: the door grows 1.3x from it, the walls at the edges about 1.75x
+const END = .3;                                                             // the door's end wall, in reach(): everything this close to the door is as far away as the door
+const STEPS = 8, BOB = .007, SWAY = .003;                                   // footsteps over the whole walk; how far your view rises (and sways) each step, in screen heights
+const reach = (dx, dy) => Math.sqrt(Math.sqrt(dx ** 4 + dy ** 4));         // dx, dy: out from the door, in tunnel widths and heights (a rounded square, like the vault)
+const flames = [...pframe.querySelectorAll(".flame")].map(f => ({ f, x: parseFloat(f.style.left) / 100, y: parseFloat(f.style.top) / 100 }));
+/* the canvas's drawing instructions (they run on the graphics chip, once for every dot on the screen): find which
+   spot of the picture belongs on this dot, the same sums as above, run backwards */
+const BEND = `precision highp float;
+uniform sampler2D pic;
+uniform float dpr, hd;     // dots per screen pixel; the canvas's height in dots
+uniform vec3 cam;          // where the picture sits before it's bent: its left and top (screen pixels) and its scale
+uniform vec2 size;         // the picture's size at scale 1 (screen pixels)
+uniform vec2 door;         // the door's centre, as fractions of the picture
+uniform vec2 tun;          // the vault's mouth, out from the door, as fractions of the picture (reach 1)
+uniform float stride, end;
+void main() {
+  vec2 s = vec2(gl_FragCoord.x, hd - gl_FragCoord.y) / dpr;              // this dot on the screen, from the top left
+  vec2 q = (s - cam.xy) / (cam.z * size);                                 // ... in the picture, before it's bent
+  vec2 d = (q - door) / tun;                                              // ... out from the door
+  vec2 a = d * d; float r = sqrt(sqrt(a.x * a.x + a.y * a.y));           // reach()
+  d *= r * (1. - stride * end) <= end ? 1. - stride * end : 1. / (1. + stride * r);   // where it came from, before the step forward
+  gl_FragColor = vec4(texture2D(pic, door + d * tun).rgb, 1.);
+}`;
+let gl = null, glNo = false, U = {};
+function glStart() {                                                        // set up the canvas once; false if it can't be used
+  if (gl || glNo) return !!gl;
+  if (!pimg.complete || !(pimg.naturalWidth > pimg.naturalHeight)) return false;   // not yet: the wide picture is still coming
+  try {
+    gl = pgl.getContext("webgl", { alpha: false, antialias: false });
+    if (!gl) throw "no WebGL";
+    const prog = gl.createProgram(), part = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); gl.attachShader(prog, s); };
+    part(gl.VERTEX_SHADER, "attribute vec2 p; void main() { gl_Position = vec4(p, 0., 1.); }");   // one triangle that covers the screen
+    part(gl.FRAGMENT_SHADER, BEND);
+    gl.bindAttribLocation(prog, 0, "p"); gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw gl.getProgramInfoLog(prog);
+    gl.useProgram(prog);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    /* hand the picture to the graphics chip (no wider than it can take) */
+    const w = Math.min(pimg.naturalWidth, gl.getParameter(gl.MAX_TEXTURE_SIZE)), h = Math.round(w * pimg.naturalHeight / pimg.naturalWidth);
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const c2 = c.getContext("2d"); c2.imageSmoothingQuality = "high"; c2.drawImage(pimg, 0, 0, w, h);
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, c);
+    c.width = c.height = 0;                                                 // the helper canvas is done with
+    if (gl.getError()) throw "the picture didn't take";
+    for (const n of ["dpr", "hd", "cam", "size", "door", "tun", "stride", "end"]) U[n] = gl.getUniformLocation(prog, n);
+    gl.uniform2f(U.door, WIDE.door.x, WIDE.door.y); gl.uniform2f(U.tun, WIDE.tunnel.x, WIDE.tunnel.y); gl.uniform1f(U.end, END);
+    pgl.addEventListener("webglcontextlost", () => { gl = null; glNo = true; walk(); });   // the chip gave up: back to the zoom
+    return true;
+  } catch (err) { gl = null; glNo = true; return false; }
+}
 function walk() {
   if (room === "hall") { $("hcue").classList.toggle("gone", scrollY > 40); return; }
   if (room !== "passage") return;
-  /* the corridor's width: the screen's, edge to edge, on phones, tablets and desktops alike. Only an extra-wide screen
-     (wider than WIDEST x its height, like an ultrawide monitor) stops short, because any wider and the door would no
-     longer fit top to bottom; there the sides fade into the dark, as in the other rooms */
-  const vw = pstick.clientWidth, vh = pstick.clientHeight, fw = Math.max(Math.min(vw, vh * WIDEST), vh * 2 / 3), fh = fw * 1.5;
-  pframe.style.width = fw + "px"; pframe.classList.toggle("narrow", fw < vw - 1);
+  const S = wideScreen.matches ? WIDE : TALL, D = S.door;
+  /* the picture covers the screen: as wide as the screen, or as tall, whichever is bigger */
+  const vw = pstick.clientWidth, vh = pstick.clientHeight, fw = Math.max(vw, vh * S.ratio), fh = fw / S.ratio;
+  pframe.style.width = fw + "px";
   const p = Math.min(1, Math.max(0, scrollY / (ROOMS.passage.offsetHeight - innerHeight))), e = still ? 0 : p * p * (3 - 2 * p);
-  /* where the walk ends: zoomed until the door is about 3/4 of the screen's height, but never past ZOOM. On a wide
-     screen the door is already that big, so the walk still takes you at least STEP closer: you feel yourself walk in */
-  const s1 = Math.min(ZOOM, Math.max(STEP, .74 * vh / (DOOR.h * fh)));
+  const bend = S === WIDE && !still && glStart();                           // the bending walk, or the zoom
+  ROOMS.passage.classList.toggle("dolly", bend);
+  /* where the walk ends: zoomed until the door is about S.to of the screen's height (counting what the bending grows
+     it), but never past S.zoom */
+  const grow = bend ? 1 / (1 - STRIDE * END) : 1;
+  const s1 = Math.min(S.zoom, Math.max(1, S.to * vh / (D.h * fh * grow)));
   const s = 1 + (s1 - 1) * e;
-  /* the door's centre on screen: from a little below the middle (the first view) to the middle (the end). When the
-     door is big (wide screens), it starts only as low as keeps its foot on the screen */
-  const cy0 = Math.max(vh * .5, Math.min(vh * .62, vh * .96 - DOOR.h * fh / 2)), cy1 = vh * .5;
-  const cx = vw / 2, cy = cy0 + (cy1 - cy0) * e;
+  /* the door's centre on screen: from a little below the middle (the first view) to the middle (the end). The tall
+     picture starts only as low as keeps the door's foot on the screen; the wide one starts with its top at the top of
+     the screen, so the garland and its bow show whole (unless that would put the door lower than 70% down) */
+  const cy0 = S === WIDE ? Math.min(D.y * fh, vh * .7) : Math.max(vh * .5, Math.min(vh * .62, vh * .96 - D.h * fh / 2)), cy1 = vh * .5;
+  /* the footsteps (bending walk only): STEPS of them spread over the walk, the view rising mid-step and settling as each
+     foot lands, and swaying gently from one foot to the other; they fade in as you set off and out as you arrive */
+  const ph = Math.PI * STEPS * e, gait = bend ? Math.min(1, p / .08, (1 - p) / .08) : 0;
+  const cx = vw / 2 + SWAY * vh * Math.sin(ph) * gait, cy = cy0 + (cy1 - cy0) * e + BOB * vh * Math.sin(ph) ** 2 * gait;
   /* the corridor placed (at this scale) to put the door there, but never so far that an edge of the picture shows */
-  const x = s * fw > vw ? Math.min(0, Math.max(vw - s * fw, cx - s * DOOR.x * fw)) : (vw - s * fw) / 2,
-        y = Math.min(0, Math.max(vh - s * fh, cy - s * DOOR.y * fh));
-  pframe.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+  const x = Math.min(0, Math.max(vw - s * fw, cx - s * D.x * fw)), y = Math.min(0, Math.max(vh - s * fh, cy - s * D.y * fh));
+  if (bend) {
+    const k = STRIDE * e, g = 1 / (1 - k * END), T = WIDE.tunnel;           // how far you've walked; how much bigger the door is now
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = Math.round(vw * dpr), H = Math.round(vh * dpr);
+    if (pgl.width !== W || pgl.height !== H) { pgl.width = W; pgl.height = H; gl.viewport(0, 0, W, H); }
+    gl.uniform1f(U.stride, k); gl.uniform1f(U.dpr, W / vw); gl.uniform1f(U.hd, H);
+    gl.uniform3f(U.cam, x, y, s); gl.uniform2f(U.size, fw, fh);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    /* the frame (the door's button, the dust) grows with the door; each flame moves out with its own lamp or candle */
+    pframe.style.transform = `translate(${x + s * fw * D.x * (1 - g)}px, ${y + s * fh * D.y * (1 - g)}px) scale(${s * g})`;
+    flames.forEach(({ f, x: fx, y: fy }) => {
+      const m = 1 / (1 - k * Math.max(END, reach((fx - D.x) / T.x, (fy - D.y) / T.y))) / g - 1;
+      f.style.translate = `calc(-50% + ${(fx - D.x) * fw * m}px) calc(-50% + ${(fy - D.y) * fh * m}px)`; f.style.transform = `scale(${1 + m})`;
+    });
+  } else {
+    pframe.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    flames.forEach(({ f }) => { f.style.translate = f.style.transform = ""; });
+  }
   $("pcue").classList.toggle("gone", p > .06);
   $("enter").hidden = p < .5;
 }
+pimg.addEventListener("load", () => requestAnimationFrame(walk));          // the other picture arrived (a tablet turned): set it up
 addEventListener("scroll", () => requestAnimationFrame(walk), { passive: true });
 addEventListener("resize", () => requestAnimationFrame(walk));
 
