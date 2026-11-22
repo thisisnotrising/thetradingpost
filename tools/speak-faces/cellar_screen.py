@@ -1,4 +1,5 @@
-"""THE SPEAK, THE CELLAR (Nov 8): the TV on the barrel shows the message, not a picture.
+"""(Kept for the record: this made the Nov 8 STONE cellar's TV. Since Nov 22 the cellar is the library: cellar_room.py and cellar_tv.py.)
+THE SPEAK, THE CELLAR (Nov 8): the TV on the barrel shows the message, not a picture.
 -------------------------------------------------------------------------------------------
 The render's TV screen showed a film still. It is replaced by a glowing black-and-white CRT reading
   BILLION-DOLLAR CORPORATIONS WANT THIS SUPPRESSED. / THE ALGORITHM WILL BURY THIS.
