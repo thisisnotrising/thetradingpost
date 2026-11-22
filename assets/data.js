@@ -51,6 +51,7 @@ window.NR = {
     cover17: "issue17-cover.webp",
     cover18: "issue18-cover.webp",
     cover19: "issue19-cover.webp",
+    cover20: "issue20-cover.webp",            // Issue 20 · Machine Poet (Nov 22)
     portrait01: "issue01-portrait.webp",
     name01: "issue01-name.webp",
     coverPhoto01: "issue01-cover-photo.webp",
@@ -145,7 +146,11 @@ window.NR = {
     /* A cover with no "issue" yet shows a "coming soon" marquee instead of a magazine. Its options:
        soon: "..." = that marquee's own text (one line per \n), used instead of the automatic "Coming December 19";
        read: false = no READ ONLINE button on it. Both can go once the magazine ("issue") is filled in. */
-    { name: "Dan Korus", date: "2026-11-08", url: "https://thisisnotrising.org/2026/11/08/dan-korus/", cover: "cover19", issue: "dan-korus" }
+    { name: "Dan Korus", date: "2026-11-08", url: "https://thisisnotrising.org/2026/11/08/dan-korus/", cover: "cover19", issue: "dan-korus" },
+    /* Issue 20 · Machine Poet (Nov 22). No "issue" yet, so clicking the cover shows the "coming soon" marquee
+       (Coming December 20) with READ ONLINE. The link is the feature's own WordPress number: it works once the
+       feature publishes on Nov 22, and then forwards to the feature's address. */
+    { name: "Machine Poet", date: "2026-11-22", url: "https://thisisnotrising.org/?p=3509", cover: "cover20" }
   ],
 
   /* One magazine per issue. Each question can pick its layout:

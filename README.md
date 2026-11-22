@@ -104,6 +104,8 @@ To link it from thisisnotrising.org, add that address to your WordPress menu as 
 
 The issue appears on the rack and in the storefront window together, and the "Coming soon" note leaves that slot by itself.
 
+4. **THE POST's stand.** The Newsstand stand inside THE POST is part of the room's picture, so it doesn't update by itself. After steps 1–3, run `python3 tools/post-newsstand-cover.py 20` (the issue number). It paints the cover into its pocket in the fall and winter pictures, lit like the covers around it. Each pocket's corners are listed in `SLOTS` at the top of that file; a new pocket needs measuring once. If THE POST's room picture is ever replaced, run it again.
+
 **WebP or JPG?** Either works: just write the real file name in `IMAGES`. WebP files are smaller. https://squoosh.app converts and resizes for free in your browser.
 
 ### Swap a photo in THE POST's Gallery
