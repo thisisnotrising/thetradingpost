@@ -17,11 +17,12 @@ the wide one (tools/make-stage.py). This gets it ready the same way, in six step
      poster (POSTERS in data.js) hangs over it.
   5. The Speakeasy sign: only SPEAK is lit; EASY has almost worn away.
   6. Zoomed in like the fall street on phones: cropped from the red door's frame (x 40) to door 10's frame
-     (x 850), so both doors sit at the edges of the screen. Saved as assets/img/storefront/winter-phone-stage.webp,
+     (x 850), so both doors sit at the edges of the screen, and from y 160 down, so (like the wide picture) it
+     starts at the snowy ivy with no sky above (Kathi, Nov 22). Saved as assets/img/storefront/winter-phone-stage.webp,
      1080 pixels wide (a touch sharpened).
 
 Positions in steps 1-5 are in the whole picture's pixels (941 x 1672). STAGES.winter.phone in storefront.js uses
-the cropped picture's (810 x 1672): the same numbers, 40 less across.
+the cropped picture's (810 x 1512): the same numbers, 40 less across and 160 less down.
 """
 import os, sys, numpy as np, cv2
 from PIL import Image, ImageFilter
@@ -114,10 +115,12 @@ im = np.clip(f, 0, 255).astype(np.uint8)
 print("5. Speakeasy sign: SPEAK lit, EASY worn away")
 
 # 6. zoomed in like the fall street on phones: cropped from the red door's frame (x 40) to door 10's frame (x 850), so
-#    the shop fills the phone edge to edge and both doors sit at the edges of the screen; then saved
+#    the shop fills the phone edge to edge and both doors sit at the edges of the screen, and from y 160 down, so it starts
+#    at the snowy ivy (no night sky or branches above it, like the wide picture); then saved
 CROP = (40, 850)
-pic = Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).crop((CROP[0], 0, CROP[1], 1672))
-out = pic.resize((1080, round(1672 * 1080 / (CROP[1] - CROP[0]))), Image.LANCZOS).filter(ImageFilter.UnsharpMask(1.0, 40, 2))
+TOP = 160
+pic = Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).crop((CROP[0], TOP, CROP[1], 1672))
+out = pic.resize((1080, round((1672 - TOP) * 1080 / (CROP[1] - CROP[0]))), Image.LANCZOS).filter(ImageFilter.UnsharpMask(1.0, 40, 2))
 dst = os.path.join(OUT, "winter-phone-stage.webp")
 out.save(dst, "WEBP", quality=74, method=6)
 print("6. winter-phone-stage.webp", out.size, os.path.getsize(dst) // 1024, "KB")

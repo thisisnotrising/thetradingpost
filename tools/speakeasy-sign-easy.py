@@ -22,7 +22,7 @@ IMG = os.path.join(HERE, "..", "assets", "img", "storefront")
 GOLD = np.float32([92, 178, 226])        # the SPEAK paint's gold (BGR)
 PICS = {   # picture: (the patch behind EASY and its arrow: x0, y0, x1, y1 in its own pixels), glass size, how strong
     "winter-desk-stage": ((246, 1066, 333, 1124), 15, .28),
-    "winter-phone-stage": ((97, 1228, 160, 1276), 11, .32),
+    "winter-phone-stage": ((97, 1015, 160, 1063), 11, .32),   # (213 less down since the sky was cropped off, Nov 22)
 }
 
 
